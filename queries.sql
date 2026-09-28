@@ -1,8 +1,10 @@
 -- TODO: place names in <> with actual database names, verify correctness
+-- TODO: these queries should be placed in separate files in a folder
 
 -- Plain queries
 
 -- TODO
+
 
 -- Special queries
 
