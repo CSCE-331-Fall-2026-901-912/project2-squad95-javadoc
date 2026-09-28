@@ -6,7 +6,8 @@ headers_drinks = ['id', 'name', 'base_price', 'stock', 'serving']
 headers_toppings = ['id', 'name']
 headers_modifiers = ['id', 'sugar_level', 'ice_level']
 headers_days = ['id', 'date', 'sales']
-data_days = [[]]
+
+data_days = [[]] # stores sale histories
 
 
 menu_items = [
@@ -33,14 +34,30 @@ menu_items = [
     '',
     '',
 ]
-menu_item_prices = [4.99, 4.99, 4.99, 6]
+
+menu_item_prices = []
+# Placeholder prices, don't need to worry about more realistic pricing for now
+for _ in range(0, len(menu_items)):
+    drink_price = random.randint(4, 6) + 0.99
+    menu_item_prices.append(drink_price)
+
 
 
 day_cur = date(2024, 12, 31)
 for i in range(1,366):
     data_days.append([])
     day_cur = day_cur + timedelta(days=1)
-    data_days[i].append([i, day_cur, i*10])
+    day_cur_str = day_cur.strftime("%d/%m/%Y")
+    data_days[i].append([i, day_cur_str, i*10])
+
+
+# Need to make sure that the seeded data meets project requirements 
+assert len(menu_items) >= 20
+# print(len(menu_item_prices), len(menu_items))
+assert len(menu_item_prices) == len(menu_items)
+assert len(data_days) >= 52
+
+
 
 for row in data_days:
     for item in row:
