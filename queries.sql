@@ -4,7 +4,20 @@
 -- Plain queries
 
 -- TODO
+-- 1. Get a list of menu items
 
+
+-- 2. Get a list of the 10 last orders
+
+
+-- 3. Get the current stock of all ingredients
+
+
+-- 4. Get the list of ingredients needed for the first drink
+
+-- 5. Get a list of ingredients for the last 10 menu items
+
+-- 6. Get table of all add-ons 
 
 -- Special queries
 
