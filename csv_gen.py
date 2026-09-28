@@ -7,7 +7,7 @@ headers_toppings = ['id', 'name']
 headers_modifiers = ['id', 'sugar_level', 'ice_level']
 headers_days = ['id', 'date', 'sales']
 
-data_days = [[]] # stores sale histories
+data_days = [] # stores sale histories
 
 
 menu_items = [
@@ -44,11 +44,11 @@ for _ in range(0, len(menu_items)):
 
 
 day_cur = date(2024, 12, 31)
-for i in range(1,366):
+for i in range(0,365):
     data_days.append([])
     day_cur = day_cur + timedelta(days=1)
     day_cur_str = day_cur.strftime("%d/%m/%Y")
-    data_days[i].append([i, day_cur_str, i*10])
+    data_days[i].append([i+1, day_cur_str, (i+1)*20])
 
 
 # Need to make sure that the seeded data meets project requirements 
@@ -57,6 +57,12 @@ assert len(menu_items) >= 20
 assert len(menu_item_prices) == len(menu_items)
 assert len(data_days) >= 52
 
+total_sales_amount = 0
+for i in range(0, 365):
+    total_sales_amount += data_days[i][0][2]
+
+print("Total sales is {:.2f}".format(total_sales_amount))
+assert total_sales_amount >= 1_250_000
 
 
 for row in data_days:
