@@ -12,3 +12,7 @@ Contains the menu, toppings, and sugar composition available for the POS system.
 ### queries.sql
 
 Contains the first iteration for the SQL database.
+
+### csv_gen.py
+
+Contains the Python program to generate CSV based on the available menu.
