@@ -16,3 +16,11 @@ Contains the first iteration for the SQL database.
 ### csv_gen.py
 
 Contains the Python program to generate CSV based on the available menu.
+
+### about.html
+
+Contains the About page included during the latest lab activity.
+
+### .gitignore
+
+Contains configuration ignored by git during pull, commit, and push.
