@@ -14,8 +14,7 @@ headers_utensils = ['id', 'name', 'stock']
 headers_order_utensils = ['id', 'order_id', 'utensil_id']
 data_days = [[]]
 
-
-
+# list of menus
 menu_items = [
     'Classic Pearl Milk Tea', 
     'Classic Green Tea', 
@@ -40,17 +39,16 @@ menu_items = [
     'Strawberry Coconut',
     'Matcha Fresh Milk',
 ]
+
+# array to hold prices; each has their own
 menu_item_prices = []
-# Placeholder prices, don't need to worry about more realistic pricing for now
+# Placeholder prices; don't need to worry about more realistic pricing for now
 for _ in range(0, len(menu_items)):
     drink_price = random.randint(4, 6) + 0.99
     menu_item_prices.append(drink_price)
 
-
-
 # Target $1,000,000 total sales over 364 days -> ~$2,747 per day on average
-# for a avg $10 order, we need to sell 274.7 avg orders per day
-
+# For an avg $10 order, we need to sell 274.7 avg orders per day
 
 day_cur = date(2024, 12, 31)
 for i in range(0,365):
@@ -72,12 +70,14 @@ assert len(menu_items) >= 20
 assert len(menu_item_prices) == len(menu_items)
 assert len(data_days) >= 52
 
+# calculates total sales amount, used later for manager view
 total_sales_amount = 0
 for i in range(0, 365):
     total_sales_amount += data_days[i][0][2]
 print("Total sales is {:.2f}".format(total_sales_amount))
 assert total_sales_amount >= 1_250_000
 
+# determines peak days for manager view
 assert len(peak_days) >= 3
 for i in peak_days:
     peak_day_sales = data_days[i][0][2]
@@ -88,7 +88,6 @@ for i in peak_days:
 for row in data_days:
     for item in row:
         print(item)
-
 
 # Verify required amounts of data
 assert len(menu_items) >= 20
