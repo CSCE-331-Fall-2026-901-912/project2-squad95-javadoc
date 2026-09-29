@@ -4,7 +4,7 @@ import random
 
 headers_items = ['id', 'name', 'base_price', 'stock', 'serving']
 # csv file headers
-headers_drinks = ['id', 'name', 'base_price', 'stock', 'serving']
+headers_items = ['id', 'name', 'base_price', 'stock', 'serving']
 headers_toppings = ['id', 'name']
 headers_modifiers = ['id', 'sugar_level', 'ice_level']
 headers_days = ['id', 'date', 'sales']
