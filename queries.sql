@@ -2,9 +2,49 @@
 
 -- Plain queries
 
+--- Most popular items
+SELECT m.name AS menu_item, 
+       COUNT(oi.id) AS times_ordered 
+FROM menu_items m 
+JOIN order_items oi ON m.id = oi.item_id 
+GROUP BY m.name 
+ORDER BY times_ordered DESC;
+
+--- Orders placed after 15:00
+SELECT SUM(total) AS orders_after_3pm
+FROM orders 
+WHERE EXTRACT(HOUR FROM CAST(order_time AS timestamp)) >= 15;
+
+--- Employee with most orders
+SELECT created_by AS employee_id, 
+       COUNT(id) AS orders_made
+FROM orders 
+GROUP BY created_by 
+ORDER BY orders_made DESC;
+
+--- Top 10 orders by total
+SELECT id AS order_id, 
+       order_time, 
+       total 
+FROM orders 
+ORDER BY total DESC 
+LIMIT 10;
+
+--- Bottom 10 orders by total
+SELECT id AS order_id, 
+       order_time, 
+       total 
+FROM orders 
+ORDER BY total ASC 
+LIMIT 10;
+
+
+
 -- TODO
 
--- Special queries
+
+
+-- Special queries ---
 
 -- 1. Weekly sales history
 SELECT COUNT(<id>) FROM <order_history>
