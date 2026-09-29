@@ -95,26 +95,60 @@ WHERE order_items.size = 'Large';
 -- Special queries ---
 
 -- 1. Weekly sales history
-SELECT COUNT(<id>) FROM <order_history>
-ORDER BY <week>
+-- can select by using COUNT() instead if 
+-- an order had a date associated with it
+SELECT COUNT(id), 
+       date
+FROM orders
+GROUP BY EXTRACT(WEEK FROM time);
 
 -- 2. Peak sales day
--- TODO: verify TOP <num> syntax support by our database
-SELECT TOP 10 SUM(<order_total>), <day> 
-FROM <order_history>
-GROUP BY <day>
+-- given a specific day, what was the sum 
+-- of the top 10 order totals?
+SELECT SUM(totals) AS order_totals, 
+       DATE(date) as order_date
+FROM orders
+GROUP BY DATE(date)
+ORDER BY order_totals DESC
+LIMIT 10;
 
 -- 3. Realistic Sales History
-SELECT COUNT(<id>), SUM(order_total), <hour> 
-FROM <order_history>
-GROUP BY <hour>
+SELECT COUNT(id), 
+       SUM(totals) AS order_totals,
+       EXTRACT(HOUR FROM time) as order_hour
+FROM orders
+GROUP BY EXTRACT(HOUR FROM time);
+ORDER BY order_hour
 
 -- 4. Menu Item Inventory
+-- TODO: what do I select for inventory items
+-- select count of inventory items from inventory 
+-- and menu grouped by menu item
 SELECT SUM(<stock>), <menu-item> FROM <menu>
 GROUP BY <menu-item>
 
 -- 5. Best of the Worst
 -- Optional, but counts towards required total queries
-SELECT <order_total>, <day>, <menu-item>
-FROM <order_history>, <menu>
-WHERE <order_total> = MIN(<order_total>)
+-- given a specific week, what day had the lowest sales, 
+-- what were the sales numbers, 
+-- and what was the top seller that day?
+
+-- SELECT SUM(totals) as o_totals_sum, 
+--        DATE(date) as order_date,
+--        EXTRACT(WEEK FROM date) as week 
+-- FROM orders
+-- GROUP BY EXTRACT(WEEK FROM date)
+-- ORDER BY o_totals_sum ASC
+-- INNER JOIN items ON 
+-- WHERE o_totals_sum = MIN(<order_total>) 
+
+WITH weekly_orders AS (
+       SELECT SUM(totals) AS o_totals_sum,
+              DATE(date) as order_date
+       FROM orders
+       GROUP BY EXTRACT(WEEK FROM order_date)
+),
+
+lowest_sales_day AS (
+
+),
