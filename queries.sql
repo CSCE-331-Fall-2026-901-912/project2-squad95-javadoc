@@ -70,6 +70,28 @@ SELECT SUM(total) AS orders_before_3pm
 FROM orders 
 WHERE EXTRACT(HOUR FROM CAST(time AS time)) < 15;
 
+-- 11. Ordered drinks with toppings
+SELECT item_id FROM orders_items
+INNER JOIN order_item_toppings
+    ON order_item_toppings.order_item_id == order_items.item_id;
+
+-- 12. Days where sales exceeded 5k, in descending order
+SELECT date, sales FROM sale_history
+WHERE sales > 5000
+ORDER BY sales DESC;
+
+-- 13. Count of orders where totals exceeded 10
+SELECT COUNT(*) FROM orders
+WHERE totals > 10
+ORDER BY totals DESC;
+
+-- 14. Order items with a 'Large' size
+SELECT orders.id, order_items.size FROM orders
+INNER JOIN order_items
+    ON orders.id = order_items.order_id
+WHERE order_items.size = 'Large';
+
+
 -- Special queries ---
 
 -- 1. Weekly sales history
