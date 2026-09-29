@@ -58,11 +58,11 @@ menu_items = [
     'Honey Pearl Milk Tea',
     'Mango Green Milk Tea',
     'Coffee Creama',
-    'Matcha Pearl Milk Tea'
+    'Matcha Pearl Milk Tea',
     'Coffee Milk Tea',
     'Taro Pearl Milk Tea',
     'Thai Pearl Milk Tea',
-    'Coconut Pearl Milk Tea'
+    'Coconut Pearl Milk Tea',
     'Mango Green Tea',
     'Passion Chess',
     'Berry Lychee Burst',
