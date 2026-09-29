@@ -1,5 +1,3 @@
--- TODO: place names in <> with actual database names, verify correctness
-
 -- Plain queries
 
 --- 1. Most popular items
@@ -67,13 +65,10 @@ FROM orders
 GROUP BY EXTRACT(MONTH FROM CAST(date AS date))
 ORDER BY month;
 
-
-
-
-
--- TODO
-
-
+--- 10. Orders placed before 3pm, in case we want to run lunch specials like many Asian shops
+SELECT SUM(total) AS orders_before_3pm
+FROM orders 
+WHERE EXTRACT(HOUR FROM CAST(time AS time)) < 15;
 
 -- Special queries ---
 
