@@ -160,25 +160,23 @@ def generate_random_order():
         items_total += generate_random_order_item(i)
     order_date = generate_random_date()
     order_time = generate_random_time()
-    data_orders[i].append(i)
-    data_orders[i].append(employee_id)
-    data_orders[i].append(items_total)
-    data_orders[i].append(order_date)
-    data_orders[i].append(order_time)
+
+    data_orders[i] = [i, employee_id, items_total, order_date, order_time]
 
     return items_total
 #TODO refactor generate_random_order_item to be more readable and split into more functions
 def generate_random_order_item(order_id):
     data_order_items.append([])
     i = len(data_order_items) - 1
+
     weights_num_toppings = [36, 54, 16, 13, 8, 2]
     num_toppings = random.choices(range(6), weights=weights_num_toppings)[0]
     toppings_total = 0
     for _ in range(num_toppings):
         toppings_total += generate_random_order_item_topping(i)
 
-    weights_item = [300, 190, 195, 200, 30, 20, 15, 20, 40, 50, 40, 25, 30, 10, 60, 40, 50, 55, 30, 30]
-    item_id = random.choices(range(20), weights=weights_item)[0]
+    weights_item = [300, 190, 195, 200, 30, 20, 15, 20, 40, 35, 20, 50, 40, 25, 30, 10, 60, 40, 50, 55, 30, 30]
+    item_id = random.choices(range(22), weights=weights_item)[0]
 
     weights_size = [80, 20]
     sizes = ['Regular', 'Large']
@@ -195,24 +193,17 @@ def generate_random_order_item(order_id):
     size_modifier = 1 if (size == 'Regular') else 1.5
     item_price = data_items[item_id][2] * size_modifier
 
-    data_order_items[i].append(i)
-    data_order_items[i].append(order_id)
-    data_order_items[i].append(item_id)
-    data_order_items[i].append(item_price + toppings_total)
-    data_order_items[i].append(size)
-    data_order_items[i].append(ice_level)
-    data_order_items[i].append(sugar_level)
+    data_order_items[i] = [i, order_id, item_id, item_price + toppings_total, 
+                           size, ice_level, sugar_level]
 
     return data_order_items[i][3]
 def generate_random_order_item_topping(order_item_id):
     weights = [40, 9, 8, 5, 4, 12, 8, 6, 9, 8]
     topping_id = random.choices(range(10), weights=weights)[0]
+
     data_order_item_toppings.append([])
     i = len(data_order_item_toppings) - 1
-    data_order_item_toppings[i].append(i)
-    data_order_item_toppings[i].append(order_item_id)
-    data_order_item_toppings[i].append(topping_id)
-    data_order_item_toppings[i].append(topping_prices[topping_id])
+    data_order_item_toppings[i] = [i, order_item_id, topping_id, topping_prices[topping_id]]
     return topping_prices[topping_id]
 
 generate_orders()
