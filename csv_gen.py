@@ -7,11 +7,11 @@ headers_items = ['id', 'name', 'base_price', 'stock', 'serving']
 headers_toppings = ['id', 'name']
 headers_modifiers = ['id', 'sugar_level', 'ice_level']
 headers_days = ['id', 'date', 'sales']
-headers_orders = ['id', 'menu_item', 'totals']
-headers_order_items = ['id', 'order_id', 'item_id', 'price_at_order', 'size', '']
+headers_orders = ['id', 'date', 'time', 'totals']
+headers_order_items = ['id', 'order_id', 'item_id', 'price_at_order', 'size']
 headers_order_item_toppings = ['id', 'order_item_id', 'topping_id']
 headers_utensils = ['id', 'name', 'stock']
-headers_order_utensils = ['id', 'order_id', '']
+headers_order_utensils = ['id', 'order_id', 'utensil_id']
 data_days = [[]]
 
 
@@ -27,11 +27,11 @@ menu_items = [
     'Honey Pearl Milk Tea',
     'Mango Green Milk Tea',
     'Coffee Creama',
-    'Matcha Pearl Milk Tea'
+    'Matcha Pearl Milk Tea',
     'Coffee Milk Tea',
     'Taro Pearl Milk Tea',
     'Thai Pearl Milk Tea',
-    'Coconut Pearl Milk Tea'
+    'Coconut Pearl Milk Tea',
     'Mango Green Tea',
     'Passion Chess',
     'Berry Lychee Burst',
@@ -56,8 +56,8 @@ day_cur = date(2024, 12, 31)
 for i in range(0,365):
     data_days.append([])
     day_cur = day_cur + timedelta(days=1)
-    day_cur_str = day_cur.strftime("%d/%m/%Y")
-    data_days[i].append([i+1, day_cur_str, (i+1)*20])
+    day_cur_str = day_cur.strftime("%Y-%m-%d")  # Changed to YYYY-MM-DD format
+    data_days[i].append([i+1, day_cur_str, ((i+1)*20) + 3000])
 
 peak_days = [20, 141, 144, 331]
 for i in peak_days:
