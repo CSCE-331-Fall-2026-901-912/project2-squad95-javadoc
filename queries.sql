@@ -13,7 +13,7 @@ ORDER BY times_ordered DESC;
 --- Orders placed after 15:00
 SELECT SUM(total) AS orders_after_3pm
 FROM orders 
-WHERE EXTRACT(HOUR FROM CAST(order_time AS timestamp)) >= 15;
+WHERE EXTRACT(HOUR FROM CAST(time AS time)) >= 15;
 
 --- Employee with most orders
 SELECT created_by AS employee_id, 
