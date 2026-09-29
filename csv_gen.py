@@ -2,6 +2,7 @@ from datetime import date, datetime, timedelta
 import csv
 import random
 
+# csv file headers
 headers_items = ['id', 'name', 'base_price', 'stock', 'serving']
 headers_toppings = ['id', 'name']
 headers_modifiers = ['id', 'sugar_level', 'ice_level']
@@ -13,8 +14,6 @@ headers_utensils = ['id', 'name', 'stock']
 headers_order_utensils = ['id', 'order_id', '']
 data_days = [[]]
 
-
-data_days = [] # stores sale histories
 
 
 menu_items = [
@@ -47,6 +46,10 @@ for _ in range(0, len(menu_items)):
     drink_price = random.randint(4, 6) + 0.99
     menu_item_prices.append(drink_price)
 
+
+
+# Target $1,000,000 total sales over 364 days -> ~$2,747 per day on average
+# for a avg $10 order, we need to sell 274.7 avg orders per day
 
 
 day_cur = date(2024, 12, 31)
@@ -85,3 +88,8 @@ for i in peak_days:
 for row in data_days:
     for item in row:
         print(item)
+
+
+# Verify required amounts of data
+assert len(menu_items) >= 20
+assert len(menu_item_prices) == len(menu_items)
