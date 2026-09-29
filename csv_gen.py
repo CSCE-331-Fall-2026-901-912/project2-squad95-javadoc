@@ -2,10 +2,17 @@ from datetime import date, datetime, timedelta
 import csv
 import random
 
-headers_drinks = ['id', 'name', 'base_price', 'stock', 'serving']
+headers_items = ['id', 'name', 'base_price', 'stock', 'serving']
 headers_toppings = ['id', 'name']
 headers_modifiers = ['id', 'sugar_level', 'ice_level']
 headers_days = ['id', 'date', 'sales']
+headers_orders = ['id', 'menu_item', 'totals']
+headers_order_items = ['id', 'order_id', 'item_id', 'price_at_order', 'size', '']
+headers_order_item_toppings = ['id', 'order_item_id', 'topping_id']
+headers_utensils = ['id', 'name', 'stock']
+headers_order_utensils = ['id', 'order_id', '']
+data_days = [[]]
+
 
 data_days = [] # stores sale histories
 
@@ -31,10 +38,9 @@ menu_items = [
     'Berry Lychee Burst',
     'Peach Tea',
     'Honey Lemonade',
-    '',
-    '',
+    'Strawberry Coconut',
+    'Matcha Fresh Milk',
 ]
-
 menu_item_prices = []
 # Placeholder prices, don't need to worry about more realistic pricing for now
 for _ in range(0, len(menu_items)):
