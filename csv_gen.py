@@ -228,18 +228,17 @@ with open('order_items.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(headers_order_items)
     writer.writerows(data_order_items)
-with open('output.csv', 'w', newline='', encoding='utf-8') as file:
+with open('toppings.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(headers_toppings)
     writer.writerows(data_toppings)
-with open('output.csv', 'w', newline='', encoding='utf-8') as file:
+with open('order_item_toppings.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(headers_order_item_toppings)
     writer.writerows(data_order_item_toppings)
-with open('output.csv', 'w', newline='', encoding='utf-8') as file:
+with open('orders.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(headers_orders)
     writer.writerows(data_orders)
-
 
 
