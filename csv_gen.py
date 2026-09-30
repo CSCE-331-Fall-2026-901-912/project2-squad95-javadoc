@@ -1,3 +1,8 @@
+#TODO add utensils
+#TODO change employees?
+#TODO add tax
+#TODO refactor generate_random_order_item to be more readable and split into more functions
+#TODO add restocking 
 from datetime import date, datetime, timedelta, time
 import csv
 import random
@@ -22,7 +27,6 @@ data_order_utensils = []
 data_inventory = []
 data_recipes = []
 
-#TODO Change employees?
 data_employees = [[0, 'John Smith', 'Manager'],
                   [1, 'Jane Doe', 'Cashier'],
                   [2, 'Mary Richards', 'Cashier']]
@@ -201,6 +205,7 @@ for item_id, item_name in enumerate(menu_items):
         data_recipes.append([len(data_recipes), item_id, inventory_id, quantity])
         recipe_lookup[item_id].append((inventory_id, quantity))
 
+
 def consume_inventory(inventory_id, quantity):
     data_inventory[inventory_id][3] -= quantity
 
@@ -209,13 +214,12 @@ def consume_recipe(item_id, size):
     for inventory_id, quantity in recipe_lookup[item_id]:
         consume_inventory(inventory_id, quantity * multiplier)
 
-#TODO Change total_sales cutoff logic?
-#TODO Add utensils
 def generate_orders():
     DESIRED_TOTAL_SALES = 1000000.0
     total_sales = 0
     while (total_sales < DESIRED_TOTAL_SALES):
         total_sales += generate_random_order()
+
 def generate_random_date():
     start_date = datetime(2025, 1, 1)
     end_date = datetime(2025, 12, 31)
@@ -250,7 +254,6 @@ def generate_random_order():
     
     weights_num_items = [50, 25, 12, 7, 3, 2, 1, 1, 1, 1]
     num_items = random.choices(range(10), weights=weights_num_items)[0]
-    #TODO add tax
     items_total = 0
     for _ in range(num_items):
         items_total += generate_random_order_item(i)
@@ -260,7 +263,6 @@ def generate_random_order():
     data_orders[i] = [i, employee_id, items_total, order_date, order_time]
 
     return items_total
-#TODO refactor generate_random_order_item to be more readable and split into more functions
 def generate_random_order_item(order_id):
     data_order_items.append([])
     i = len(data_order_items) - 1
