@@ -124,8 +124,11 @@ ORDER BY order_hour
 -- TODO: what do I select for inventory items
 -- select count of inventory items from inventory 
 -- and menu grouped by menu item
-SELECT SUM(<stock>), <menu-item> FROM <menu>
-GROUP BY <menu-item>
+
+-- SKIP THIS IF NO TIME
+
+-- SELECT SUM(<stock>), <menu-item> FROM <menu>
+-- GROUP BY <menu-item>
 
 -- 5. Best of the Worst
 -- Optional, but counts towards required total queries
