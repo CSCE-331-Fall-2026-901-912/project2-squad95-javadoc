@@ -210,8 +210,10 @@ def consume_inventory(inventory_id, quantity):
     threshold = 500
     restock_amount = 25000
     if data_inventory[inventory_id][3] - quantity < threshold:
-        data_inventory[inventory_id][3] += restock_amount
         # should we track restocking?
+        print("Restocked:" , data_inventory[inventory_id][1] + ":" , quantity, "->", 
+            data_inventory[inventory_id][3] + restock_amount, data_inventory[inventory_id][2])
+        data_inventory[inventory_id][3] += restock_amount
     data_inventory[inventory_id][3] -= quantity
     return True
 
