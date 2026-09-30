@@ -207,7 +207,11 @@ for item_id, item_name in enumerate(menu_items):
 
 
 def consume_inventory(inventory_id, quantity):
-    data_inventory[inventory_id][3] -= quantity
+    if data_inventory[inventory_id][3] >= quantity:
+        data_inventory[inventory_id][3] -= quantity
+        return True
+    print(f"Inventory ID {inventory_id} is out of stock")
+    return False
 
 def consume_recipe(item_id, size):
     multiplier = SIZE_MULTIPLIERS[size]
