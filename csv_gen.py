@@ -5,7 +5,7 @@ import random
 headers_items = ['id', 'name', 'base_price']
 headers_toppings = ['id', 'name', 'base_price', 'inventory_item_id', 'quantity_used']
 headers_orders = ['id', 'employee_id', 'subtotal', 'tax', 'grand_total', 'date', 'time']
-headers_order_items = ['id', 'order_id', 'item_id', 'price_at_order', 'size', 'ice_level', 'sugar_level']
+headers_order_items = ['id', 'order_id', 'item_id', 'price_at_order', 'ice_level', 'sugar_level']
 headers_order_item_toppings = ['id', 'order_item_id', 'topping_id', 'price_at_order']
 headers_utensils = ['id', 'name']
 headers_employees = ['id', 'name', 'role']
@@ -230,7 +230,7 @@ def consume_inventory(inventory_id, quantity):
     data_inventory[inventory_id][3] -= quantity
     return True
 
-def consume_recipe(item_id, size):
+def consume_recipe(item_id):
     for inventory_id, quantity in recipe_lookup[item_id]:
         consume_inventory(inventory_id, quantity)
 
@@ -306,9 +306,6 @@ def generate_random_order_item(order_id):
     weights_item = [300, 190, 195, 200, 30, 20, 15, 20, 40, 35, 20, 50, 40, 25, 30, 10, 60, 40, 50, 55, 30, 30]
     item_id = random.choices(range(22), weights=weights_item)[0]
 
-    weights_size = [80, 20]
-    sizes = ['Regular', 'Large']
-    size = random.choices(sizes, weights=weights_size)[0]
 
     weights_sugar = [25, 15, 10, 20, 30]
     sugar_levels = ['0%', '30%', '50%', '80%', '100%']
@@ -318,14 +315,13 @@ def generate_random_order_item(order_id):
     ice_levels = ['Regular', 'Less', 'No Ice']
     ice_level = random.choices(ice_levels, weights=weights_ice)[0]
 
-    size_modifier = 1 if (size == 'Regular') else 1.5
-    item_price = data_items[item_id][2] * size_modifier
+    item_price = data_items[item_id][2]
 
-    consume_recipe(item_id, size)
+    consume_recipe(item_id)
 
     rounded_item_price = round(item_price + toppings_total, 2) 
     data_order_items[i] = [i, order_id, item_id, rounded_item_price, 
-                           size, ice_level, sugar_level]
+                           ice_level, sugar_level]
 
     return data_order_items[i][3]
 
