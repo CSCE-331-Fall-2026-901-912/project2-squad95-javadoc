@@ -1,19 +1,20 @@
-#TODO add utensils
-#TODO change employees?
-#TODO add tax
-#TODO refactor generate_random_order_item to be more readable and split into more functions
-#TODO add restocking 
 from datetime import date, datetime, timedelta, time
 import csv
-import random
+import random 
 
 headers_items = ['id', 'name', 'base_price']
 headers_toppings = ['id', 'name', 'base_price', 'inventory_item_id', 'quantity_used']
 headers_orders = ['id', 'employee_id', 'subtotal', 'tax', 'grand_total', 'date', 'time']
+<<<<<<< HEAD
+headers_order_items = ['id', 'order_id', 'item_id', 'price_at_order', 'ice_level', 'sugar_level']
+headers_order_item_toppings = ['id', 'order_item_id', 'topping_id', 'price_at_order']
+headers_utensils = ['id', 'name']
+=======
 headers_order_items = ['id', 'order_id', 'item_id', 'price_at_order', 'size', 'ice_level', 'sugar_level']
 headers_order_item_toppings = ['id', 'order_item_id', 'topping_id', 'price_at_order']
 headers_utensils = ['id', 'name', 'stock']
 headers_order_utensils = ['id', 'order_id', 'utensil_id', 'quantity']
+>>>>>>> main
 headers_employees = ['id', 'name', 'role']
 headers_inventory = ['id', 'name', 'unit', 'stock']
 headers_recipes = ['id', 'item_id', 'inventory_item_id', 'quantity']
@@ -23,7 +24,6 @@ data_orders = []
 data_order_items = []
 data_order_item_toppings = []
 data_utensils = []
-data_order_utensils = []
 data_inventory = []
 data_recipes = []
 
@@ -139,6 +139,18 @@ base_items = [
     ('Napkin',                   'unit', 500),
     ('Tray',                     'unit', 500),
 ]
+utensil_names = [
+    'Cup',
+    'Straw',
+    'Lid',
+    'Napkin',
+    'Tray'
+]
+index = 0
+for utensil_name in utensil_names:
+    data_utensils.append([])
+    data_utensils[index] = [index, utensil_name]
+    index += 1
 topping_inventory_names = [
     'Tapioca Pearls',
     'Coffee Jelly',
@@ -152,8 +164,6 @@ topping_inventory_names = [
     'Creama Foam',
 ]
 topping_quantities = [50, 50, 50, 50, 50, 50, 40, 40, 60, 40]
-
-SIZE_MULTIPLIERS = {'Regular': 1.0, 'Large': 1.5}
 
 recipes = {
     'Classic Pearl Milk Tea': {'Black Tea Leaves': 4, 'Milk': 60, 'Simple Syrup': 30, 'Ice': 150, 'Tapioca Pearls': 50, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
@@ -194,11 +204,10 @@ for index, (name, unit, starting_stock) in enumerate(base_items):
 index = 0
 for topping in toppings:
     data_toppings.append([])
-    data_toppings[index].append(index)
-    data_toppings[index].append(topping)
-    data_toppings[index].append(topping_prices[index])
-    data_toppings[index].append(inventory_ids[topping_inventory_names[index]])
-    data_toppings[index].append(topping_quantities[index])
+    data_toppings[index] = [index, topping, topping_prices[index], 
+                            inventory_ids[topping_inventory_names[index]], 
+                            topping_quantities[index]]
+
     index += 1
 
 
@@ -210,28 +219,40 @@ for item_id, item_name in enumerate(menu_items):
         data_recipes.append([len(data_recipes), item_id, inventory_id, quantity])
         recipe_lookup[item_id].append((inventory_id, quantity))
 
+def generate_peak_days():
+    days = [date(2025, 8, 20), date(2025, 12, 25), date(2025, 10, 31), date(2025, 4, 30)]
+    DESIRED_PEAK_SALES = 3000
+    total_day_sales = 0
+    for day in days:
+        total_day_sales = 0
+        while total_day_sales < DESIRED_PEAK_SALES:
+            total_day_sales += generate_random_order(day)
+        
 
 def consume_inventory(inventory_id, quantity):
     threshold = 500
     restock_amount = 25000
     if data_inventory[inventory_id][3] - quantity < threshold:
+<<<<<<< HEAD
+=======
         # track restocking?
         # print("Restocked:" , data_inventory[inventory_id][1] + ":" , quantity, "->", 
         #    data_inventory[inventory_id][3] + restock_amount, data_inventory[inventory_id][2])
+>>>>>>> main
         data_inventory[inventory_id][3] += restock_amount
     data_inventory[inventory_id][3] -= quantity
     return True
 
-def consume_recipe(item_id, size):
-    multiplier = SIZE_MULTIPLIERS[size]
+def consume_recipe(item_id):
     for inventory_id, quantity in recipe_lookup[item_id]:
-        consume_inventory(inventory_id, quantity * multiplier)
+        consume_inventory(inventory_id, quantity)
 
 def generate_orders():
     DESIRED_TOTAL_SALES = 1000000.0
     total_sales = 0
     while (total_sales < DESIRED_TOTAL_SALES):
         total_sales += generate_random_order()
+    generate_peak_days()
 
 def generate_random_date():
     start_date = datetime(2025, 1, 1)
@@ -239,7 +260,7 @@ def generate_random_date():
     time_between_dates = end_date - start_date
     days_between_dates = time_between_dates.days
     
-    random_number_of_days = random.randrange(days_between_dates)
+    random_number_of_days = random.randrange(days_between_dates + 1)
     random_date = start_date + timedelta(days=random_number_of_days)
     
     return random_date
@@ -258,7 +279,7 @@ def generate_random_time():
     ).time()
     return random_time
 
-def generate_random_order():
+def generate_random_order(day = None):
     data_orders.append([])
     i = len(data_orders) - 1
     
@@ -271,7 +292,11 @@ def generate_random_order():
     for _ in range(num_items):
         items_total += generate_random_order_item(i)
         
+<<<<<<< HEAD
+    order_date = generate_random_date() if day == None else day
+=======
     order_date = generate_random_date()
+>>>>>>> main
     order_time = generate_random_time()
 
     subtotal = round(items_total, 2) # revenue
@@ -298,9 +323,6 @@ def generate_random_order_item(order_id):
     weights_item = [300, 190, 195, 200, 30, 20, 15, 20, 40, 35, 20, 50, 40, 25, 30, 10, 60, 40, 50, 55, 30, 30]
     item_id = random.choices(range(22), weights=weights_item)[0]
 
-    weights_size = [80, 20]
-    sizes = ['Regular', 'Large']
-    size = random.choices(sizes, weights=weights_size)[0]
 
     weights_sugar = [25, 15, 10, 20, 30]
     sugar_levels = ['0%', '30%', '50%', '80%', '100%']
@@ -310,14 +332,13 @@ def generate_random_order_item(order_id):
     ice_levels = ['Regular', 'Less', 'No Ice']
     ice_level = random.choices(ice_levels, weights=weights_ice)[0]
 
-    size_modifier = 1 if (size == 'Regular') else 1.5
-    item_price = data_items[item_id][2] * size_modifier
+    item_price = data_items[item_id][2]
 
-    consume_recipe(item_id, size)
+    consume_recipe(item_id)
 
-    rounded_item_price = round(item_price + toppings_total, 2) # some totals were long floats making fractions of a penny
+    rounded_item_price = round(item_price + toppings_total, 2) 
     data_order_items[i] = [i, order_id, item_id, rounded_item_price, 
-                           size, ice_level, sugar_level]
+                           ice_level, sugar_level]
 
     return data_order_items[i][3]
 
@@ -368,5 +389,12 @@ with open('recipes.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(headers_recipes)
     writer.writerows(data_recipes)
+<<<<<<< HEAD
+with open('utensils.csv', 'w', newline='', encoding='utf-8') as file:
+    writer = csv.writer(file)
+    writer.writerow(headers_utensils)
+    writer.writerows(data_utensils)
+=======
     
+>>>>>>> main
 print("done.")
