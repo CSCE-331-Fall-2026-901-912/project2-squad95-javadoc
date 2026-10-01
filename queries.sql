@@ -95,26 +95,77 @@ WHERE order_items.size = 'Large';
 -- Special queries ---
 
 -- 1. Weekly sales history
-SELECT COUNT(<id>) FROM <order_history>
-ORDER BY <week>
+-- can select by using COUNT() instead if 
+-- an order had a date associated with it
+SELECT COUNT(id), 
+       date
+FROM orders
+GROUP BY EXTRACT(WEEK FROM time);
 
 -- 2. Peak sales day
--- TODO: verify TOP <num> syntax support by our database
-SELECT TOP 10 SUM(<order_total>), <day> 
-FROM <order_history>
-GROUP BY <day>
+-- given a specific day, what was the sum 
+-- of the top 10 order totals?
+SELECT SUM(totals) AS order_totals, 
+       DATE(date) as order_date
+FROM orders
+GROUP BY DATE(date)
+ORDER BY order_totals DESC
+LIMIT 10;
 
 -- 3. Realistic Sales History
-SELECT COUNT(<id>), SUM(order_total), <hour> 
-FROM <order_history>
-GROUP BY <hour>
+SELECT COUNT(id), 
+       SUM(totals) AS order_totals,
+       EXTRACT(HOUR FROM time) as order_hour
+FROM orders
+GROUP BY EXTRACT(HOUR FROM time);
+ORDER BY order_hour
 
 -- 4. Menu Item Inventory
-SELECT SUM(<stock>), <menu-item> FROM <menu>
-GROUP BY <menu-item>
+-- TODO: what do I select for inventory items
+-- select count of inventory items from inventory 
+-- and menu grouped by menu item
+
+-- SKIP THIS IF NO TIME
+
+-- SELECT SUM(<stock>), <menu-item> FROM <menu>
+-- GROUP BY <menu-item>
 
 -- 5. Best of the Worst
 -- Optional, but counts towards required total queries
-SELECT <order_total>, <day>, <menu-item>
-FROM <order_history>, <menu>
-WHERE <order_total> = MIN(<order_total>)
+"get the lowest sales day from orders grouped by weeks, 
+then get the top selling item from the lowest sales day,
+and finally display the sales of lowest sales day and
+the top selling item"
+
+WITH weekly_orders AS (
+  SELECT SUM(totals) AS total_sales,
+         DATE(date) AS order_date
+  FROM orders
+  GROUP BY EXTRACT(WEEK FROM order_date)
+),
+
+lowest_sales_day AS (
+  SELECT order_date, total_sales
+  FROM weekly_orders
+  ORDER BY total_sales ASC
+  LIMIT 1
+),
+
+top_selling_item AS (
+  SELECT items.name AS item_name,
+         COUNT(oi.id) as quantity_sold
+  FROM order_items oi
+  INNER JOIN orders ON orders.id = oi.order_id
+  INNER JOIN items ON item.id = oi.item_id
+  INNER JOIN lowest_sales_day lsd ON DATE(orders.date) = lsd.date
+  GROUP BY items.id, items.name
+  ORDER BY quantity_sold DESC
+  LIMIT 1
+)
+
+SELECT lowest_sales_day.order_date
+       lowest_sales_day.total_sales
+       top_selling_item.item_name
+       top_selling_item.quantity_sold
+FROM lowest_sales_day
+CROSS JOIN top_selling_item
