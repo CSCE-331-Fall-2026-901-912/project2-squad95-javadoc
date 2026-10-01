@@ -5,9 +5,16 @@ import random
 headers_items = ['id', 'name', 'base_price']
 headers_toppings = ['id', 'name', 'base_price', 'inventory_item_id', 'quantity_used']
 headers_orders = ['id', 'employee_id', 'subtotal', 'tax', 'grand_total', 'date', 'time']
+<<<<<<< HEAD
 headers_order_items = ['id', 'order_id', 'item_id', 'price_at_order', 'ice_level', 'sugar_level']
 headers_order_item_toppings = ['id', 'order_item_id', 'topping_id', 'price_at_order']
 headers_utensils = ['id', 'name']
+=======
+headers_order_items = ['id', 'order_id', 'item_id', 'price_at_order', 'size', 'ice_level', 'sugar_level']
+headers_order_item_toppings = ['id', 'order_item_id', 'topping_id', 'price_at_order']
+headers_utensils = ['id', 'name', 'stock']
+headers_order_utensils = ['id', 'order_id', 'utensil_id', 'quantity']
+>>>>>>> main
 headers_employees = ['id', 'name', 'role']
 headers_inventory = ['id', 'name', 'unit', 'stock']
 headers_recipes = ['id', 'item_id', 'inventory_item_id', 'quantity']
@@ -226,6 +233,12 @@ def consume_inventory(inventory_id, quantity):
     threshold = 500
     restock_amount = 25000
     if data_inventory[inventory_id][3] - quantity < threshold:
+<<<<<<< HEAD
+=======
+        # track restocking?
+        # print("Restocked:" , data_inventory[inventory_id][1] + ":" , quantity, "->", 
+        #    data_inventory[inventory_id][3] + restock_amount, data_inventory[inventory_id][2])
+>>>>>>> main
         data_inventory[inventory_id][3] += restock_amount
     data_inventory[inventory_id][3] -= quantity
     return True
@@ -279,7 +292,11 @@ def generate_random_order(day = None):
     for _ in range(num_items):
         items_total += generate_random_order_item(i)
         
+<<<<<<< HEAD
     order_date = generate_random_date() if day == None else day
+=======
+    order_date = generate_random_date()
+>>>>>>> main
     order_time = generate_random_time()
 
     subtotal = round(items_total, 2) # revenue
@@ -372,8 +389,12 @@ with open('recipes.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(headers_recipes)
     writer.writerows(data_recipes)
+<<<<<<< HEAD
 with open('utensils.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(headers_utensils)
     writer.writerows(data_utensils)
+=======
+    
+>>>>>>> main
 print("done.")

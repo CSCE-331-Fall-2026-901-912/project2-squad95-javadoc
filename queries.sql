@@ -95,26 +95,66 @@ WHERE order_items.size = 'Large';
 -- Special queries ---
 
 -- 1. Weekly sales history
-SELECT COUNT(<id>) FROM <order_history>
-ORDER BY <week>
+-- count of orders grouped by week
+SELECT COUNT(id), 
+       date
+FROM orders
+GROUP BY EXTRACT(WEEK FROM time);
 
 -- 2. Peak sales day
--- TODO: verify TOP <num> syntax support by our database
-SELECT TOP 10 SUM(<order_total>), <day> 
-FROM <order_history>
-GROUP BY <day>
+-- sum of the top 10 order totals group by day
+SELECT SUM(totals) AS order_totals, 
+       DATE(date) as order_date
+FROM orders
+GROUP BY DATE(date)
+ORDER BY order_totals DESC
+LIMIT 10;
 
 -- 3. Realistic Sales History
-SELECT COUNT(<id>), SUM(order_total), <hour> 
-FROM <order_history>
-GROUP BY <hour>
+-- count of orders and sum of order totals grouped by hour
+SELECT COUNT(id), 
+       SUM(totals) AS order_totals,
+       EXTRACT(HOUR FROM time) as order_hour
+FROM orders
+GROUP BY EXTRACT(HOUR FROM time);
+ORDER BY order_hour
 
 -- 4. Menu Item Inventory
-SELECT SUM(<stock>), <menu-item> FROM <menu>
-GROUP BY <menu-item>
+-- count of inventory items and menu grouped by menu item
+SELECT items.id,
+       items.name,
+       COUNT(recipes.inventory_item_id) as total_inventory
+FROM items
+LEFT JOIN recipe 
+    ON items.id = recipe.item_id
+GROUP BY items.id,
+         items.name
 
 -- 5. Best of the Worst
 -- Optional, but counts towards required total queries
-SELECT <order_total>, <day>, <menu-item>
-FROM <order_history>, <menu>
-WHERE <order_total> = MIN(<order_total>)
+"get the lowest sales day from orders grouped by weeks, 
+then get the top selling item from the lowest sales day,
+and finally display the sales of lowest sales day and
+the top selling item"
+
+SELECT lowest_sales_day.order_date,
+       lowest_sales_day.total_sales,
+       items.name AS item_name,
+       COUNT(order_items.id) AS quantity_sold
+FROM (
+    SELECT DATE(date) AS order_date, SUM(totals) AS total_sales
+    FROM orders
+    GROUP BY order_date
+    ORDER BY total_sales ASC
+    LIMIT 1
+) lowest_sales_day
+JOIN order_items ON order_items.order_id IN (
+    SELECT id FROM orders WHERE DATE(date) = lowest_sales_day.order_date
+)
+JOIN items ON items.id = order_items.item_id
+GROUP BY lowest_sales_day.order_date, 
+         lowest_sales_day.total_sales, 
+         items.id, 
+         items.name
+ORDER BY quantity_sold DESC
+LIMIT 1;
