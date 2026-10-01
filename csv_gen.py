@@ -207,11 +207,15 @@ for item_id, item_name in enumerate(menu_items):
 
 
 def consume_inventory(inventory_id, quantity):
-    if data_inventory[inventory_id][3] >= quantity:
-        data_inventory[inventory_id][3] -= quantity
-        return True
-    print(f"Inventory ID {inventory_id} is out of stock")
-    return False
+    threshold = 500
+    restock_amount = 25000
+    if data_inventory[inventory_id][3] - quantity < threshold:
+        # should we track restocking?
+        print("Restocked:" , data_inventory[inventory_id][1] + ":" , quantity, "->", 
+            data_inventory[inventory_id][3] + restock_amount, data_inventory[inventory_id][2])
+        data_inventory[inventory_id][3] += restock_amount
+    data_inventory[inventory_id][3] -= quantity
+    return True
 
 def consume_recipe(item_id, size):
     multiplier = SIZE_MULTIPLIERS[size]
@@ -267,6 +271,7 @@ def generate_random_order():
     data_orders[i] = [i, employee_id, items_total, order_date, order_time]
 
     return items_total
+
 def generate_random_order_item(order_id):
     data_order_items.append([])
     i = len(data_order_items) - 1
@@ -297,10 +302,12 @@ def generate_random_order_item(order_id):
 
     consume_recipe(item_id, size)
 
-    data_order_items[i] = [i, order_id, item_id, item_price + toppings_total, 
+    rounded_item_price = round(item_price + toppings_total, 2) # some totals were long floats making fractions of a penny
+    data_order_items[i] = [i, order_id, item_id, rounded_item_price, 
                            size, ice_level, sugar_level]
 
     return data_order_items[i][3]
+
 def generate_random_order_item_topping(order_item_id):
     weights = [40, 9, 8, 5, 4, 12, 8, 6, 9, 8]
     topping_id = random.choices(range(10), weights=weights)[0]
