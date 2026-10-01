@@ -121,14 +121,16 @@ GROUP BY EXTRACT(HOUR FROM time);
 ORDER BY order_hour
 
 -- 4. Menu Item Inventory
--- TODO: what do I select for inventory items
 -- select count of inventory items from inventory 
 -- and menu grouped by menu item
-
--- SKIP THIS IF NO TIME
-
--- SELECT SUM(<stock>), <menu-item> FROM <menu>
--- GROUP BY <menu-item>
+SELECT items.id,
+       items.name,
+       COUNT(recipes.inventory_item_id) as total_inventory
+FROM items
+LEFT JOIN recipe 
+    ON items.id = recipe.item_id
+GROUP BY items.id,
+         items.name
 
 -- 5. Best of the Worst
 -- Optional, but counts towards required total queries
