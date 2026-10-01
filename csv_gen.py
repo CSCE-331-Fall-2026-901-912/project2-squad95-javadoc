@@ -189,11 +189,9 @@ for index, (name, unit, starting_stock) in enumerate(base_items):
 index = 0
 for topping in toppings:
     data_toppings.append([])
-    data_toppings[index].append(index)
-    data_toppings[index].append(topping)
-    data_toppings[index].append(topping_prices[index])
-    data_toppings[index].append(inventory_ids[topping_inventory_names[index]])
-    data_toppings[index].append(topping_quantities[index])
+    data_toppings[index] = [index, topping, topping_prices[index], 
+                            inventory_ids[topping_inventory_names[index]], 
+                            topping_quantities[index]]
     index += 1
 
 
@@ -222,11 +220,21 @@ def consume_recipe(item_id, size):
     for inventory_id, quantity in recipe_lookup[item_id]:
         consume_inventory(inventory_id, quantity * multiplier)
 
+def generate_peak_days():
+    days = [date(2025, 8, 20), date(2025, 12, 25), date(2025, 10, 31), date(2025, 4, 30)]
+    DESIRED_PEAK_SALES = 3000
+    total_day_sales = 0
+    for day in days:
+        total_day_sales = 0
+        while total_day_sales < DESIRED_PEAK_SALES:
+            total_day_sales += generate_random_order(day)
+        
 def generate_orders():
     DESIRED_TOTAL_SALES = 1000000.0
     total_sales = 0
     while (total_sales < DESIRED_TOTAL_SALES):
         total_sales += generate_random_order()
+    generate_peak_days()
 
 def generate_random_date():
     start_date = datetime(2025, 1, 1)
@@ -253,7 +261,7 @@ def generate_random_time():
     ).time()
     return random_time
 
-def generate_random_order():
+def generate_random_order(day = None):
     data_orders.append([])
     i = len(data_orders) - 1
     
@@ -265,7 +273,7 @@ def generate_random_order():
     items_total = 0
     for _ in range(num_items):
         items_total += generate_random_order_item(i)
-    order_date = generate_random_date()
+    order_date = generate_random_date() if day == None else day
     order_time = generate_random_time()
 
     data_orders[i] = [i, employee_id, items_total, order_date, order_time]
