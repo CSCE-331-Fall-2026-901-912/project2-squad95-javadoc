@@ -95,16 +95,14 @@ WHERE order_items.size = 'Large';
 -- Special queries ---
 
 -- 1. Weekly sales history
--- can select by using COUNT() instead if 
--- an order had a date associated with it
+-- count of orders grouped by week
 SELECT COUNT(id), 
        date
 FROM orders
 GROUP BY EXTRACT(WEEK FROM time);
 
 -- 2. Peak sales day
--- given a specific day, what was the sum 
--- of the top 10 order totals?
+-- sum of the top 10 order totals group by day
 SELECT SUM(totals) AS order_totals, 
        DATE(date) as order_date
 FROM orders
@@ -113,6 +111,7 @@ ORDER BY order_totals DESC
 LIMIT 10;
 
 -- 3. Realistic Sales History
+-- count of orders and sum of order totals grouped by hour
 SELECT COUNT(id), 
        SUM(totals) AS order_totals,
        EXTRACT(HOUR FROM time) as order_hour
@@ -121,8 +120,7 @@ GROUP BY EXTRACT(HOUR FROM time);
 ORDER BY order_hour
 
 -- 4. Menu Item Inventory
--- select count of inventory items from inventory 
--- and menu grouped by menu item
+-- count of inventory items and menu grouped by menu item
 SELECT items.id,
        items.name,
        COUNT(recipes.inventory_item_id) as total_inventory
@@ -142,7 +140,7 @@ the top selling item"
 SELECT lowest_sales_day.order_date,
        lowest_sales_day.total_sales,
        items.name AS item_name,
-       COUNT(oi.id) AS quantity_sold
+       COUNT(order_items.id) AS quantity_sold
 FROM (
     SELECT DATE(date) AS order_date, SUM(totals) AS total_sales
     FROM orders
