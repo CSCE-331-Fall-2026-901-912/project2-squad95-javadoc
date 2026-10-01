@@ -137,35 +137,24 @@ then get the top selling item from the lowest sales day,
 and finally display the sales of lowest sales day and
 the top selling item"
 
-WITH weekly_orders AS (
-  SELECT SUM(totals) AS total_sales,
-         DATE(date) AS order_date
-  FROM orders
-  GROUP BY EXTRACT(WEEK FROM order_date)
-),
-
-lowest_sales_day AS (
-  SELECT order_date, total_sales
-  FROM weekly_orders
-  ORDER BY total_sales ASC
-  LIMIT 1
-),
-
-top_selling_item AS (
-  SELECT items.name AS item_name,
-         COUNT(oi.id) as quantity_sold
-  FROM order_items oi
-  INNER JOIN orders ON orders.id = oi.order_id
-  INNER JOIN items ON item.id = oi.item_id
-  INNER JOIN lowest_sales_day lsd ON DATE(orders.date) = lsd.date
-  GROUP BY items.id, items.name
-  ORDER BY quantity_sold DESC
-  LIMIT 1
+SELECT lowest_sales_day.order_date,
+       lowest_sales_day.total_sales,
+       items.name AS item_name,
+       COUNT(oi.id) AS quantity_sold
+FROM (
+    SELECT DATE(date) AS order_date, SUM(totals) AS total_sales
+    FROM orders
+    GROUP BY order_date
+    ORDER BY total_sales ASC
+    LIMIT 1
+) lowest_sales_day
+JOIN order_items ON order_items.order_id IN (
+    SELECT id FROM orders WHERE DATE(date) = lowest_sales_day.order_date
 )
-
-SELECT lowest_sales_day.order_date
-       lowest_sales_day.total_sales
-       top_selling_item.item_name
-       top_selling_item.quantity_sold
-FROM lowest_sales_day
-CROSS JOIN top_selling_item
+JOIN items ON items.id = order_items.item_id
+GROUP BY lowest_sales_day.order_date, 
+         lowest_sales_day.total_sales, 
+         items.id, 
+         items.name
+ORDER BY quantity_sold DESC
+LIMIT 1;
