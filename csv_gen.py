@@ -5,15 +5,15 @@
 #TODO add restocking 
 from datetime import date, datetime, timedelta, time
 import csv
-import random
+import random 
 
 headers_items = ['id', 'name', 'base_price']
 headers_toppings = ['id', 'name', 'base_price', 'inventory_item_id', 'quantity_used']
-headers_orders = ['id', 'employee_id', 'total', 'date', 'time']
+headers_orders = ['id', 'employee_id', 'subtotal', 'tax', 'grand_total', 'date', 'time']
 headers_order_items = ['id', 'order_id', 'item_id', 'price_at_order', 'size', 'ice_level', 'sugar_level']
 headers_order_item_toppings = ['id', 'order_item_id', 'topping_id', 'price_at_order']
 headers_utensils = ['id', 'name', 'stock']
-headers_order_utensils = ['id', 'order_id']
+headers_order_utensils = ['id', 'order_id', 'utensil_id', 'quantity']
 headers_employees = ['id', 'name', 'role']
 headers_inventory = ['id', 'name', 'unit', 'stock']
 headers_recipes = ['id', 'item_id', 'inventory_item_id', 'quantity']
@@ -133,6 +133,11 @@ base_items = [
     ('Strawberry Popping Boba',  'g', 4000),
     ('Ice Cream',                'g', 5000),
     ('Creama Foam',              'g', 5000),
+    ('Cup',                      'unit', 500),
+    ('Straw',                    'unit', 500),
+    ('Lid',                      'unit', 500),
+    ('Napkin',                   'unit', 500),
+    ('Tray',                     'unit', 500),
 ]
 topping_inventory_names = [
     'Tapioca Pearls',
@@ -151,28 +156,28 @@ topping_quantities = [50, 50, 50, 50, 50, 50, 40, 40, 60, 40]
 SIZE_MULTIPLIERS = {'Regular': 1.0, 'Large': 1.5}
 
 recipes = {
-    'Classic Pearl Milk Tea': {'Black Tea Leaves': 4, 'Milk': 60, 'Simple Syrup': 30, 'Ice': 150, 'Tapioca Pearls': 50},
-    'Classic Green Tea':      {'Green Tea Leaves': 4, 'Simple Syrup': 30, 'Ice': 150},
-    'Classic Black Tea':      {'Black Tea Leaves': 4, 'Simple Syrup': 30, 'Ice': 150},
-    'Classic Oolong Tea':     {'Oolong Tea Leaves': 4, 'Simple Syrup': 30, 'Ice': 150},
-    'Honey Green Tea':        {'Green Tea Leaves': 4, 'Honey': 35, 'Ice': 150},
-    'Honey Black Tea':        {'Black Tea Leaves': 4, 'Honey': 35, 'Ice': 150},
-    'Honey Oolong Tea':       {'Oolong Tea Leaves': 4, 'Honey': 35, 'Ice': 150},
-    'Honey Pearl Milk Tea':   {'Black Tea Leaves': 4, 'Milk': 60, 'Honey': 35, 'Ice': 150, 'Tapioca Pearls': 50},
-    'Mango Green Milk Tea':   {'Green Tea Leaves': 4, 'Milk': 60, 'Mango Puree': 50, 'Simple Syrup': 20, 'Ice': 150},
-    'Coffee Creama':          {'Coffee Concentrate': 60, 'Simple Syrup': 25, 'Ice': 150, 'Creama Foam': 40},
-    'Matcha Pearl Milk Tea':  {'Matcha Powder': 6, 'Milk': 120, 'Simple Syrup': 25, 'Ice': 150, 'Tapioca Pearls': 50},
-    'Coffee Milk Tea':        {'Black Tea Leaves': 4, 'Coffee Concentrate': 40, 'Milk': 60, 'Simple Syrup': 30, 'Ice': 150},
-    'Taro Pearl Milk Tea':    {'Taro Powder': 30, 'Milk': 100, 'Simple Syrup': 20, 'Ice': 150, 'Tapioca Pearls': 50},
-    'Thai Pearl Milk Tea':    {'Thai Tea Mix': 6, 'Milk': 80, 'Simple Syrup': 35, 'Ice': 150, 'Tapioca Pearls': 50},
-    'Coconut Pearl Milk Tea': {'Black Tea Leaves': 4, 'Coconut Milk': 60, 'Milk': 40, 'Simple Syrup': 30, 'Ice': 150, 'Tapioca Pearls': 50},
-    'Mango Green Tea':        {'Green Tea Leaves': 4, 'Mango Puree': 60, 'Simple Syrup': 15, 'Ice': 150},
-    'Passion Chess':          {'Green Tea Leaves': 4, 'Passion Fruit Puree': 50, 'Simple Syrup': 20, 'Ice': 150, 'Creama Foam': 40},
-    'Berry Lychee Burst':     {'Green Tea Leaves': 4, 'Lychee Syrup': 40, 'Berry Puree': 40, 'Ice': 150},
-    'Peach Tea':              {'Black Tea Leaves': 4, 'Peach Syrup': 45, 'Ice': 150},
-    'Honey Lemonade':         {'Honey': 35, 'Lemon Juice': 40, 'Ice': 150},
-    'Strawberry Coconut':     {'Strawberry Puree': 50, 'Coconut Milk': 80, 'Simple Syrup': 20, 'Ice': 150},
-    'Matcha Fresh Milk':      {'Matcha Powder': 6, 'Milk': 200, 'Simple Syrup': 20, 'Ice': 150},
+    'Classic Pearl Milk Tea': {'Black Tea Leaves': 4, 'Milk': 60, 'Simple Syrup': 30, 'Ice': 150, 'Tapioca Pearls': 50, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Classic Green Tea':      {'Green Tea Leaves': 4, 'Simple Syrup': 30, 'Ice': 150, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Classic Black Tea':      {'Black Tea Leaves': 4, 'Simple Syrup': 30, 'Ice': 150, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Classic Oolong Tea':     {'Oolong Tea Leaves': 4, 'Simple Syrup': 30, 'Ice': 150, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Honey Green Tea':        {'Green Tea Leaves': 4, 'Honey': 35, 'Ice': 150, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Honey Black Tea':        {'Black Tea Leaves': 4, 'Honey': 35, 'Ice': 150, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Honey Oolong Tea':       {'Oolong Tea Leaves': 4, 'Honey': 35, 'Ice': 150, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Honey Pearl Milk Tea':   {'Black Tea Leaves': 4, 'Milk': 60, 'Honey': 35, 'Ice': 150, 'Tapioca Pearls': 50, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Mango Green Milk Tea':   {'Green Tea Leaves': 4, 'Milk': 60, 'Mango Puree': 50, 'Simple Syrup': 20, 'Ice': 150, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Coffee Creama':          {'Coffee Concentrate': 60, 'Simple Syrup': 25, 'Ice': 150, 'Creama Foam': 40, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Matcha Pearl Milk Tea':  {'Matcha Powder': 6, 'Milk': 120, 'Simple Syrup': 25, 'Ice': 150, 'Tapioca Pearls': 50, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Coffee Milk Tea':        {'Black Tea Leaves': 4, 'Coffee Concentrate': 40, 'Milk': 60, 'Simple Syrup': 30, 'Ice': 150, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Taro Pearl Milk Tea':    {'Taro Powder': 30, 'Milk': 100, 'Simple Syrup': 20, 'Ice': 150, 'Tapioca Pearls': 50, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Thai Pearl Milk Tea':    {'Thai Tea Mix': 6, 'Milk': 80, 'Simple Syrup': 35, 'Ice': 150, 'Tapioca Pearls': 50, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Coconut Pearl Milk Tea': {'Black Tea Leaves': 4, 'Coconut Milk': 60, 'Milk': 40, 'Simple Syrup': 30, 'Ice': 150, 'Tapioca Pearls': 50, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Mango Green Tea':        {'Green Tea Leaves': 4, 'Mango Puree': 60, 'Simple Syrup': 15, 'Ice': 150, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Passion Chess':          {'Green Tea Leaves': 4, 'Passion Fruit Puree': 50, 'Simple Syrup': 20, 'Ice': 150, 'Creama Foam': 40, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Berry Lychee Burst':     {'Green Tea Leaves': 4, 'Lychee Syrup': 40, 'Berry Puree': 40, 'Ice': 150, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Peach Tea':              {'Black Tea Leaves': 4, 'Peach Syrup': 45, 'Ice': 150, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Honey Lemonade':         {'Honey': 35, 'Lemon Juice': 40, 'Ice': 150, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Strawberry Coconut':     {'Strawberry Puree': 50, 'Coconut Milk': 80, 'Simple Syrup': 20, 'Ice': 150, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
+    'Matcha Fresh Milk':      {'Matcha Powder': 6, 'Milk': 200, 'Simple Syrup': 20, 'Ice': 150, 'Cup': 1, 'Straw': 1, 'Lid': 1, 'Napkin': 1},
 }
 
 index = 0
@@ -189,9 +194,11 @@ for index, (name, unit, starting_stock) in enumerate(base_items):
 index = 0
 for topping in toppings:
     data_toppings.append([])
-    data_toppings[index] = [index, topping, topping_prices[index], 
-                            inventory_ids[topping_inventory_names[index]], 
-                            topping_quantities[index]]
+    data_toppings[index].append(index)
+    data_toppings[index].append(topping)
+    data_toppings[index].append(topping_prices[index])
+    data_toppings[index].append(inventory_ids[topping_inventory_names[index]])
+    data_toppings[index].append(topping_quantities[index])
     index += 1
 
 
@@ -208,9 +215,9 @@ def consume_inventory(inventory_id, quantity):
     threshold = 500
     restock_amount = 25000
     if data_inventory[inventory_id][3] - quantity < threshold:
-        # should we track restocking?
-        print("Restocked:" , data_inventory[inventory_id][1] + ":" , quantity, "->", 
-            data_inventory[inventory_id][3] + restock_amount, data_inventory[inventory_id][2])
+        # track restocking?
+        # print("Restocked:" , data_inventory[inventory_id][1] + ":" , quantity, "->", 
+        #    data_inventory[inventory_id][3] + restock_amount, data_inventory[inventory_id][2])
         data_inventory[inventory_id][3] += restock_amount
     data_inventory[inventory_id][3] -= quantity
     return True
@@ -220,21 +227,11 @@ def consume_recipe(item_id, size):
     for inventory_id, quantity in recipe_lookup[item_id]:
         consume_inventory(inventory_id, quantity * multiplier)
 
-def generate_peak_days():
-    days = [date(2025, 8, 20), date(2025, 12, 25), date(2025, 10, 31), date(2025, 4, 30)]
-    DESIRED_PEAK_SALES = 3000
-    total_day_sales = 0
-    for day in days:
-        total_day_sales = 0
-        while total_day_sales < DESIRED_PEAK_SALES:
-            total_day_sales += generate_random_order(day)
-        
 def generate_orders():
     DESIRED_TOTAL_SALES = 1000000.0
     total_sales = 0
     while (total_sales < DESIRED_TOTAL_SALES):
         total_sales += generate_random_order()
-    generate_peak_days()
 
 def generate_random_date():
     start_date = datetime(2025, 1, 1)
@@ -261,7 +258,7 @@ def generate_random_time():
     ).time()
     return random_time
 
-def generate_random_order(day = None):
+def generate_random_order():
     data_orders.append([])
     i = len(data_orders) - 1
     
@@ -269,16 +266,24 @@ def generate_random_order(day = None):
     employee_id = random.choices(range(3), weights=weights_employees)[0]
     
     weights_num_items = [50, 25, 12, 7, 3, 2, 1, 1, 1, 1]
-    num_items = random.choices(range(10), weights=weights_num_items)[0]
+    num_items = random.choices(range(1, 11), weights=weights_num_items)[0]
     items_total = 0
     for _ in range(num_items):
         items_total += generate_random_order_item(i)
-    order_date = generate_random_date() if day == None else day
+        
+    order_date = generate_random_date()
     order_time = generate_random_time()
 
-    data_orders[i] = [i, employee_id, items_total, order_date, order_time]
+    subtotal = round(items_total, 2) # revenue
+    tax_amount = round(subtotal * 0.0625, 2) # texas sales tax
+    grand_total = round(subtotal + tax_amount, 2) # total customer pays
 
-    return items_total
+    if num_items >= 3:  # order has 3+ items it will use a tray
+        consume_inventory(inventory_ids['Tray'], 1)
+
+    data_orders[i] = [i, employee_id, subtotal, tax_amount, grand_total, order_date, order_time]
+
+    return subtotal
 
 def generate_random_order_item(order_id):
     data_order_items.append([])
@@ -363,3 +368,5 @@ with open('recipes.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(headers_recipes)
     writer.writerows(data_recipes)
+    
+print("done.")
