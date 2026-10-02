@@ -24,3 +24,7 @@ Contains the About page included during the latest lab activity - more git. For 
 ### .gitignore
 
 Contains configuration ignored by git during pull, commit, and push.
+
+### NOTES (for TA)
+
+1. Some commits are done under lonestarflightreviews. That is the secondary account for cjermia-zach and was accidentally used here for commit and push due to a technical issue on Christopher Jermia's machine. No security breach occurred in our repository while the code was being developed
