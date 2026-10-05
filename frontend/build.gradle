@@ -29,3 +29,21 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 */
+
+plugins {
+  id 'application'
+  id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+javafx {
+    version = "23"
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
+}   
+
+application {
+    mainClass = 'com.app.CashierCtrl'
+}

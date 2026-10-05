@@ -1,4 +1,4 @@
-package frontend;
+package com.app;
 // Source - https://stackoverflow.com/a/51457200
 // Posted by Slaw
 // Retrieved 2026-10-02, License - CC BY-SA 4.0
@@ -10,7 +10,7 @@ public class Cashier {
     private final String name;
     private boolean housePet;
 
-    public Animal(@NamedArg("name") String name) {
+    public Cashier(@NamedArg("name") String name) {
         this.name = name;
     }
 

@@ -1,0 +1,7 @@
+{
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.project.sourcePaths": [
+        "frontend/src/main/java"
+    ],
+    "java.import.gradle.enabled": true
+}
