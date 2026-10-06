@@ -37,6 +37,12 @@
     <Text fx:id="actiontarget"
         GridPane.columnIndex="1" GridPane.rowIndex="6"/>
 
+    <VBox spacing="10" alignment="center"
+        GridPane.columnIndex="0" GridPane.rowIndex="7"
+        GridPane.columnSpan="2">
+        <Text id="welcome-text" text="dosak; goosac! there is goo in the sack!" />
+    </VBox>
+
     <stylesheets>
         <URL value="@style.css" />
     </stylesheets>
