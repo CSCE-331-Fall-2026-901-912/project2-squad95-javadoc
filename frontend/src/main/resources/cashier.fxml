@@ -1,24 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.* ?>
-<?import javafx.scene.layout.* ?>
-<?import javafx.scene.text.* ?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml" prefHeight="400.0" prefWidth="600.0">
-</AnchorPane>
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
+<!-- why is FXML such a PITA to work with -->
 
-<ArrayList xmlns="http://javafx.com/javafx/10.0.2" xmlns:fx="http://javafx.com/fxml/1">
+<GridPane fx:controller="com.app.CashierCtrl" 
+    xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10"
+    styleClass="root">
+<padding><Insets top="25" right="25" bottom="10" left="25"/></padding>
+    <Text id="welcome-text" text="Welcome" 
+        GridPane.columnIndex="0" GridPane.rowIndex="0"
+        GridPane.columnSpan="2"/>
+ 
+    <Label text="User Name:"
+        GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+ 
+    <TextField 
+        GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+ 
+    <Label text="Password:"
+        GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+ 
+    <PasswordField fx:id="passwordField" 
+        GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
-    <Animal name="Cat" housePet="true"/>
-    <Animal name="Dog" housePet="true"/>
-    <Animal name="Bear" housePet="false"/>
-    <Animal name="Wolf" housePet="false"/>
+    <HBox spacing="10" alignment="bottom_right" 
+        GridPane.columnIndex="1" GridPane.rowIndex="4">
+        <Button text="Sign In"     
+            onAction="#handleSubmitButtonAction"/>
+    </HBox>
 
-    <!-- Another way of declaring an Animal -->
+    <Text fx:id="actiontarget"
+        GridPane.columnIndex="1" GridPane.rowIndex="6"/>
 
-    <Animal>
-        <name>Snake</name>
-        <housePet>true</housePet>
-    </Animal>
+    <stylesheets>
+        <URL value="@style.css" />
+    </stylesheets>
 
-</ArrayList>
+</GridPane>
