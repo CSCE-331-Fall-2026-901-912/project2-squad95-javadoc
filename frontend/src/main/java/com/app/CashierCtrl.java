@@ -16,8 +16,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.ColumnConstraints;
@@ -35,8 +33,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.geometry.Insets;
 
-public class CashierCtrl extends Application implements Initializable{
 
+public class CashierCtrl extends Application implements Initializable {
     @FXML 
     private ListView<Integer> ordersList;
     final ObservableList<Integer> orderIds = FXCollections.observableArrayList();
@@ -45,23 +43,48 @@ public class CashierCtrl extends Application implements Initializable{
     private ListView<String> orderItemsList;
     ObservableList<String> itemIDs = FXCollections.observableArrayList();
 
-    @Override 
+    @FXML
+    private TilePane menuPane;
+    ObservableList<ShopMenuItem> menuItems = FXCollections.observableArrayList();
+    
+    final static int TEMP_ITEMS_COUNT = 32;
+
+    // temp
+    private void populateMenuPane() {
+        for (int i = 0; i < TEMP_ITEMS_COUNT / 2; ++i) {
+            menuItems.add(new ShopMenuItem("GOgog fjfjfjfjfjfjfjfjfjfjfjffjf fjfjfj"));
+            menuItems.add(new ShopMenuItem("Dusak"));
+        }
+        for (ShopMenuItem shopMenuItem : menuItems) {
+            Button menuButton = new Button(shopMenuItem.name());
+            menuButton.setPrefSize(60, 60);
+            menuButton.setMaxSize(100, 100);
+            menuButton.setWrapText(true);
+            menuPane.getChildren().add(menuButton);
+            System.out.println(menuPane.getChildren().size());
+        }
+    }
+
+    @FXML 
     public void initialize(URL location, ResourceBundle resourceBundle) {
         // ordersList isn't available when start() is called, so
         // populate it here instead
         // TODO: find a better way to dynamically populate ordersList
-        int TEMP_ITEMS_COUNT = 32;
+        
         for (int i = 0; i < TEMP_ITEMS_COUNT; ++i) {
             orderIds.add(i);
         }
         // TODO phase 4: give actions to listview that switches the 
         // global context for other menus  
+        // https://blueskyworkshop.com/topics/Java-Pages/fx-ListView-Basics/
         ordersList.setItems(orderIds);
 
         itemIDs.add(STYLESHEET_CASPIAN);
         itemIDs.add(STYLESHEET_MODENA);
         itemIDs.add("12am");
         orderItemsList.setItems(itemIDs);
+
+        populateMenuPane();
     }
 
     @Override
@@ -154,7 +177,11 @@ public class CashierCtrl extends Application implements Initializable{
         
         // leave code commented above for now pls
 
-        Parent root = FXMLLoader.load(getClass().getResource("/cashier.fxml"));
+        // Set the controller manually to avoid needing to respecify fx:controller 
+        // attribute again for every .fxml import
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/cashier.fxml"));
+        loader.setController(new CashierCtrl());
+        Parent root = loader.load();
     
         Scene scene = new Scene(root, 1280, 720);
     
