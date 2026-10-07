@@ -1,6 +1,7 @@
 package com.app;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -23,6 +24,19 @@ import javafx.stage.Stage;
 
 public class CashierCtrl extends Application {
 
+    private void populateListPane(FlowPane listPane, ArrayList<String> items) {
+        // TODO for phase 4: nest order item buttons in a dedicated pane
+        ArrayList<Button> itemButtons = new ArrayList<Button>();
+        for (String item : items) {
+            Button itemButton = new Button(item);
+            // stretch button width to width of pane
+            itemButton.prefWidthProperty().bind(listPane.widthProperty());
+            // TODO phase 4: give actions to button that switches the 
+            // global context for other menus  
+            itemButtons.add(itemButton);
+        }
+        listPane.getChildren().addAll(itemButtons);
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -37,6 +51,7 @@ public class CashierCtrl extends Application {
             }
         });
 
+        // temporary items
         ArrayList<String> items = new ArrayList<String>();
         items.add("AHH");
         items.add("Hello");
@@ -50,7 +65,7 @@ public class CashierCtrl extends Application {
 
         FlowPane itemTabPane = new FlowPane();
         
-        // temporary colors
+        // colors for debugging
         ArrayList<BackgroundFill> backgroundFills = new ArrayList<BackgroundFill>();
         backgroundFills.add(new BackgroundFill(Color.ALICEBLUE, null, null));
         backgroundFills.add(new BackgroundFill(Color.ANTIQUEWHITE, null, null));
@@ -65,7 +80,6 @@ public class CashierCtrl extends Application {
         itemTabPane.setBackground(new Background(backgroundFills.get(2)));
         GridPane.setConstraints(itemTabPane, 2, 0, 1, 4);
 
-
         double[] columnPercentWidths = new double[] {25, 50, 25};
         for (double percent : columnPercentWidths) {
             ColumnConstraints columnProp = new ColumnConstraints();
@@ -73,6 +87,15 @@ public class CashierCtrl extends Application {
             columnProp.setHgrow(Priority.ALWAYS);
             rootPane.getColumnConstraints().add(columnProp);
         }
+
+        // programming war crime
+        ArrayList<String> orderIDs = new ArrayList<String>();
+        orderIDs.add(STYLESHEET_CASPIAN);
+        orderIDs.add(STYLESHEET_MODENA);
+        orderIDs.add("12am");
+
+        populateListPane(orderTabPane, orderIDs);
+        populateListPane(itemTabPane, items);
         
         // Columns fill the entire window
         RowConstraints rowProp = new RowConstraints();
