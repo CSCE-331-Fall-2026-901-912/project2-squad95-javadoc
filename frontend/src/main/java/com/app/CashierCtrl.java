@@ -2,11 +2,18 @@ package com.app;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.ResourceBundle;
+import java.net.URL;
 
 import javafx.application.Application;
+import javafx.beans.Observable;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -23,25 +30,38 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
-
+import javafx.util.Callback;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.geometry.Insets;
 
-public class CashierCtrl extends Application {
+public class CashierCtrl extends Application implements Initializable{
 
-    private void populateListPane(FlowPane listPane, ArrayList<String> items) {
-        // TODO for phase 4: nest order item buttons in a dedicated pane
-        ArrayList<Button> itemButtons = new ArrayList<Button>();
-        for (String item : items) {
-            Button itemButton = new Button(item);
-            // stretch button width to width of pane
-            itemButton.prefWidthProperty().bind(listPane.widthProperty());
-            // TODO phase 4: give actions to button that switches the 
-            // global context for other menus  
-            itemButtons.add(itemButton);
+    @FXML 
+    private ListView<Integer> ordersList;
+    final ObservableList<Integer> orderIds = FXCollections.observableArrayList();
+
+    @FXML 
+    private ListView<String> orderItemsList;
+    ObservableList<String> itemIDs = FXCollections.observableArrayList();
+
+    @Override 
+    public void initialize(URL location, ResourceBundle resourceBundle) {
+        // ordersList isn't available when start() is called, so
+        // populate it here instead
+        // TODO: find a better way to dynamically populate ordersList
+        int TEMP_ITEMS_COUNT = 32;
+        for (int i = 0; i < TEMP_ITEMS_COUNT; ++i) {
+            orderIds.add(i);
         }
-        listPane.getChildren().addAll(itemButtons);
+        // TODO phase 4: give actions to listview that switches the 
+        // global context for other menus  
+        ordersList.setItems(orderIds);
+
+        itemIDs.add(STYLESHEET_CASPIAN);
+        itemIDs.add(STYLESHEET_MODENA);
+        itemIDs.add("12am");
+        orderItemsList.setItems(itemIDs);
     }
 
     @Override
