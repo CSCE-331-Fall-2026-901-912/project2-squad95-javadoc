@@ -15,21 +15,21 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.FlowPane?>
 
-<GridPane prefHeight="720.0" prefWidth="1280.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/26"
-   fx:controller="com.app.CashierCtrl">
+<GridPane prefHeight="720.0" prefWidth="1280.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/26">
   <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="295.3333740234375" minWidth="10.0" percentWidth="25.0" prefWidth="142.33334350585938" />
     <ColumnConstraints hgrow="SOMETIMES" maxWidth="381.0" minWidth="10.0" percentWidth="50.0" prefWidth="301.33335367838544" />
     <ColumnConstraints hgrow="SOMETIMES" maxWidth="374.6666259765625" minWidth="10.0" percentWidth="25.0" prefWidth="150.66664632161456" />
   </columnConstraints>
   <rowConstraints>
+    <RowConstraints />
     <RowConstraints maxHeight="131.33332061767578" minHeight="0.0" prefHeight="34.33333524068197" vgrow="SOMETIMES" />
     <RowConstraints maxHeight="406.6666666666667" minHeight="10.0" prefHeight="326.0" vgrow="SOMETIMES" />
-    <RowConstraints maxHeight="178.99998474121094" minHeight="0.0" prefHeight="68.66664632161456" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="178.99998474121094" minHeight="0.0" prefHeight="68.66664632161456" vgrow="SOMETIMES" />
       <RowConstraints maxHeight="178.99998474121094" minHeight="10.0" prefHeight="72.66668701171875" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
-      <ScrollPane hbarPolicy="NEVER" pannable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+      <ScrollPane hbarPolicy="NEVER" pannable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
          <content>
             <TilePane fx:id="menuItemsPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumns="3" prefHeight="300.0" prefRows="3" prefTileHeight="100.0" prefTileWidth="100.0" prefWidth="639.0">
                <!-- <children> -->
@@ -59,19 +59,19 @@
             </TilePane>
          </content>
       </ScrollPane>
-      <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Checkout" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-      <ToolBar maxHeight="1.7976931348623157E308" prefHeight="57.0" prefWidth="1280.0" GridPane.columnSpan="2147483647">
+      <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Checkout" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+      <ToolBar maxHeight="1.7976931348623157E308" prefHeight="57.0" prefWidth="1280.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
         <items>
           <Button mnemonicParsing="false" prefHeight="58.0" prefWidth="77.0" text="i do a thing" />
         </items>
       </ToolBar>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="3">
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="4">
          <children>
             <Button mnemonicParsing="false" prefHeight="73.0" prefWidth="102.0" text="New" />
             <Button mnemonicParsing="false" prefHeight="73.0" prefWidth="104.0" text="Cancel" />
          </children>
       </HBox>
-      <SplitPane dividerPositions="0.24058577405857745" prefHeight="160.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.rowSpan="2147483647">
+      <SplitPane dividerPositions="0.24058577405857745" prefHeight="160.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.rowSpan="2147483647">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                <children>
@@ -104,13 +104,13 @@
             </AnchorPane>
         </items>
       </SplitPane>
-      <VBox maxHeight="1.7976931348623157E308" maxWidth="1000.0" prefHeight="52.0" prefWidth="150.0" GridPane.rowIndex="1" GridPane.rowSpan="2">
+      <VBox maxHeight="1.7976931348623157E308" maxWidth="1000.0" prefHeight="52.0" prefWidth="150.0" GridPane.rowIndex="2" GridPane.rowSpan="2">
          <children>
             <Label text="Orders" />
             <ListView fx:id="ordersList" prefHeight="1000.0" prefWidth="200.0" />
          </children>
       </VBox>
-      <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.rowSpan="2">
+      <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.rowSpan="2">
          <children>
             <Label prefWidth="10000.0" text="Order ID: 76535362427" />
             <ListView fx:id="orderItemsList" prefHeight="2000.0" prefWidth="200.0" />
