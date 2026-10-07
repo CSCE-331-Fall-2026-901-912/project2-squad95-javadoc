@@ -15,7 +15,8 @@
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 
-<GridPane prefHeight="720.0" prefWidth="1280.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/26">
+<GridPane prefHeight="720.0" prefWidth="1280.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/26"
+   fx:controller="com.app.CashierCtrl">
   <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="295.3333740234375" minWidth="10.0" percentWidth="25.0" prefWidth="142.33334350585938" />
     <ColumnConstraints hgrow="SOMETIMES" maxWidth="381.0" minWidth="10.0" percentWidth="50.0" prefWidth="301.33335367838544" />
