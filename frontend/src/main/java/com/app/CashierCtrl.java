@@ -35,6 +35,10 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.geometry.Insets;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 public class CashierCtrl extends Application implements Initializable{
 
     @FXML 
@@ -44,6 +48,45 @@ public class CashierCtrl extends Application implements Initializable{
     @FXML 
     private ListView<String> orderItemsList;
     ObservableList<String> itemIDs = FXCollections.observableArrayList();
+
+
+    @FXML
+    private TilePane menuItemsPane;
+
+    public void initialize1() {
+
+        System.out.println(new java.io.File("items.csv").getAbsolutePath());
+        try (BufferedReader reader = new BufferedReader(new FileReader("items.csv"))) {
+
+            String line;
+
+            reader.readLine();
+
+            while ((line = reader.readLine()) != null) {
+
+                String[] data = line.split(",");
+
+                String name = data[1];
+                double price = Double.parseDouble(data[2]);
+
+                Button button = new Button(name);
+
+                button.setPrefSize(100, 60);
+                button.setWrapText(true);
+
+                button.setOnAction(event -> {
+                    System.out.println("Selected: " + name);
+                    System.out.println("Price: $" + price);
+                });
+
+                menuItemsPane.getChildren().add(button);
+            }
+
+        } catch (IOException e) {
+            System.out.println("FAILED TO READ items.csv");
+            e.printStackTrace();
+        }
+    }
 
     @Override 
     public void initialize(URL location, ResourceBundle resourceBundle) {
@@ -62,6 +105,8 @@ public class CashierCtrl extends Application implements Initializable{
         itemIDs.add(STYLESHEET_MODENA);
         itemIDs.add("12am");
         orderItemsList.setItems(itemIDs);
+
+        initialize1();
     }
 
     @Override

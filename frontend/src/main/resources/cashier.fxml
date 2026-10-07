@@ -13,6 +13,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.FlowPane?>
 
 <GridPane prefHeight="720.0" prefWidth="1280.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/26"
    fx:controller="com.app.CashierCtrl">
@@ -30,16 +31,31 @@
    <children>
       <ScrollPane hbarPolicy="NEVER" pannable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
          <content>
-            <TilePane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumns="3" prefHeight="300.0" prefRows="3" prefTileHeight="100.0" prefTileWidth="100.0" prefWidth="639.0">
-               <children>
-                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Button" />
-                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Button" />
-                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Button" />
-                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="ehehehehhwehhewh asdnakj" wrapText="true" />
-                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Button" />
-                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Button" />
-                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Button" />
-               </children>
+            <TilePane fx:id="menuItemsPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumns="3" prefHeight="300.0" prefRows="3" prefTileHeight="100.0" prefTileWidth="100.0" prefWidth="639.0">
+               <!-- <children> -->
+                  <!-- <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Pearl Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Green Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Black Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Oolong Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Honey Green Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Honey Black Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Honey Oolong Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Honey Pearl Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Mango Green Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Matcha Pearl Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Coffee Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Taro Pearl Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Thai Pearl Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Coconut Pearl Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Mango Green Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Passion Chess" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Berry Lychee Burst" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Peach Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Honey Lemonade" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Strawberry Coconut" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Matcha Fresh Milk" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Coffee Creama" wrapText="True" /> -->
+               <!-- </children> -->
             </TilePane>
          </content>
       </ScrollPane>
