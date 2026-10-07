@@ -131,7 +131,8 @@ public class CashierCtrl extends Application {
         // // gridPaneChildren.addAll(button, btn, label);
         // primaryStage.setScene(new Scene(rootPane, 640, 480));
         // primaryStage.show();
-
+        
+        // leave code commented above for now pls
 
         Parent root = FXMLLoader.load(getClass().getResource("/cashier.fxml"));
     
