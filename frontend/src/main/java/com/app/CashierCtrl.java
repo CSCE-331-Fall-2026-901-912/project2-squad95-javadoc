@@ -112,11 +112,6 @@ public class CashierCtrl extends Application implements Initializable {
 
             currProgOrderId = currSelectedOrder.id();
 
-            // debugging to see if items update on button clicks
-            currSelectedOrder.orderItems().add(new OrderItem(STYLESHEET_CASPIAN));
-            currSelectedOrder.orderItems().add(new OrderItem(STYLESHEET_MODENA));
-            currSelectedOrder.orderItems().add(new OrderItem("12am"));
-
             orderItemsList.setItems(currSelectedOrder.orderItems());
         });
 
@@ -137,6 +132,19 @@ public class CashierCtrl extends Application implements Initializable {
         String errorMessage = String.format("Failed to remove order of ID %d", currProgOrderId);
         System.err.println(errorMessage);
         return false;
+    }
+
+    private int getOrderIndexOfId(int targetId) {
+        for (int i = 0; i < orderEntries.size(); ++i) {
+            Order entry = orderEntries.get(i);
+            if (entry.id() == targetId) {
+                return i;
+            }
+        }
+
+        String errorMessage = String.format("Failed to remove order of ID %d", currProgOrderId);
+        System.err.println(errorMessage);
+        return -1;
     }
 
     private void onCheckout(ActionEvent event) {
@@ -391,6 +399,10 @@ public class CashierCtrl extends Application implements Initializable {
 
             orderPreviewLabel.setText(orderInfo);
 
+            // TODO: orderitem doesn't fill in all req info, need to complete  
+            OrderItem completedOrderItem = new OrderItem(selectedDrink.getText());
+            addItemToCurrOrder(completedOrderItem);
+
             popup.close();
         });
 
@@ -402,6 +414,12 @@ public class CashierCtrl extends Application implements Initializable {
         popup.show();
     }
 
+    private void addItemToCurrOrder(OrderItem item) {
+        int currOrderIndex = getOrderIndexOfId(currProgOrderId);
+        // handle case where no order is selected 
+        if (currOrderIndex < 0) return;
+        orderEntries.get(currOrderIndex).orderItems().add(item);
+    }
 
     @FXML
     private void switchToManager(ActionEvent event) throws IOException {
@@ -449,12 +467,6 @@ public class CashierCtrl extends Application implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resourceBundle) {
-        // ordersList isn't available when start() is called, so
-        // populate it here instead
-        // TODO: find a better way to dynamically populate ordersList
-
-
-
         // TODO phase 4: give actions to listview that switches the 
         // global context for other menus  
         // https://blueskyworkshop.com/topics/Java-Pages/fx-ListView-Basics/
@@ -463,6 +475,9 @@ public class CashierCtrl extends Application implements Initializable {
         initialize1();
         //initializeDrinks();
         //populateMenuPane();
+
+        // ordersList isn't available when start() is called, so
+        // populate it here instead
         initializeOrderLists();
 
         checkoutButton.setOnAction(this::onCheckout);
@@ -471,94 +486,6 @@ public class CashierCtrl extends Application implements Initializable {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        // primaryStage.setTitle("Hello World!");
-        // Button btn = new Button();
-        // btn.setText("Say 'Hello World'");
-        // btn.setOnAction(new EventHandler<ActionEvent>() {
- 
-        //     @Override
-        //     public void handle(ActionEvent event) {
-        //         System.out.println("Hello World!");
-        //     }
-        // });
-
-        // // temporary items
-        // ArrayList<String> items = new ArrayList<String>();
-        // items.add("AHH");
-        // items.add("Hello");
-        // items.add("world!");
-        
-        // GridPane rootPane = new GridPane();
-
-        // FlowPane orderTabPane = new FlowPane();
-
-        // TilePane menuPane = new TilePane();
-
-        // FlowPane itemTabPane = new FlowPane();
-        
-        // // colors for debugging
-        // ArrayList<BackgroundFill> backgroundFills = new ArrayList<BackgroundFill>();
-        // backgroundFills.add(new BackgroundFill(Color.ALICEBLUE, null, null));
-        // backgroundFills.add(new BackgroundFill(Color.ANTIQUEWHITE, null, null));
-        // backgroundFills.add(new BackgroundFill(Color.CADETBLUE, null, null));
-
-        // orderTabPane.setBackground(new Background(backgroundFills.get(0)));
-        // GridPane.setConstraints(orderTabPane, 0, 0, 1, 4);
-
-        // menuPane.setBackground(new Background(backgroundFills.get(1)));
-        // GridPane.setConstraints(menuPane, 1, 0, 1, 4);
-
-        // itemTabPane.setBackground(new Background(backgroundFills.get(2)));
-        // GridPane.setConstraints(itemTabPane, 2, 0, 1, 4);
-
-        // double[] columnPercentWidths = new double[] {25, 50, 25};
-        // for (double percent : columnPercentWidths) {
-        //     ColumnConstraints columnProp = new ColumnConstraints();
-        //     columnProp.setPercentWidth(percent);
-        //     columnProp.setHgrow(Priority.ALWAYS);
-        //     rootPane.getColumnConstraints().add(columnProp);
-        // }
-
-        // // programming war crime
-        // ArrayList<String> orderIDs = new ArrayList<String>();
-        // orderIDs.add(STYLESHEET_CASPIAN);
-        // orderIDs.add(STYLESHEET_MODENA);
-        // orderIDs.add("12am");
-
-        // populateListPane(orderTabPane, orderIDs);
-        // populateListPane(itemTabPane, items);
-        
-        // // Columns fill the entire window
-        // RowConstraints rowProp = new RowConstraints();
-        // // NOTE: adjust this if other panes (like a tab or info pane)
-        // // are added to the top or bottom
-        // rowProp.setPercentHeight(100);
-        // rootPane.getRowConstraints().add(rowProp);
-
-        // rootPane.getChildren().addAll(orderTabPane, menuPane, itemTabPane);
-
-        // // Button button = new Button();
-        // // button.setText("I love 331!");
-        // // GridPane.setRowIndex(button, 0);
-        // // GridPane.setColumnIndex(button, 1);
-
-        // Label label = new Label();
-        // label.setText(STYLESHEET_CASPIAN);
-
-        // orderTabPane.getChildren().add(label);
-        // menuPane.getChildren().add(label);
-        // itemTabPane.getChildren().add(label);
-
-        // // GridPane.setConstraints(label, 2, 0); // column=2 row=0
-
-        // // var gridPaneChildren = rootPane.getChildren();
-
-        // // gridPaneChildren.addAll(button, btn, label);
-        // primaryStage.setScene(new Scene(rootPane, 640, 480));
-        // primaryStage.show();
-        
-        // leave code commented above for now pls
-
         // Set the controller manually to avoid needing to respecify fx:controller 
         // attribute again for every .fxml import
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/cashier.fxml"));
