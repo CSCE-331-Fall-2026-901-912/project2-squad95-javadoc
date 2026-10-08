@@ -48,5 +48,6 @@ javafx {
 }   
 
 application {
-    mainClass = 'com.app.CashierCtrl'
+    // mainClass = 'com.app.CashierCtrl'
+    mainClass = 'com.app.Manager'
 }
