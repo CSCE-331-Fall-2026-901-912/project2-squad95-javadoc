@@ -9,11 +9,15 @@ import com.app.controllers.*;
 import com.app.models.*;
 
 import java.util.Set;
+
+import javafx.beans.value.*;
+
 import java.net.URL;
 import java.sql.SQLException;
 
 import javafx.application.Application;
 import javafx.beans.Observable;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -47,13 +51,8 @@ import java.io.IOException;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
-import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ToggleGroup;
-
 import io.github.cdimascio.dotenv.Dotenv;
 
 //maybe not needed
@@ -65,17 +64,90 @@ public class CashierCtrl extends Application implements Initializable {
 
     // Note: fx:id and variable name *must match* because of JavaFX reflection 
     @FXML 
-    private ListView<Integer> ordersList;
-    final ObservableList<Integer> orderIds = FXCollections.observableArrayList();
+    private ListView<Order> ordersList;
+    // NOTE: cellfactory is an alternative but that's for phase 4/5
+    final ObservableList<Order> orderEntries = FXCollections.observableArrayList();
 
     @FXML 
-    private ListView<String> orderItemsList;
-    ObservableList<String> itemIDs = FXCollections.observableArrayList();
+    private ListView<OrderItem> orderItemsList;
 
+    @FXML 
+    private Button newOrderButton;
+
+    @FXML
+    private Button checkoutButton;
+
+    @FXML private Button deleteOrderButton;
+
+    // the working id used for tracking the currently selected
+    // order. this should be transformed into a different id
+    // for inserting into the database when submitted
+    private static int currProgOrderId = 0;
+
+    // the id of the most recently created order. used for creating new orders
+    private static int latestProgOrderId = 0; 
 
     @FXML
     private TilePane menuItemsPane;
-    ObservableList<ShopMenuItem> menuItems = FXCollections.observableArrayList();
+    final ObservableList<ShopMenuItem> menuItems = FXCollections.observableArrayList();
+    
+    private void onNewOrderClick(ActionEvent event) {
+        ObservableList<OrderItem> orderList = FXCollections.observableArrayList();
+        ++latestProgOrderId;
+        Order newOrder = new Order(latestProgOrderId, orderList);
+        orderEntries.add(newOrder);
+    }
+
+    private void initializeOrderLists() {
+        newOrderButton.setOnAction(this::onNewOrderClick);
+        
+        // https://stackoverflow.com/questions/13264017/getting-selected-element-from-listview 
+        ordersList.getSelectionModel().selectedItemProperty().addListener( (observable, oldVal, newVal) -> {
+            Order currSelectedOrder = newVal;
+            // break early if no list item is selected
+            if (currSelectedOrder == null) { 
+                orderItemsList.setItems(null);
+                return; 
+            }
+
+            currProgOrderId = currSelectedOrder.id();
+
+            // debugging to see if items update on button clicks
+            currSelectedOrder.orderItems().add(new OrderItem(STYLESHEET_CASPIAN));
+            currSelectedOrder.orderItems().add(new OrderItem(STYLESHEET_MODENA));
+            currSelectedOrder.orderItems().add(new OrderItem("12am"));
+
+            orderItemsList.setItems(currSelectedOrder.orderItems());
+        });
+
+        // TODO for phase 4: interaction for selecting an order's item 
+    }
+
+    private boolean removeFirstOrderItemOfId(int targetId) {
+        // Linear search, because id =/= list index
+        // would be better to use an observable map later on
+        for (int i = 0; i < orderEntries.size(); ++i) {
+            Order entry = orderEntries.get(i);
+            if (entry.id() == targetId) {
+                orderEntries.remove(i);
+                return true;          
+            }
+        }
+
+        String errorMessage = String.format("Failed to remove order of ID %d", currProgOrderId);
+        System.err.println(errorMessage);
+        return false;
+    }
+
+    private void onCheckout(ActionEvent event) {
+        // TODO: SQL submit command(s)
+
+        removeFirstOrderItemOfId(currProgOrderId);
+    }
+
+    private void onDeleteOrder(ActionEvent event) {
+        removeFirstOrderItemOfId(currProgOrderId);
+    } 
 
     @FXML
     private Label orderPreviewLabel;
@@ -366,22 +438,21 @@ public class CashierCtrl extends Application implements Initializable {
         // ordersList isn't available when start() is called, so
         // populate it here instead
         // TODO: find a better way to dynamically populate ordersList
-        
-        for (int i = 0; i < TEMP_ITEMS_COUNT; ++i) {
-            orderIds.add(i);
-        }
+
+
+
         // TODO phase 4: give actions to listview that switches the 
         // global context for other menus  
         // https://blueskyworkshop.com/topics/Java-Pages/fx-ListView-Basics/
-        ordersList.setItems(orderIds);
+        ordersList.setItems(orderEntries);
 
-        itemIDs.add(STYLESHEET_CASPIAN);
-        itemIDs.add(STYLESHEET_MODENA);
-        itemIDs.add("12am");
-        orderItemsList.setItems(itemIDs);
+        initialize1();
+        //initializeDrinks();
+        //populateMenuPane();
+        initializeOrderLists();
 
-        //initialize1();
-        loadMenuPane();
+        checkoutButton.setOnAction(this::onCheckout);
+        deleteOrderButton.setOnAction(this::onDeleteOrder);
     }
 
     @Override
