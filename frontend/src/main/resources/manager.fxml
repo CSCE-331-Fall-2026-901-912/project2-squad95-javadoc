@@ -46,24 +46,24 @@
                             <Label text="-8%" style="-fx-font-size: 16px;"/>
                         </VBox>
                     </HBox>
-                    <HBox spacing="20">
-                        <VBox prefWidth="400">
-                            <Label text="Revenue trend" alignment="CENTER" prefWidth="400" style="-fx-font-size: 18px;"/>
-                            <BarChart fx:id="revenueTrendChart" prefHeight="250">
+                    <HBox spacing="20" VBox.vgrow="ALWAYS">
+                        <VBox HBox.hgrow="ALWAYS">
+                            <Label text="Revenue trend" alignment="CENTER" maxWidth="Infinity" style="-fx-font-size: 18px;"/>
+                            <BarChart fx:id="revenueTrendChart" prefHeight="250" VBox.vgrow="ALWAYS">
                                 <xAxis><CategoryAxis/></xAxis>
                                 <yAxis><NumberAxis/></yAxis>
                             </BarChart>
                         </VBox>
-                        <VBox prefWidth="400">
-                            <Label text="Top cashiers" alignment="CENTER" prefWidth="400" style="-fx-font-size: 18px;"/>
-                            <BarChart fx:id="topCashiersChart" prefHeight="250">
+                        <VBox HBox.hgrow="ALWAYS">
+                            <Label text="Top cashiers" alignment="CENTER" maxWidth="Infinity" style="-fx-font-size: 18px;"/>
+                            <BarChart fx:id="topCashiersChart" prefHeight="250" VBox.vgrow="ALWAYS">
                                 <xAxis><NumberAxis/></xAxis>
                                 <yAxis><CategoryAxis/></yAxis>
                             </BarChart>
                         </VBox>
                     </HBox>
-                    <HBox spacing="20">
-                        <TableView fx:id="inventoryTable" prefWidth="400" prefHeight="250">
+                    <HBox spacing="20" VBox.vgrow="ALWAYS">
+                        <TableView fx:id="inventoryTable" prefHeight="250" HBox.hgrow="ALWAYS">
                             <columns>
                                 <TableColumn text="Inventory" prefWidth="120"/>
                                 <TableColumn text="On hand" prefWidth="90"/>
@@ -71,7 +71,7 @@
                                 <TableColumn text="Action" prefWidth="90"/>
                             </columns>
                         </TableView>
-                        <TableView fx:id="employeeTable" prefWidth="400" prefHeight="250">
+                        <TableView fx:id="employeeTable" prefHeight="250" HBox.hgrow="ALWAYS">
                             <columns>
                                 <TableColumn text="Cashier" prefWidth="100"/>
                                 <TableColumn text="Hours worked" prefWidth="100"/>
@@ -80,6 +80,7 @@
                             </columns>
                         </TableView>
                     </HBox>
+                    
                 </VBox>
 
                 <!-- Financials -->
