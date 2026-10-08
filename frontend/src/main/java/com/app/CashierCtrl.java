@@ -2,7 +2,9 @@ package com.app;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.net.URL;
 
 import javafx.application.Application;
@@ -37,6 +39,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class CashierCtrl extends Application implements Initializable {
@@ -55,14 +63,18 @@ public class CashierCtrl extends Application implements Initializable {
     private TilePane menuItemsPane;
     ObservableList<ShopMenuItem> menuItems = FXCollections.observableArrayList();
 
-    @FXML
+    private Button selectedDrink = null;
+
+    private double selectedDrinkPrice = 0.0;
+    private double toppingTotal = 0.0;
+
     public void initialize1() {
 
         System.out.println(new java.io.File("items.csv").getAbsolutePath());
+
         try (BufferedReader reader = new BufferedReader(new FileReader("items.csv"))) {
 
             String line;
-
             reader.readLine();
 
             while ((line = reader.readLine()) != null) {
@@ -77,9 +89,24 @@ public class CashierCtrl extends Application implements Initializable {
                 button.setPrefSize(100, 60);
                 button.setWrapText(true);
 
+                button.setStyle("-fx-background-color: lightgray;");
+
                 button.setOnAction(event -> {
+
+                    if (selectedDrink != null) {
+                        selectedDrink.setStyle("-fx-background-color: lightgray;");
+                    }
+
+                    button.setStyle("-fx-background-color: lightgreen;");
+
+
+                    selectedDrink = button;
+                    selectedDrinkPrice = price;
+
                     System.out.println("Selected: " + name);
                     System.out.println("Price: $" + price);
+                    
+                    showToppingsPopup();
                 });
 
                 menuItemsPane.getChildren().add(button);
@@ -90,9 +117,88 @@ public class CashierCtrl extends Application implements Initializable {
             e.printStackTrace();
         }
     }
-    
+
+
+    private void showToppingsPopup() {
+        //System.out.println("POPUP STARTED");
+        //double[] toppingTotal = {0.0};
+        Stage popup = new Stage();
+        popup.setTitle("Select Toppings");
+
+        FlowPane toppingsPane = new FlowPane();
+        toppingsPane.setHgap(10);
+        toppingsPane.setVgap(10);
+        toppingsPane.setPadding(new Insets(20));
+        toppingsPane.setPrefWrapLength(400);
+
+        Set<String> selectedToppings = new HashSet<>();
+        double[] toppingTotal = {0.0};
+
+        try (BufferedReader reader =
+                new BufferedReader(new FileReader("toppings.csv"))) {
+
+            String line;
+            reader.readLine();
+
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+
+                String name = data[1];
+                double price = Double.parseDouble(data[2]);
+
+                Button button = new Button(name);
+                button.setPrefSize(120, 60);
+                button.setWrapText(true);
+                button.setStyle("-fx-background-color: lightgray;");
+
+                button.setOnAction(event -> {
+                    if (selectedToppings.contains(name)) {
+                        selectedToppings.remove(name);
+                        toppingTotal[0] -= price;
+                        button.setStyle("-fx-background-color: lightgray;");
+                    } else {
+                        selectedToppings.add(name);
+                        toppingTotal[0] += price;
+                        button.setStyle("-fx-background-color: lightgreen;");
+                    }
+                });
+
+                toppingsPane.getChildren().add(button);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Button confirmButton = new Button("Confirm");
+
+        confirmButton.setOnAction(event -> {
+            double totalPrice = selectedDrinkPrice + toppingTotal[0];
+
+            System.out.println("Drink: " + selectedDrink.getText());
+            System.out.printf("Drink Price: $%.2f%n", selectedDrinkPrice);
+            System.out.println("Toppings: " + selectedToppings);
+            System.out.printf("Toppings Price: $%.2f%n", toppingTotal[0]);
+            System.out.printf("Total Price: $%.2f%n", totalPrice);
+
+            popup.close();
+        });
+
+        VBox root = new VBox(20, toppingsPane, confirmButton);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+
+        Scene scene = new Scene(root, 500, 450);
+        popup.setScene(scene);
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.showAndWait();
+    }
+
+
+
     final static int TEMP_ITEMS_COUNT = 32;
 
+    
     // temp
     private void populateMenuPane() {
         for (int i = 0; i < TEMP_ITEMS_COUNT / 2; ++i) {
@@ -130,6 +236,7 @@ public class CashierCtrl extends Application implements Initializable {
         orderItemsList.setItems(itemIDs);
 
         initialize1();
+        //initializeDrinks();
         //populateMenuPane();
     }
 
