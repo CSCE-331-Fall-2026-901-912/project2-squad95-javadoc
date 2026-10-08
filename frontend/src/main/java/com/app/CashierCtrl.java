@@ -40,7 +40,7 @@ import javafx.util.Callback;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.geometry.Insets;
-
+import javafx.scene.Node;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -331,7 +331,21 @@ public class CashierCtrl extends Application implements Initializable {
     }
 
 
+    @FXML
+    private void switchToManager(ActionEvent event) throws IOException {
+        FXMLLoader loader = new FXMLLoader(
+            getClass().getResource("/manager.fxml")
+        );
 
+        Parent root = loader.load();
+
+        Stage stage = (Stage) ((Node) event.getSource())
+            .getScene().getWindow();
+
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
+    }
 
 
 
@@ -477,7 +491,7 @@ public class CashierCtrl extends Application implements Initializable {
         // Set the controller manually to avoid needing to respecify fx:controller 
         // attribute again for every .fxml import
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/cashier.fxml"));
-        loader.setController(new CashierCtrl());
+        //loader.setController(new CashierCtrl());
         Parent root = loader.load();
     
         Scene scene = new Scene(root, 1280, 720);
@@ -495,6 +509,7 @@ public class CashierCtrl extends Application implements Initializable {
             System.out.println(item.toString());
         }
     }
+
     public static void main(String[] args) {
         
         launch();
