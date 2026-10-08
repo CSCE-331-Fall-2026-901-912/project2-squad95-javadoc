@@ -22,6 +22,7 @@
         <VBox spacing="10" prefWidth="200" styleClass="sidebar">
             <Button text="Dashboard" onAction="#showDashboard" prefWidth="200" styleClass="nav-btn active-nav-btn"/>
             <Button text="Financials" onAction="#showFinancials" prefWidth="200" styleClass="nav-btn"/>
+            <Button text="Menu" onAction="#showMenu" prefWidth="200" styleClass="nav-btn"/>
             <Button text="Orders" onAction="#showOrders" prefWidth="200" styleClass="nav-btn"/>
             <Button text="Employees" onAction="#showEmployees" prefWidth="200" styleClass="nav-btn"/>
             <Button text="Inventory" onAction="#showInventory" prefWidth="200" styleClass="nav-btn"/>
@@ -66,10 +67,10 @@
                     <HBox spacing="20" VBox.vgrow="ALWAYS">
                         <TableView fx:id="inventoryTable" prefHeight="250" HBox.hgrow="ALWAYS">
                             <columns>
-                                <TableColumn text="Inventory" prefWidth="120"/>
-                                <TableColumn text="On hand" prefWidth="90"/>
-                                <TableColumn text="Reorder at" prefWidth="90"/>
-                                <TableColumn text="Action" prefWidth="90"/>
+                                <TableColumn fx:id="inventoryIdColumn" text="ID" prefWidth="70"/>
+                                <TableColumn fx:id="inventoryNameColumn" text="Item" prefWidth="200"/>
+                                <TableColumn fx:id="inventoryUnitColumn" text="Unit" prefWidth="120"/>
+                                <TableColumn fx:id="inventoryQuantityColumn" text="Quantity" prefWidth="150"/>
                             </columns>
                         </TableView>
                         <TableView fx:id="employeeTable" prefHeight="250" HBox.hgrow="ALWAYS">
@@ -118,6 +119,23 @@
                     </VBox>
                 </HBox>
 
+                
+                <!-- Menu Management -->
+                <VBox fx:id="menuView" spacing="20" visible="false" managed="false">
+                    <Label text="Menu Management" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                    <TableView fx:id="menuTable" VBox.vgrow="ALWAYS" prefHeight="400">
+                        <columns>
+                            <TableColumn fx:id="menuIdColumn" text="ID" prefWidth="80"/>
+                            <TableColumn fx:id="menuNameColumn" text="Menu Item" prefWidth="250"/>
+                            <TableColumn fx:id="menuPriceColumn" text="Price ($)" prefWidth="150"/>
+                        </columns>
+                    </TableView>
+                    <HBox spacing="20">
+                        <Button text="Add Item" onAction="#addMenuItem"/>
+                        <Button text="Update Item" onAction="#updateMenuItem"/>
+                    </HBox>
+                </VBox>
+
                 <!-- Orders -->
                 <VBox fx:id="ordersView" spacing="20" visible="false" managed="false">
                     <HBox spacing="30">
@@ -164,24 +182,31 @@
                     
                     <TableView fx:id="employeesFullTable" VBox.vgrow="ALWAYS" prefHeight="300">
                         <columns>
-                            <TableColumn text="Cashier" prefWidth="150"/>
-                            <TableColumn text="Hours worked" prefWidth="150"/>
-                            <TableColumn text="Sales made" prefWidth="150"/>
-                            <TableColumn text="Manager" prefWidth="100"/>
+                            <TableColumn fx:id="cashierColumn" text="Cashier" prefWidth="150"/>
+                            <TableColumn fx:id="hoursColumn" text="Hours worked" prefWidth="150"/>
+                            <TableColumn fx:id="salesColumn" text="Sales made" prefWidth="150"/>
+                            <TableColumn fx:id="managerColumn" text="Manager" prefWidth="100"/>
                         </columns>
                     </TableView>
 
                     <HBox spacing="20">
-                        <Button text="Add User" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #333; -fx-background-color: white; -fx-padding: 5 25; -fx-font-size: 14px;"/>
-                        <Button text="Remove User" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #333; -fx-background-color: white; -fx-padding: 5 25; -fx-font-size: 14px;"/>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button text="Promote To Manager" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #333; -fx-background-color: white; -fx-padding: 5 25; -fx-font-size: 14px;"/>
+                        <Button text="Add User" onAction="#addEmployee"/>
+
+                        <Button text="Update User" onAction="#updateEmployee"/>
+
+                        <Button text="Remove User" onAction="#removeEmployee"/>
+
+                        <Region HBox.hgrow="ALWAYS"/>
+
+                        <Button text="Promote To Manager" onAction="#promoteEmployee"/>
                     </HBox>
                 </VBox>
 
                 <!-- Inventory -->
                 <VBox fx:id="inventoryFullView" spacing="20" visible="false" managed="false">
                     <HBox spacing="30">
+                        <Button text="Add Item"  onAction="#addInventoryItem"/>
+                        <Button text="Update Quantity" onAction="#updateInventoryQuantity"/>
                         <VBox styleClass="kpi-card kpi-red" alignment="CENTER" prefWidth="220" prefHeight="120">
                             <Label text="Low Stock" style="-fx-font-size: 18px;"/>
                             <Label text="##" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
@@ -198,19 +223,16 @@
                     
                     <TableView fx:id="inventoryFullTable" VBox.vgrow="ALWAYS" prefHeight="300">
                         <columns>
-                            <TableColumn text="Inventory" prefWidth="200"/>
-                            <TableColumn text="On hand" prefWidth="150"/>
-                            <TableColumn text="Reorder at" prefWidth="150"/>
-                            <TableColumn text="Action" prefWidth="150"/>
+                            <TableColumn fx:id="inventoryIdColumn" text="ID" prefWidth="70"/>
+                            <TableColumn fx:id="inventoryNameColumn" text="Inventory" prefWidth="200"/>
+                            <TableColumn fx:id="inventoryQuantityColumn" text="On Hand" prefWidth="150"/>
+                            <TableColumn fx:id="inventoryUnitColumn" text="Unit" prefWidth="120"/>
                         </columns>
                     </TableView>
 
                     <HBox spacing="20" alignment="CENTER_LEFT">
-                        <Button text="Add Item" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #333; -fx-background-color: white; -fx-padding: 5 25; -fx-font-size: 14px;"/>
-                        <Button text="Remove Item" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #333; -fx-background-color: white; -fx-padding: 5 25; -fx-font-size: 14px;"/>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <TextField promptText="Qty..." prefWidth="80" style="-fx-background-radius: 5; -fx-border-color: #333; -fx-padding: 5; -fx-font-size: 14px;"/>
-                        <Button text="Order" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #333; -fx-background-color: white; -fx-padding: 5 25; -fx-font-size: 14px;"/>
+                        <Button text="Add Item" onAction="#addInventoryItem"/>
+                        <Button text="Update Quantity" onAction="#updateInventoryQuantity"/>
                     </HBox>
                 </VBox>
 
