@@ -12,6 +12,7 @@ public class ManagerCtrl {
     @FXML private HBox financialsView;
     @FXML private VBox ordersView;
     @FXML private VBox employeesView;
+    @FXML private VBox inventoryFullView;
 
     @FXML
     public void initialize() {
@@ -33,6 +34,9 @@ public class ManagerCtrl {
 
         employeesView.setVisible(false);
         employeesView.setManaged(false);
+
+        inventoryFullView.setVisible(false);
+        inventoryFullView.setManaged(false);
     }
 
     @FXML
@@ -48,6 +52,9 @@ public class ManagerCtrl {
 
         employeesView.setVisible(false);
         employeesView.setManaged(false);
+
+        inventoryFullView.setVisible(false);
+        inventoryFullView.setManaged(false);
     }
 
     @FXML
@@ -63,6 +70,9 @@ public class ManagerCtrl {
 
         employeesView.setVisible(false);
         employeesView.setManaged(false);
+
+        inventoryFullView.setVisible(false);
+        inventoryFullView.setManaged(false);
     }
 
     @FXML
@@ -78,5 +88,26 @@ public class ManagerCtrl {
 
         employeesView.setVisible(true);
         employeesView.setManaged(true);
+
+        inventoryFullView.setVisible(false);
+        inventoryFullView.setManaged(false);
+    }
+
+    @FXML
+    private void showInventory(ActionEvent event) {
+        dashboardView.setVisible(false);
+        dashboardView.setManaged(false);
+        
+        financialsView.setVisible(false);
+        financialsView.setManaged(false);
+        
+        ordersView.setVisible(false);
+        ordersView.setManaged(false);
+
+        employeesView.setVisible(false);
+        employeesView.setManaged(false);
+
+        inventoryFullView.setVisible(true);
+        inventoryFullView.setManaged(true);
     }
 }
