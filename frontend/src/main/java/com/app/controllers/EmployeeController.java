@@ -6,22 +6,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import com.app.models.Item;
-import com.app.Database;
 
-public class ItemController {
-        public List<Item> getAll() throws SQLException {
-        String sql = "SELECT id, name, base_price FROM items";
-        List<Item> items = new ArrayList<>();
+import com.app.Database;
+import com.app.models.Employee;
+
+public class EmployeeController {
+    public List<Employee> getAll() throws SQLException {
+        String sql = "SELECT id, name, role FROM toppings";
+        List<Employee> employees = new ArrayList<>();
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                items.add(new Item(
+                employees.add(new Employee(
                     rs.getInt("id"), rs.getString("name"),
-                    rs.getDouble("base_price")));
+                    rs.getString("role")));
             }
         }
-        return items;
+        return employees;
     }
 }

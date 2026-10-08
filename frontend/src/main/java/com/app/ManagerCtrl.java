@@ -1,241 +1,116 @@
 package com.app;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+
+import com.app.controllers.EmployeeDAO;
+import com.app.controllers.InventoryDAO;
+import com.app.controllers.ItemDAO;
+import com.app.models.EmployeeRow;
+import com.app.models.InventoryItem;
+import com.app.models.Item;
+
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-
-
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
-import java.io.IOException;
-
 import javafx.scene.control.*;
-import javafx.collections.*;
-
-import javafx.beans.property.*;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class ManagerCtrl {
 
-    // Views 
+    private final ItemDAO itemDAO = new ItemDAO();
+    private final InventoryDAO inventoryDAO = new InventoryDAO();
+    private final EmployeeDAO employeeDAO = new EmployeeDAO();
+
+
     @FXML private VBox dashboardView;
     @FXML private HBox financialsView;
     @FXML private VBox ordersView;
     @FXML private VBox employeesView;
     @FXML private VBox inventoryFullView;
+    @FXML private VBox menuView;
 
     @FXML
     public void initialize() {
-        showDashboard(null);
+        showOnly(dashboardView);
         initializeEmployees();
         initializeInventory();
-        loadMenuItems();
         initializeMenu();
+        refreshEmployees();
+        refreshInventory();
+        refreshMenu();
     }
 
-    // Navigation 
-
-    @FXML
-    private void showDashboard(ActionEvent event) {
-        dashboardView.setVisible(true);
-        dashboardView.setManaged(true);
-        
-        financialsView.setVisible(false);
-        financialsView.setManaged(false);
-        
-        ordersView.setVisible(false);
-        ordersView.setManaged(false);
-
-        employeesView.setVisible(false);
-        employeesView.setManaged(false);
-
-        inventoryFullView.setVisible(false);
-        inventoryFullView.setManaged(false);
-
-        menuView.setVisible(false);
-        menuView.setManaged(false);
+    private void dbError(Exception e) {
+        e.printStackTrace();
+        new Alert(Alert.AlertType.ERROR, "Database error: " + e.getMessage()).showAndWait();
     }
 
-    @FXML
-    private void showFinancials(ActionEvent event) {
-        dashboardView.setVisible(false);
-        dashboardView.setManaged(false);
-        
-        financialsView.setVisible(true);
-        financialsView.setManaged(true);
-        
-        ordersView.setVisible(false);
-        ordersView.setManaged(false);
+    // ---------------------------------------------------------------
+    // Navigation
+    // ---------------------------------------------------------------
 
-        employeesView.setVisible(false);
-        employeesView.setManaged(false);
-
-        inventoryFullView.setVisible(false);
-        inventoryFullView.setManaged(false);
-
-        menuView.setVisible(false);
-        menuView.setManaged(false);
+    private void showOnly(Region view) {
+        for (Region r : List.of(dashboardView, financialsView, ordersView,
+                                employeesView, inventoryFullView, menuView)) {
+            boolean on = (r == view);
+            r.setVisible(on);
+            r.setManaged(on);
+        }
     }
 
-    @FXML
-    private void showMenu(ActionEvent event) {
-        dashboardView.setVisible(false);
-        dashboardView.setManaged(false);
-
-        financialsView.setVisible(false);
-        financialsView.setManaged(false);
-
-        ordersView.setVisible(false);
-        ordersView.setManaged(false);
-
-        employeesView.setVisible(false);
-        employeesView.setManaged(false);
-
-        inventoryFullView.setVisible(false);
-        inventoryFullView.setManaged(false);
-
-        menuView.setVisible(true);
-        menuView.setManaged(true);
-    }
-    
-    @FXML
-    private void showOrders(ActionEvent event) {
-        dashboardView.setVisible(false);
-        dashboardView.setManaged(false);
-        
-        financialsView.setVisible(false);
-        financialsView.setManaged(false);
-        
-        ordersView.setVisible(true);
-        ordersView.setManaged(true);
-
-        employeesView.setVisible(false);
-        employeesView.setManaged(false);
-
-        inventoryFullView.setVisible(false);
-        inventoryFullView.setManaged(false);
-
-        menuView.setVisible(false);
-        menuView.setManaged(false);
-    }
-
-    @FXML
-    private void showEmployees(ActionEvent event) {
-        dashboardView.setVisible(false);
-        dashboardView.setManaged(false);
-        
-        financialsView.setVisible(false);
-        financialsView.setManaged(false);
-        
-        ordersView.setVisible(false);
-        ordersView.setManaged(false);
-
-        employeesView.setVisible(true);
-        employeesView.setManaged(true);
-
-        inventoryFullView.setVisible(false);
-        inventoryFullView.setManaged(false);
-
-        menuView.setVisible(false);
-        menuView.setManaged(false);
-    }
-
-    @FXML
-    private void showInventory(ActionEvent event) {
-        dashboardView.setVisible(false);
-        dashboardView.setManaged(false);
-        
-        financialsView.setVisible(false);
-        financialsView.setManaged(false);
-        
-        ordersView.setVisible(false);
-        ordersView.setManaged(false);
-
-        employeesView.setVisible(false);
-        employeesView.setManaged(false);
-
-        inventoryFullView.setVisible(true);
-        inventoryFullView.setManaged(true);
-
-        menuView.setVisible(false);
-        menuView.setManaged(false);
-    }
+    @FXML private void showDashboard(ActionEvent e)  { showOnly(dashboardView); }
+    @FXML private void showFinancials(ActionEvent e) { showOnly(financialsView); }
+    @FXML private void showOrders(ActionEvent e)     { showOnly(ordersView); }
+    @FXML private void showEmployees(ActionEvent e)  { showOnly(employeesView); }
+    @FXML private void showInventory(ActionEvent e)  { showOnly(inventoryFullView); }
+    @FXML private void showMenu(ActionEvent e)       { showOnly(menuView); }
 
     @FXML
     private void switchToCashier(ActionEvent event) throws IOException {
-        FXMLLoader loader = new FXMLLoader(
-            getClass().getResource("/cashier.fxml")
-        );
-
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/cashier.fxml"));
         Parent root = loader.load();
 
-        Stage stage = (Stage) ((Node) event.getSource())
-            .getScene().getWindow();
-
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
         stage.show();
     }
 
-    @FXML private TableView<Employee> employeesFullTable;
 
-    @FXML private TableColumn<Employee, String> cashierColumn;
-    @FXML private TableColumn<Employee, Number> hoursColumn;
-    @FXML private TableColumn<Employee, Number> salesColumn;
-    @FXML private TableColumn<Employee, Boolean> managerColumn;
-
-    private final ObservableList<Employee> employees =
-        FXCollections.observableArrayList();
-
-    public class Employee {
-        private final StringProperty name;
-        private final DoubleProperty hours;
-        private final DoubleProperty sales;
-        private final BooleanProperty manager;
-
-        public Employee(String name, double hours,
-                        double sales, boolean manager) {
-            this.name = new SimpleStringProperty(name);
-            this.hours = new SimpleDoubleProperty(hours);
-            this.sales = new SimpleDoubleProperty(sales);
-            this.manager = new SimpleBooleanProperty(manager);
-        }
-
-        public String getName() { return name.get(); }
-        public double getHours() { return hours.get(); }
-        public double getSales() { return sales.get(); }
-        public boolean isManager() { return manager.get(); }
-
-        public void setName(String value) { name.set(value); }
-        public void setHours(double value) { hours.set(value); }
-        public void setSales(double value) { sales.set(value); }
-        public void setManager(boolean value) { manager.set(value); }
-    }
+    @FXML private TableView<EmployeeRow> employeesFullTable;
+    @FXML private TableColumn<EmployeeRow, String> cashierColumn;
+    @FXML private TableColumn<EmployeeRow, Number> hoursColumn;
+    @FXML private TableColumn<EmployeeRow, Number> salesColumn;
+    @FXML private TableColumn<EmployeeRow, Boolean> managerColumn;
+    private final ObservableList<EmployeeRow> employees = FXCollections.observableArrayList();
 
     private void initializeEmployees() {
-        cashierColumn.setCellValueFactory(
-            data -> new SimpleStringProperty(data.getValue().getName())
-        );
-
-        hoursColumn.setCellValueFactory(
-            data -> new SimpleDoubleProperty(data.getValue().getHours())
-        );
-
-        salesColumn.setCellValueFactory(
-            data -> new SimpleDoubleProperty(data.getValue().getSales())
-        );
-
-        managerColumn.setCellValueFactory(
-            data -> new SimpleBooleanProperty(data.getValue().isManager())
-        );
-
+        cashierColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
+        salesColumn.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().sales()));
+        managerColumn.setCellValueFactory(d -> new SimpleBooleanProperty(d.getValue().isManager()));
+        hoursColumn.setVisible(false); // no hours data in the schema; remove from the FXML if unused
         employeesFullTable.setItems(employees);
+    }
+
+    private void refreshEmployees() {
+        try {
+            employees.setAll(employeeDAO.getAllWithSales());
+        } catch (SQLException e) {
+            dbError(e);
+        }
     }
 
     @FXML
@@ -245,111 +120,85 @@ public class ManagerCtrl {
         dialog.setHeaderText("Enter employee name");
 
         dialog.showAndWait().ifPresent(name -> {
-            if (!name.isBlank()) {
-                employees.add(new Employee(name.trim(), 0, 0, false));
+            if (name.isBlank()) return;
+            try {
+                employeeDAO.insert(name.trim(), "cashier");
+                refreshEmployees();
+            } catch (SQLException e) {
+                dbError(e);
             }
         });
     }
 
     @FXML
     private void updateEmployee() {
-        Employee selected =
-            employeesFullTable.getSelectionModel().getSelectedItem();
+        EmployeeRow sel = employeesFullTable.getSelectionModel().getSelectedItem();
+        if (sel == null) return;
 
-        if (selected == null) {
-            return;
-        }
-
-        TextInputDialog dialog =
-            new TextInputDialog(selected.getName());
-
+        TextInputDialog dialog = new TextInputDialog(sel.name());
         dialog.setTitle("Update Employee");
         dialog.setHeaderText("Update employee name");
 
         dialog.showAndWait().ifPresent(name -> {
-            if (!name.isBlank()) {
-                selected.setName(name.trim());
-                employeesFullTable.refresh();
+            if (name.isBlank()) return;
+            try {
+                employeeDAO.updateName(sel.id(), name.trim());
+                refreshEmployees();
+            } catch (SQLException e) {
+                dbError(e);
             }
         });
     }
 
     @FXML
     private void removeEmployee() {
-        Employee selected =
-            employeesFullTable.getSelectionModel().getSelectedItem();
+        EmployeeRow sel = employeesFullTable.getSelectionModel().getSelectedItem();
+        if (sel == null) return;
 
-        if (selected != null) {
-            employees.remove(selected);
+        try {
+            employeeDAO.delete(sel.id());
+            refreshEmployees();
+        } catch (SQLException e) {
+            dbError(e); 
         }
     }
 
     @FXML
     private void promoteEmployee() {
-        Employee selected =
-            employeesFullTable.getSelectionModel().getSelectedItem();
+        EmployeeRow sel = employeesFullTable.getSelectionModel().getSelectedItem();
+        if (sel == null) return;
 
-        if (selected != null) {
-            selected.setManager(true);
-            employeesFullTable.refresh();
+        try {
+            employeeDAO.updateRole(sel.id(), "manager");
+            refreshEmployees();
+        } catch (SQLException e) {
+            dbError(e);
         }
     }
 
 
-
-
-
-    public class InventoryItem {
-        private final IntegerProperty id;
-        private final StringProperty name;
-        private final DoubleProperty quantity;
-        private final StringProperty unit;
-
-        public InventoryItem(int id, String name,
-                            double quantity, String unit) {
-            this.id = new SimpleIntegerProperty(id);
-            this.name = new SimpleStringProperty(name);
-            this.quantity = new SimpleDoubleProperty(quantity);
-            this.unit = new SimpleStringProperty(unit);
-        }
-
-        public int getId() { return id.get(); }
-        public String getName() { return name.get(); }
-        public double getQuantity() { return quantity.get(); }
-        public String getUnit() { return unit.get(); }
-
-        public void setQuantity(double value) {
-            quantity.set(value);
-        }
-    }
 
     @FXML private TableView<InventoryItem> inventoryFullTable;
-
     @FXML private TableColumn<InventoryItem, Number> inventoryIdColumn;
     @FXML private TableColumn<InventoryItem, String> inventoryNameColumn;
     @FXML private TableColumn<InventoryItem, Number> inventoryQuantityColumn;
     @FXML private TableColumn<InventoryItem, String> inventoryUnitColumn;
-
     private final ObservableList<InventoryItem> inventoryItems = FXCollections.observableArrayList();
 
     private void initializeInventory() {
-        inventoryIdColumn.setCellValueFactory(
-            data -> new SimpleIntegerProperty(data.getValue().getId())
-        );
-
-        inventoryNameColumn.setCellValueFactory(
-            data -> new SimpleStringProperty(data.getValue().getName())
-        );
-
-        inventoryQuantityColumn.setCellValueFactory(
-            data -> new SimpleDoubleProperty(data.getValue().getQuantity())
-        );
-
-        inventoryUnitColumn.setCellValueFactory(
-            data -> new SimpleStringProperty(data.getValue().getUnit())
-        );
-
+        inventoryIdColumn.setCellValueFactory(d -> new SimpleIntegerProperty(d.getValue().id()));
+        inventoryNameColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
+        inventoryQuantityColumn.setCellValueFactory(d -> new SimpleIntegerProperty(d.getValue().stock()));
+        inventoryUnitColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().unit()));
         inventoryFullTable.setItems(inventoryItems);
+    }
+
+    private void refreshInventory() {
+        try {
+            inventoryItems.setAll(inventoryDAO.getAll());
+        } catch (SQLException e) {
+            dbError(e);
+        }
     }
 
     @FXML
@@ -357,12 +206,8 @@ public class ManagerCtrl {
         Dialog<InventoryItem> dialog = new Dialog<>();
         dialog.setTitle("Add Inventory Item");
 
-        ButtonType addButton =
-            new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
-
-        dialog.getDialogPane().getButtonTypes().addAll(
-            addButton, ButtonType.CANCEL
-        );
+        ButtonType addButton = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButton, ButtonType.CANCEL);
 
         TextField nameField = new TextField();
         nameField.setPromptText("Item name");
@@ -378,160 +223,100 @@ public class ManagerCtrl {
             new Label("Unit"), unitField,
             new Label("Quantity"), quantityField
         );
-
         dialog.getDialogPane().setContent(form);
 
         dialog.setResultConverter(button -> {
-            if (button == addButton) {
-                try {
-                    String name = nameField.getText().trim();
-                    String unit = unitField.getText().trim();
-                    double quantity =
-                        Double.parseDouble(quantityField.getText().trim());
+            if (button != addButton) return null;
+            try {
+                String name = nameField.getText().trim();
+                String unit = unitField.getText().trim();
+                int quantity = Integer.parseInt(quantityField.getText().trim());
 
-                    if (name.isEmpty() || unit.isEmpty()
-                            || !Double.isFinite(quantity) || quantity < 0) {
-                        return null;
-                    }
-
-                    int nextId = inventoryItems.stream()
-                        .mapToInt(InventoryItem::getId)
-                        .max().orElse(-1) + 1;
-
-                    return new InventoryItem(nextId, name, quantity, unit);
-                } catch (NumberFormatException e) {
+                if (name.isEmpty() || unit.isEmpty() || quantity < 0) {
                     return null;
                 }
+                return new InventoryItem(0, name, unit, quantity);
+            } catch (NumberFormatException e) {
+                return null;
             }
-            return null;
         });
 
-        dialog.showAndWait().ifPresent(inventoryItems::add);
+        dialog.showAndWait().ifPresent(item -> {
+            try {
+                inventoryDAO.insert(item.name(), item.unit(), item.stock());
+                refreshInventory();
+            } catch (SQLException e) {
+                dbError(e);
+            }
+        });
     }
-
 
     @FXML
     private void updateInventoryQuantity() {
-        InventoryItem selected =
-            inventoryFullTable.getSelectionModel().getSelectedItem();
+        InventoryItem selected = inventoryFullTable.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
-            new Alert(Alert.AlertType.WARNING,
-                "Please select an inventory item first.")
-                .showAndWait();
+            new Alert(Alert.AlertType.WARNING, "Please select an inventory item first.").showAndWait();
             return;
         }
 
-        TextInputDialog dialog = new TextInputDialog(
-            String.valueOf(selected.getQuantity())
-        );
-
+        TextInputDialog dialog = new TextInputDialog(String.valueOf(selected.stock()));
         dialog.setTitle("Update Inventory");
-        dialog.setHeaderText("Update " + selected.getName());
+        dialog.setHeaderText("Update " + selected.name());
         dialog.setContentText("New quantity:");
 
         dialog.showAndWait().ifPresent(input -> {
+            int quantity;
             try {
-                double quantity = Double.parseDouble(input.trim());
-
-                if (!Double.isFinite(quantity) || quantity < 0) {
-                    throw new NumberFormatException();
-                }
-
-                selected.setQuantity(quantity);
-                inventoryFullTable.refresh();
-
+                quantity = Integer.parseInt(input.trim());
             } catch (NumberFormatException e) {
+                quantity = -1;
+            }
+
+            if (quantity < 0) {
                 new Alert(Alert.AlertType.ERROR,
-                    "Please enter a valid non-negative quantity.")
-                    .showAndWait();
+                    "Please enter a valid non-negative whole number.").showAndWait();
+                return;
+            }
+
+            try {
+                inventoryDAO.updateStock(selected.id(), quantity);
+                refreshInventory();
+            } catch (SQLException e) {
+                dbError(e);
             }
         });
     }
 
 
-
-
-    public class MenuItem {
-        private final IntegerProperty id;
-        private final StringProperty name;
-        private final DoubleProperty price;
-
-        public MenuItem(int id, String name, double price) {
-            this.id = new SimpleIntegerProperty(id);
-            this.name = new SimpleStringProperty(name);
-            this.price = new SimpleDoubleProperty(price);
-        }
-
-        public int getId() { return id.get(); }
-        public String getName() { return name.get(); }
-        public double getPrice() { return price.get(); }
-
-        public void setName(String value) { name.set(value); }
-        public void setPrice(double value) { price.set(value); }
-    }
-
-    @FXML private VBox menuView;
-
-    @FXML private TableView<MenuItem> menuTable;
-
-    @FXML private TableColumn<MenuItem, Number> menuIdColumn;
-    @FXML private TableColumn<MenuItem, String> menuNameColumn;
-    @FXML private TableColumn<MenuItem, Number> menuPriceColumn;
-
-    private final ObservableList<MenuItem> menuItems = FXCollections.observableArrayList();
+    @FXML private TableView<Item> menuTable;
+    @FXML private TableColumn<Item, Number> menuIdColumn;
+    @FXML private TableColumn<Item, String> menuNameColumn;
+    @FXML private TableColumn<Item, Number> menuPriceColumn;
+    private final ObservableList<Item> menuItems = FXCollections.observableArrayList();
 
     private void initializeMenu() {
-        menuIdColumn.setCellValueFactory(
-            data -> new SimpleIntegerProperty(data.getValue().getId())
-        );
-
-        menuNameColumn.setCellValueFactory(
-            data -> new SimpleStringProperty(data.getValue().getName())
-        );
-
-        menuPriceColumn.setCellValueFactory(
-            data -> new SimpleDoubleProperty(data.getValue().getPrice())
-        );
-
+        menuIdColumn.setCellValueFactory(d -> new SimpleIntegerProperty(d.getValue().id()));
+        menuNameColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
+        menuPriceColumn.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().basePrice()));
         menuTable.setItems(menuItems);
     }
 
-    private void loadMenuItems() {
-        menuItems.clear();
-
-        try (BufferedReader reader =
-                new BufferedReader(new FileReader("items.csv"))) {
-
-            String line;
-            reader.readLine(); // Skip header
-
-            while ((line = reader.readLine()) != null) {
-                String[] data = line.split(",", -1);
-
-                int id = Integer.parseInt(data[0].trim());
-                String name = data[1].trim();
-                double price = Double.parseDouble(data[2].trim());
-
-                menuItems.add(new MenuItem(id, name, price));
-            }
-
-        } catch (IOException | NumberFormatException e) {
-            e.printStackTrace();
+    private void refreshMenu() {
+        try {
+            menuItems.setAll(itemDAO.getAll());
+        } catch (SQLException e) {
+            dbError(e);
         }
     }
 
     @FXML
     private void addMenuItem() {
-        Dialog<MenuItem> dialog = new Dialog<>();
+        Dialog<Item> dialog = new Dialog<>();
         dialog.setTitle("Add Menu Item");
 
-        ButtonType addButton =
-            new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
-
-        dialog.getDialogPane().getButtonTypes().addAll(
-            addButton, ButtonType.CANCEL
-        );
+        ButtonType addButton = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButton, ButtonType.CANCEL);
 
         TextField nameField = new TextField();
         nameField.setPromptText("Drink name");
@@ -543,91 +328,77 @@ public class ManagerCtrl {
             new Label("Drink Name"), nameField,
             new Label("Price"), priceField
         );
-
         dialog.getDialogPane().setContent(form);
 
         dialog.setResultConverter(button -> {
-            if (button == addButton) {
-                try {
-                    String name = nameField.getText().trim();
-                    double price = Double.parseDouble(
-                        priceField.getText().trim()
-                    );
+            if (button != addButton) return null;
+            try {
+                String name = nameField.getText().trim();
+                double price = Double.parseDouble(priceField.getText().trim());
 
-                    if (name.isEmpty() || !Double.isFinite(price) || price < 0) {
-                        return null;
-                    }
-
-                    int nextId = menuItems.stream()
-                        .mapToInt(MenuItem::getId)
-                        .max().orElse(-1) + 1;
-
-                    return new MenuItem(nextId, name, price);
-
-                } catch (NumberFormatException e) {
+                if (name.isEmpty() || !Double.isFinite(price) || price < 0) {
                     return null;
                 }
+                return new Item(0, name, price);
+            } catch (NumberFormatException e) {
+                return null;
             }
-            return null;
         });
 
-        dialog.showAndWait().ifPresent(menuItems::add);
+        dialog.showAndWait().ifPresent(item -> {
+            try {
+                itemDAO.insert(item.name(), item.basePrice());
+                refreshMenu();
+            } catch (SQLException e) {
+                dbError(e);
+            }
+        });
     }
 
     @FXML
     private void updateMenuItem() {
-        MenuItem selected =
-            menuTable.getSelectionModel().getSelectedItem();
+        Item selected = menuTable.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
-            new Alert(Alert.AlertType.WARNING,
-                "Please select a menu item first.")
-                .showAndWait();
+            new Alert(Alert.AlertType.WARNING, "Please select a menu item first.").showAndWait();
             return;
         }
 
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Update Menu Item");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        dialog.getDialogPane().getButtonTypes().addAll(
-            ButtonType.OK, ButtonType.CANCEL
-        );
-
-        TextField nameField =
-            new TextField(selected.getName());
-
-        TextField priceField =
-            new TextField(String.valueOf(selected.getPrice()));
+        TextField nameField = new TextField(selected.name());
+        TextField priceField = new TextField(String.valueOf(selected.basePrice()));
 
         VBox form = new VBox(10,
             new Label("Drink Name"), nameField,
             new Label("Price"), priceField
         );
-
         dialog.getDialogPane().setContent(form);
 
         dialog.showAndWait().ifPresent(button -> {
-            if (button == ButtonType.OK) {
-                try {
-                    String name = nameField.getText().trim();
-                    double price = Double.parseDouble(
-                        priceField.getText().trim()
-                    );
+            if (button != ButtonType.OK) return;
 
-                    if (name.isEmpty() || !Double.isFinite(price) || price < 0) {
-                        throw new IllegalArgumentException();
-                    }
+            String name = nameField.getText().trim();
+            double price;
+            try {
+                price = Double.parseDouble(priceField.getText().trim());
+            } catch (NumberFormatException e) {
+                price = -1;
+            }
 
-                    selected.setName(name);
-                    selected.setPrice(price);
+            if (name.isEmpty() || !Double.isFinite(price) || price < 0) {
+                new Alert(Alert.AlertType.ERROR,
+                    "Enter a valid name and non-negative price.").showAndWait();
+                return;
+            }
 
-                    menuTable.refresh();
-
-                } catch (IllegalArgumentException e) {
-                    new Alert(Alert.AlertType.ERROR,
-                        "Enter a valid name and non-negative price.")
-                        .showAndWait();
-                }
+            try {
+                itemDAO.update(new Item(selected.id(), name, price));
+                refreshMenu();
+            } catch (SQLException e) {
+                dbError(e);
             }
         });
     }
