@@ -164,18 +164,23 @@
                     
                     <TableView fx:id="employeesFullTable" VBox.vgrow="ALWAYS" prefHeight="300">
                         <columns>
-                            <TableColumn text="Cashier" prefWidth="150"/>
-                            <TableColumn text="Hours worked" prefWidth="150"/>
-                            <TableColumn text="Sales made" prefWidth="150"/>
-                            <TableColumn text="Manager" prefWidth="100"/>
+                            <TableColumn fx:id="cashierColumn" text="Cashier" prefWidth="150"/>
+                            <TableColumn fx:id="hoursColumn" text="Hours worked" prefWidth="150"/>
+                            <TableColumn fx:id="salesColumn" text="Sales made" prefWidth="150"/>
+                            <TableColumn fx:id="managerColumn" text="Manager" prefWidth="100"/>
                         </columns>
                     </TableView>
 
                     <HBox spacing="20">
-                        <Button text="Add User" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #333; -fx-background-color: white; -fx-padding: 5 25; -fx-font-size: 14px;"/>
-                        <Button text="Remove User" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #333; -fx-background-color: white; -fx-padding: 5 25; -fx-font-size: 14px;"/>
-                        <Region HBox.hgrow="ALWAYS" />
-                        <Button text="Promote To Manager" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #333; -fx-background-color: white; -fx-padding: 5 25; -fx-font-size: 14px;"/>
+                        <Button text="Add User" onAction="#addEmployee"/>
+
+                        <Button text="Update User" onAction="#updateEmployee"/>
+
+                        <Button text="Remove User" onAction="#removeEmployee"/>
+
+                        <Region HBox.hgrow="ALWAYS"/>
+
+                        <Button text="Promote To Manager" onAction="#promoteEmployee"/>
                     </HBox>
                 </VBox>
 

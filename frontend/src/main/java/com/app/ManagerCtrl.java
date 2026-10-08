@@ -13,6 +13,11 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
 
+import javafx.scene.control.*;
+import javafx.collections.*;
+
+import javafx.beans.property.*;
+
 public class ManagerCtrl {
 
     // Views 
@@ -25,6 +30,7 @@ public class ManagerCtrl {
     @FXML
     public void initialize() {
         showDashboard(null);
+        initializeEmployees();
     }
 
     // Navigation 
@@ -133,5 +139,117 @@ public class ManagerCtrl {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();
+    }
+
+    @FXML private TableView<Employee> employeesFullTable;
+
+    @FXML private TableColumn<Employee, String> cashierColumn;
+    @FXML private TableColumn<Employee, Number> hoursColumn;
+    @FXML private TableColumn<Employee, Number> salesColumn;
+    @FXML private TableColumn<Employee, Boolean> managerColumn;
+
+    private final ObservableList<Employee> employees =
+        FXCollections.observableArrayList();
+
+    public class Employee {
+        private final StringProperty name;
+        private final DoubleProperty hours;
+        private final DoubleProperty sales;
+        private final BooleanProperty manager;
+
+        public Employee(String name, double hours,
+                        double sales, boolean manager) {
+            this.name = new SimpleStringProperty(name);
+            this.hours = new SimpleDoubleProperty(hours);
+            this.sales = new SimpleDoubleProperty(sales);
+            this.manager = new SimpleBooleanProperty(manager);
+        }
+
+        public String getName() { return name.get(); }
+        public double getHours() { return hours.get(); }
+        public double getSales() { return sales.get(); }
+        public boolean isManager() { return manager.get(); }
+
+        public void setName(String value) { name.set(value); }
+        public void setHours(double value) { hours.set(value); }
+        public void setSales(double value) { sales.set(value); }
+        public void setManager(boolean value) { manager.set(value); }
+    }
+
+    private void initializeEmployees() {
+        cashierColumn.setCellValueFactory(
+            data -> new SimpleStringProperty(data.getValue().getName())
+        );
+
+        hoursColumn.setCellValueFactory(
+            data -> new SimpleDoubleProperty(data.getValue().getHours())
+        );
+
+        salesColumn.setCellValueFactory(
+            data -> new SimpleDoubleProperty(data.getValue().getSales())
+        );
+
+        managerColumn.setCellValueFactory(
+            data -> new SimpleBooleanProperty(data.getValue().isManager())
+        );
+
+        employeesFullTable.setItems(employees);
+    }
+
+    @FXML
+    private void addEmployee() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Add Employee");
+        dialog.setHeaderText("Enter employee name");
+
+        dialog.showAndWait().ifPresent(name -> {
+            if (!name.isBlank()) {
+                employees.add(new Employee(name.trim(), 0, 0, false));
+            }
+        });
+    }
+
+    @FXML
+    private void updateEmployee() {
+        Employee selected =
+            employeesFullTable.getSelectionModel().getSelectedItem();
+
+        if (selected == null) {
+            return;
+        }
+
+        TextInputDialog dialog =
+            new TextInputDialog(selected.getName());
+
+        dialog.setTitle("Update Employee");
+        dialog.setHeaderText("Update employee name");
+
+        dialog.showAndWait().ifPresent(name -> {
+            if (!name.isBlank()) {
+                selected.setName(name.trim());
+                employeesFullTable.refresh();
+            }
+        });
+    }
+
+    @FXML
+    private void removeEmployee() {
+        Employee selected =
+            employeesFullTable.getSelectionModel().getSelectedItem();
+
+        if (selected != null) {
+            employees.remove(selected);
+        }
+    }
+
+    @FXML
+    private void promoteEmployee() {
+        Employee selected =
+            employeesFullTable.getSelectionModel().getSelectedItem();
+
+        if (selected != null) {
+            selected.setManager(true);
+            employeesFullTable.refresh();
+        }
     }
 }
