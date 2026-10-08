@@ -1,8 +1,13 @@
 package com.app;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
+
+import org.postgresql.core.SetupQueryRunner;
 
 import com.app.controllers.EmployeeDAO;
 import com.app.controllers.InventoryDAO;
@@ -10,6 +15,7 @@ import com.app.controllers.ItemDAO;
 import com.app.models.EmployeeRow;
 import com.app.models.InventoryItem;
 import com.app.models.Item;
+import com.app.models.Order;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -20,14 +26,22 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.print.PrinterJob;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import javax.print.*;
+import javax.print.attribute.*;
+import javax.print.attribute.standard.*;
+
 
 public class ManagerCtrl {
 
@@ -46,6 +60,7 @@ public class ManagerCtrl {
     @FXML
     public void initialize() {
         showOnly(dashboardView);
+        initializeFinancials();
         initializeEmployees();
         initializeInventory();
         initializeMenu();
@@ -87,6 +102,106 @@ public class ManagerCtrl {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(root));
         stage.show();
+    }
+
+    @FXML private Button printReportButton;
+    @FXML private TableView<Order> financialsTable;
+    @FXML private Label finOrdersTotalLabel;
+    @FXML private Label finRevenueTotalLabel;
+    @FXML private BarChart<String, Number> finRevenueTrendChart;
+
+    // Database Queries
+    private void loadOrdersToday() {
+        String sql = "SELECT COUNT(id) FROM orders WHERE date = CURRENT_DATE;";
+
+        try (Connection conn = Database.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                finOrdersTotalLabel.setText(String.valueOf(rs.getInt(1)));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadTotalRevenue() {
+        String sql = "SELECT SUM(subtotal) FROM orders;";
+        
+        try (Connection conn = Database.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+             
+            if (rs.next()) {
+                double totalRevenue = rs.getDouble(1);
+                finRevenueTotalLabel.setText(String.format("$%,.2f", totalRevenue));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadRevenueTrend() {
+        String sql = "SELECT TO_CHAR(date, 'Mon') AS month, SUM(subtotal) AS revenue " +
+                     "FROM orders " +
+                     "GROUP BY TO_CHAR(date, 'Mon'), EXTRACT(MONTH FROM date) " +
+                     "ORDER BY EXTRACT(MONTH FROM date);";
+
+        try (Connection conn = Database.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            XYChart.Series<String, Number> series = new XYChart.Series<>();
+            series.setName("2025 Revenue Trend");
+
+            while (rs.next()) {
+                series.getData().add(new XYChart.Data<>(rs.getString("month"), rs.getDouble("revenue")));
+            }
+
+            finRevenueTrendChart.getData().clear();
+            finRevenueTrendChart.getData().add(series);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void printNode() {
+        
+    }
+
+    private void initializeFinancials() {
+        loadTotalRevenue();
+        loadOrdersToday();
+        loadRevenueTrend();
+
+        printReportButton.setOnAction( (event) -> {
+            PrinterJob job = PrinterJob.createPrinterJob();
+            if (job != null) {
+                // Show system print dialog; user selects 'Save as PDF' / 'Print to PDF'
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                boolean proceed = job.showPrintDialog(stage);
+                if (proceed) {
+                    boolean success = job.printPage(finRevenueTrendChart);
+                    System.out.println("printing...");
+                    if (success) {
+                        job.endJob();
+                    }
+                }
+            }
+            System.out.println("the print failed");
+        });
+    }
+    
+    private void refreshFinanicals() {
+        try { 
+            loadTotalRevenue();
+            loadOrdersToday();
+            loadRevenueTrend();
+        } catch (Exception e) {
+            dbError(e);
+        }
     }
 
 
