@@ -39,6 +39,8 @@ import java.io.IOException;
 
 
 public class CashierCtrl extends Application implements Initializable {
+
+    // Note: fx:id and variable name *must match* because of JavaFX reflection 
     @FXML 
     private ListView<Integer> ordersList;
     final ObservableList<Integer> orderIds = FXCollections.observableArrayList();
@@ -50,6 +52,7 @@ public class CashierCtrl extends Application implements Initializable {
 
     @FXML
     private TilePane menuItemsPane;
+    ObservableList<ShopMenuItem> menuItems = FXCollections.observableArrayList();
 
     public void initialize1() {
 
@@ -85,11 +88,6 @@ public class CashierCtrl extends Application implements Initializable {
             e.printStackTrace();
         }
     }
-
-    @Override 
-    @FXML
-    private TilePane menuPane;
-    ObservableList<ShopMenuItem> menuItems = FXCollections.observableArrayList();
     
     final static int TEMP_ITEMS_COUNT = 32;
 
@@ -104,8 +102,8 @@ public class CashierCtrl extends Application implements Initializable {
             menuButton.setPrefSize(60, 60);
             menuButton.setMaxSize(100, 100);
             menuButton.setWrapText(true);
-            menuPane.getChildren().add(menuButton);
-            System.out.println(menuPane.getChildren().size());
+            menuItemsPane.getChildren().add(menuButton);
+            System.out.println(menuItemsPane.getChildren().size());
         }
     }
 
