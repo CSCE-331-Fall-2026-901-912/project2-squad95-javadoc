@@ -1,4 +1,4 @@
-package com.app;
+package com.app.models;
 
 import javafx.collections.ObservableList;
 

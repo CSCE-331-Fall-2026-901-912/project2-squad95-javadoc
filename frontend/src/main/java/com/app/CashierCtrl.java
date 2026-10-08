@@ -3,12 +3,18 @@ package com.app;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ResourceBundle;
+
+import com.app.controllers.*;
+import com.app.models.*;
+
 import java.net.URL;
+import java.sql.SQLException;
 
 import javafx.application.Application;
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -39,7 +45,12 @@ import java.io.IOException;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
+//maybe not needed
+import java.util.List;
+
 public class CashierCtrl extends Application implements Initializable {
+
+    private static final ItemController itemController = new ItemController();
 
     // Note: fx:id and variable name *must match* because of JavaFX reflection 
     @FXML 
@@ -57,7 +68,6 @@ public class CashierCtrl extends Application implements Initializable {
 
     @FXML
     public void initialize1() {
-
         System.out.println(new java.io.File("items.csv").getAbsolutePath());
         try (BufferedReader reader = new BufferedReader(new FileReader("items.csv"))) {
 
@@ -94,18 +104,21 @@ public class CashierCtrl extends Application implements Initializable {
     final static int TEMP_ITEMS_COUNT = 32;
 
     // temp
-    private void populateMenuPane() {
-        for (int i = 0; i < TEMP_ITEMS_COUNT / 2; ++i) {
-            menuItems.add(new ShopMenuItem("GOgog fjfjfjfjfjfjfjfjfjfjfjffjf fjfjfj"));
-            menuItems.add(new ShopMenuItem("Dusak"));
-        }
-        for (ShopMenuItem shopMenuItem : menuItems) {
-            Button menuButton = new Button(shopMenuItem.name());
-            menuButton.setPrefSize(60, 60);
-            menuButton.setMaxSize(100, 100);
-            menuButton.setWrapText(true);
-            menuItemsPane.getChildren().add(menuButton);
-            System.out.println(menuItemsPane.getChildren().size());
+    private void loadMenuPane() {
+        Task<List<Item>> task = new Task<>() {
+            @Override protected List<Item> call() throws Exception {
+                return itemController.getAll();
+            }
+        };
+        task.setOnSucceeded(e -> populateMenuPane(task.getValue()));
+        task.setOnFailed(e -> showError(task.getException()));
+        new Thread(task).start();
+    }
+    private void populateMenuPane(List<Item> items) {
+        menuItemsPane.getChildren().clear();
+        for (Item item : items) {
+            Button btn = new Button(item.name() + "\n$" + item.basePrice());
+            menuItemsPane.getChildren().add(btn);
         }
     }
 
@@ -129,8 +142,8 @@ public class CashierCtrl extends Application implements Initializable {
         itemIDs.add("12am");
         orderItemsList.setItems(itemIDs);
 
-        initialize1();
-        //populateMenuPane();
+        //initialize1();
+        loadMenuPane();
     }
 
     @Override
@@ -236,12 +249,16 @@ public class CashierCtrl extends Application implements Initializable {
         primaryStage.show();
 
     }
+    private static void showError(Throwable ex) {
+        ex.printStackTrace();
+    }
+    private static void printResults(List<Item> items) {
+        for (Item item : items) {
+            System.out.println(item.toString());
+        }
+    }
     public static void main(String[] args) {
-        Dotenv dotenv = Dotenv.load();
-        String dbHost = dotenv.get("DB_HOST");
-        String dbUser = dotenv.get("DB_USER");
-        String dbPass = dotenv.get("DB_PASSWORD");
-        System.out.println(dbHost);
+        
         launch();
     }
 
