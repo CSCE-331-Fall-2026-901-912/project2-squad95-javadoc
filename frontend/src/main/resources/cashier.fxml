@@ -58,7 +58,7 @@
             </TilePane>
          </content>
       </ScrollPane>
-      <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Checkout" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+      <Button fx:id="checkoutButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Checkout" GridPane.columnIndex="2" GridPane.rowIndex="4" />
       <ToolBar maxHeight="1.7976931348623157E308" prefHeight="57.0" prefWidth="1280.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
         <items>
           <Button mnemonicParsing="false" prefHeight="58.0" prefWidth="77.0" text="i do a thing" />
@@ -67,7 +67,7 @@
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="4">
          <children>
             <Button fx:id="newOrderButton" mnemonicParsing="false" prefHeight="73.0" prefWidth="102.0" text="New" />
-            <Button mnemonicParsing="false" prefHeight="73.0" prefWidth="104.0" text="Cancel" />
+            <Button fx:id="deleteOrderButton" mnemonicParsing="false" prefHeight="73.0" prefWidth="104.0" text="Delete" />
          </children>
       </HBox>
       <SplitPane dividerPositions="0.24058577405857745" prefHeight="160.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.rowSpan="2147483647">

@@ -56,6 +56,11 @@ public class CashierCtrl extends Application implements Initializable {
     @FXML 
     private Button newOrderButton;
 
+    @FXML
+    private Button checkoutButton;
+
+    @FXML private Button deleteOrderButton;
+
     // the working id used for tracking the currently selected
     // order. this should be transformed into a different id
     // for inserting into the database when submitted
@@ -82,7 +87,10 @@ public class CashierCtrl extends Application implements Initializable {
         ordersList.getSelectionModel().selectedItemProperty().addListener( (observable, oldVal, newVal) -> {
             Order currSelectedOrder = newVal;
             // break early if no list item is selected
-            if (currSelectedOrder == null) { return; }
+            if (currSelectedOrder == null) { 
+                orderItemsList.setItems(null);
+                return; 
+            }
 
             currProgOrderId = currSelectedOrder.id();
 
@@ -96,6 +104,32 @@ public class CashierCtrl extends Application implements Initializable {
 
         // TODO for phase 4: interaction for selecting an order's item 
     }
+
+    private boolean removeFirstOrderItemOfId(int targetId) {
+        // Linear search, because id =/= list index
+        // would be better to use an observable map later on
+        for (int i = 0; i < orderEntries.size(); ++i) {
+            Order entry = orderEntries.get(i);
+            if (entry.id() == targetId) {
+                orderEntries.remove(i);
+                return true;          
+            }
+        }
+
+        String errorMessage = String.format("Failed to remove order of ID %d", currProgOrderId);
+        System.err.println(errorMessage);
+        return false;
+    }
+
+    private void onCheckout(ActionEvent event) {
+        // TODO: SQL submit command(s)
+
+        removeFirstOrderItemOfId(currProgOrderId);
+    }
+
+    private void onDeleteOrder(ActionEvent event) {
+        removeFirstOrderItemOfId(currProgOrderId);
+    } 
 
     @FXML
     public void initialize1() {
@@ -168,6 +202,9 @@ public class CashierCtrl extends Application implements Initializable {
         initialize1();
         //populateMenuPane();
         initializeOrderLists();
+
+        checkoutButton.setOnAction(this::onCheckout);
+        deleteOrderButton.setOnAction(this::onDeleteOrder);
     }
 
     @Override
