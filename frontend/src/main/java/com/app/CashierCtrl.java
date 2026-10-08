@@ -37,6 +37,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+import io.github.cdimascio.dotenv.Dotenv;
 
 public class CashierCtrl extends Application implements Initializable {
 
@@ -236,6 +237,11 @@ public class CashierCtrl extends Application implements Initializable {
 
     }
     public static void main(String[] args) {
+        Dotenv dotenv = Dotenv.load();
+        String dbHost = dotenv.get("DB_HOST");
+        String dbUser = dotenv.get("DB_USER");
+        String dbPass = dotenv.get("DB_PASSWORD");
+        System.out.println(dbHost);
         launch();
     }
 

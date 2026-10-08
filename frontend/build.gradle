@@ -29,7 +29,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 */
-
 plugins {
   id 'application'
   id 'org.openjfx.javafxplugin' version '0.1.0'
@@ -37,6 +36,10 @@ plugins {
 
 repositories {
     mavenCentral()
+}
+
+dependencies {
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 }
 
 javafx {
