@@ -46,23 +46,16 @@ public class CashierCtrl extends Application implements Initializable {
 
     // Note: fx:id and variable name *must match* because of JavaFX reflection 
     @FXML 
-    private ListView<Integer> ordersList;
-    // TODO: change this list to use the Order record, and implement 
-    // a toString() method for the Order class
+    private ListView<Order> ordersList;
     // NOTE: cellfactory is an alternative but that's for phase 4/5
-    final ObservableList<Integer> orderIds = FXCollections.observableArrayList();
+    final ObservableList<Order> orderEntries = FXCollections.observableArrayList();
 
     @FXML 
-    private ListView<String> orderItemsList;
-    ObservableList<String> itemIDs = FXCollections.observableArrayList();
-
-
-    @FXML
-    private TilePane menuItemsPane;
-    ObservableList<ShopMenuItem> menuItems = FXCollections.observableArrayList();
+    private ListView<OrderItem> orderItemsList;
 
     @FXML 
     private Button newOrderButton;
+
     // the working id used for tracking the currently selected
     // order. this should be transformed into a different id
     // for inserting into the database when submitted
@@ -71,39 +64,37 @@ public class CashierCtrl extends Application implements Initializable {
     // the id of the most recently created order. used for creating new orders
     private static int latestProgOrderId = 0; 
 
-    private static ObservableList<Order> orderEntries = FXCollections.observableArrayList();
+    @FXML
+    private TilePane menuItemsPane;
+    final ObservableList<ShopMenuItem> menuItems = FXCollections.observableArrayList();
     
-
-    public void onNewOrderClick() {
-        // TODO: append a new order entry to the 
-        // orderEntries list
+    private void onNewOrderClick(ActionEvent event) {
+        ObservableList<OrderItem> orderList = FXCollections.observableArrayList();
+        ++latestProgOrderId;
+        Order newOrder = new Order(latestProgOrderId, orderList);
+        orderEntries.add(newOrder);
     }
 
-    public void initializeOrderLists() {
-        // TODO: bind action to the new order button
-        newOrderButton.setOnAction( (event) -> {
-            ObservableList<OrderItem> orderList = FXCollections.observableArrayList();
-            ++latestProgOrderId;
-            Order newOrder = new Order(latestProgOrderId, orderList);
-            orderEntries.add(newOrder);
-            orderIds.add(latestProgOrderId);
-        });
+    private void initializeOrderLists() {
+        newOrderButton.setOnAction(this::onNewOrderClick);
         
-        // TODO: bind action to selecting an item from the listview
         // https://stackoverflow.com/questions/13264017/getting-selected-element-from-listview 
         ordersList.getSelectionModel().selectedItemProperty().addListener( (observable, oldVal, newVal) -> {
-            int currIdx = newVal.intValue();
-            System.out.println(currIdx);
-            if (currIdx >= 0) {
-                currProgOrderId = currIdx;
-            }
-            // TODO: clear the orderItemsList and populate with an Order's list of items
+            Order currSelectedOrder = newVal;
+            // break early if no list item is selected
+            if (currSelectedOrder == null) { return; }
+
+            currProgOrderId = currSelectedOrder.id();
+
+            // debugging to see if items update on button clicks
+            currSelectedOrder.orderItems().add(new OrderItem(STYLESHEET_CASPIAN));
+            currSelectedOrder.orderItems().add(new OrderItem(STYLESHEET_MODENA));
+            currSelectedOrder.orderItems().add(new OrderItem("12am"));
+
+            orderItemsList.setItems(currSelectedOrder.orderItems());
         });
 
-    }
-
-    public void displayOrderItems(int progOrderId) {
-        // TODO: clear the items list to display a list of the current order's items
+        // TODO for phase 4: interaction for selecting an order's item 
     }
 
     @FXML
@@ -166,19 +157,13 @@ public class CashierCtrl extends Application implements Initializable {
         // ordersList isn't available when start() is called, so
         // populate it here instead
         // TODO: find a better way to dynamically populate ordersList
-        
-        for (int i = 0; i < TEMP_ITEMS_COUNT; ++i) {
-            orderIds.add(i);
-        }
+
+
+
         // TODO phase 4: give actions to listview that switches the 
         // global context for other menus  
         // https://blueskyworkshop.com/topics/Java-Pages/fx-ListView-Basics/
-        ordersList.setItems(orderIds);
-
-        itemIDs.add(STYLESHEET_CASPIAN);
-        itemIDs.add(STYLESHEET_MODENA);
-        itemIDs.add("12am");
-        orderItemsList.setItems(itemIDs);
+        ordersList.setItems(orderEntries);
 
         initialize1();
         //populateMenuPane();
