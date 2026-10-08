@@ -2,11 +2,13 @@ package com.app;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.ResourceBundle;
 
 import com.app.controllers.*;
 import com.app.models.*;
 
+import java.util.Set;
 import java.net.URL;
 import java.sql.SQLException;
 
@@ -43,6 +45,15 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
+
 import io.github.cdimascio.dotenv.Dotenv;
 
 //maybe not needed
@@ -67,12 +78,22 @@ public class CashierCtrl extends Application implements Initializable {
     ObservableList<ShopMenuItem> menuItems = FXCollections.observableArrayList();
 
     @FXML
+    private Label orderPreviewLabel;
+
+    private Button selectedDrink = null;
+
+    private double selectedDrinkPrice = 0.0;
+    private double toppingTotal = 0.0;
+
+    private String selectedSugar = "100%";
+    private String selectedIce = "100%";
+
     public void initialize1() {
         System.out.println(new java.io.File("items.csv").getAbsolutePath());
+
         try (BufferedReader reader = new BufferedReader(new FileReader("items.csv"))) {
 
             String line;
-
             reader.readLine();
 
             while ((line = reader.readLine()) != null) {
@@ -87,9 +108,24 @@ public class CashierCtrl extends Application implements Initializable {
                 button.setPrefSize(100, 60);
                 button.setWrapText(true);
 
+                button.setStyle("-fx-background-color: lightgray;");
+
                 button.setOnAction(event -> {
+
+                    if (selectedDrink != null) {
+                        selectedDrink.setStyle("-fx-background-color: lightgray;");
+                    }
+
+                    button.setStyle("-fx-background-color: lightgreen;");
+
+
+                    selectedDrink = button;
+                    selectedDrinkPrice = price;
+
                     System.out.println("Selected: " + name);
                     System.out.println("Price: $" + price);
+                    
+                    showToppingsPopup();
                 });
 
                 menuItemsPane.getChildren().add(button);
@@ -100,9 +136,211 @@ public class CashierCtrl extends Application implements Initializable {
             e.printStackTrace();
         }
     }
-    
+
+
+    private void showToppingsPopup() {
+        //System.out.println("POPUP STARTED");
+        //double[] toppingTotal = {0.0};
+        Stage popup = new Stage();
+        popup.setTitle("Select Toppings");
+
+        FlowPane toppingsPane = new FlowPane();
+        toppingsPane.setHgap(10);
+        toppingsPane.setVgap(10);
+        toppingsPane.setPadding(new Insets(20));
+        toppingsPane.setPrefWrapLength(400);
+
+        Set<String> selectedToppings = new HashSet<>();
+        double[] toppingTotal = {0.0};
+
+        try (BufferedReader reader =
+                new BufferedReader(new FileReader("toppings.csv"))) {
+
+            String line;
+            reader.readLine();
+
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+
+                String name = data[1];
+                double price = Double.parseDouble(data[2]);
+
+                Button button = new Button(name);
+                button.setPrefSize(120, 60);
+                button.setWrapText(true);
+                button.setStyle("-fx-background-color: lightgray;");
+
+                button.setOnAction(event -> {
+                    if (selectedToppings.contains(name)) {
+                        selectedToppings.remove(name);
+                        toppingTotal[0] -= price;
+                        button.setStyle("-fx-background-color: lightgray;");
+                    } else {
+                        selectedToppings.add(name);
+                        toppingTotal[0] += price;
+                        button.setStyle("-fx-background-color: lightgreen;");
+                    }
+                });
+
+                toppingsPane.getChildren().add(button);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Button confirmButton = new Button("Confirm");
+
+        confirmButton.setOnAction(event -> {
+            double totalPrice = selectedDrinkPrice + toppingTotal[0];
+
+            String orderInfo = String.format("Drink: %s%n%n" + "Drink Price: $%.2f%n%n" + "Toppings: %s%n%n" + "Toppings Price: $%.2f%n%n" + "Total Price: $%.2f",
+                selectedDrink.getText(), selectedDrinkPrice, selectedToppings, toppingTotal[0], totalPrice);
+
+            orderPreviewLabel.setText(orderInfo);
+
+            popup.close();
+
+            showSugarPopup(selectedToppings, toppingTotal[0]);
+        });
+
+        VBox root = new VBox(20, toppingsPane, confirmButton);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+
+        Scene scene = new Scene(root, 500, 450);
+        popup.setScene(scene);
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.showAndWait();
+    }
+
+
+    private void showSugarPopup(Set<String> toppings, double toppingsPrice) {
+        Stage popup = new Stage();
+        popup.setTitle("Select Sugar Level");
+
+        VBox root = new VBox(15);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+
+        Label title = new Label("Choose Sugar Level");
+
+        String[] sugarLevels = {
+            "0%", "25%", "50%", "75%", "100%"
+        };
+
+        ToggleGroup group = new ToggleGroup();
+
+        for (String level : sugarLevels) {
+            RadioButton button = new RadioButton(level);
+            button.setToggleGroup(group);
+
+            if (level.equals("100%")) {
+                button.setSelected(true);
+            }
+
+            root.getChildren().add(button);
+        }
+
+        Button confirmButton = new Button("Confirm");
+
+        confirmButton.setOnAction(event -> {
+            RadioButton selected =
+                (RadioButton) group.getSelectedToggle();
+
+            selectedSugar = selected.getText();
+
+            popup.close();
+            showIcePopup(toppings, toppingsPrice);
+        });
+
+        root.getChildren().add(0, title);
+        root.getChildren().add(confirmButton);
+
+        popup.setScene(new Scene(root, 350, 350));
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.show();
+    }
+
+
+    private void showIcePopup(Set<String> toppings, double toppingsPrice) {
+        Stage popup = new Stage();
+        popup.setTitle("Select Ice Level");
+
+        VBox root = new VBox(15);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+
+        Label title = new Label("Choose Ice Level");
+
+        String[] iceLevels = {
+            "No Ice", "Less Ice", "Regular Ice", "Extra Ice"
+        };
+
+        ToggleGroup group = new ToggleGroup();
+
+        for (String level : iceLevels) {
+            RadioButton button = new RadioButton(level);
+            button.setToggleGroup(group);
+
+            if (level.equals("Regular Ice")) {
+                button.setSelected(true);
+            }
+
+            root.getChildren().add(button);
+        }
+
+        Button confirmButton = new Button("Confirm");
+
+        confirmButton.setOnAction(event -> {
+            RadioButton selected =
+                (RadioButton) group.getSelectedToggle();
+
+            selectedIce = selected.getText();
+
+            double totalPrice = selectedDrinkPrice + toppingsPrice;
+
+            String orderInfo = String.format(
+                "Drink: %s%n" +
+                "Drink Price: $%.2f%n" +
+                "Toppings: %s%n" +
+                "Toppings Price: $%.2f%n" +
+                "Sugar Level: %s%n" +
+                "Ice Level: %s%n" +
+                "Total Price: $%.2f",
+                selectedDrink.getText(),
+                selectedDrinkPrice,
+                String.join(", ", toppings),
+                toppingsPrice,
+                selectedSugar,
+                selectedIce,
+                totalPrice
+            );
+
+            orderPreviewLabel.setText(orderInfo);
+
+            popup.close();
+        });
+
+        root.getChildren().add(0, title);
+        root.getChildren().add(confirmButton);
+
+        popup.setScene(new Scene(root, 350, 350));
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.show();
+    }
+
+
+
+
+
+
+
+
+
     final static int TEMP_ITEMS_COUNT = 32;
 
+    
     // temp
     private void loadMenuPane() {
         Task<List<Item>> task = new Task<>() {
