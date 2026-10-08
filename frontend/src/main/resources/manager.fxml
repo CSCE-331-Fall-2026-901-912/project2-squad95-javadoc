@@ -26,6 +26,7 @@
             <Button text="Employees" onAction="#showEmployees" prefWidth="200" styleClass="nav-btn"/>
             <Button text="Inventory" onAction="#showInventory" prefWidth="200" styleClass="nav-btn"/>
             <Button text="Settings" prefWidth="200" styleClass="nav-btn"/>
+            <Button text="Cashier" onAction="#switchToCashier" prefWidth="200" styleClass="nav-btn"/>
         </VBox>
     </left>
     <center>
