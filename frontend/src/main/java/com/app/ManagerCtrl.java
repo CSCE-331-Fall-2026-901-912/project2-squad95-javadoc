@@ -18,6 +18,9 @@ import javafx.collections.*;
 
 import javafx.beans.property.*;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+
 public class ManagerCtrl {
 
     // Views 
@@ -32,6 +35,8 @@ public class ManagerCtrl {
         showDashboard(null);
         initializeEmployees();
         initializeInventory();
+        loadMenuItems();
+        initializeMenu();
     }
 
     // Navigation 
@@ -52,6 +57,9 @@ public class ManagerCtrl {
 
         inventoryFullView.setVisible(false);
         inventoryFullView.setManaged(false);
+
+        menuView.setVisible(false);
+        menuView.setManaged(false);
     }
 
     @FXML
@@ -70,8 +78,32 @@ public class ManagerCtrl {
 
         inventoryFullView.setVisible(false);
         inventoryFullView.setManaged(false);
+
+        menuView.setVisible(false);
+        menuView.setManaged(false);
     }
 
+    @FXML
+    private void showMenu(ActionEvent event) {
+        dashboardView.setVisible(false);
+        dashboardView.setManaged(false);
+
+        financialsView.setVisible(false);
+        financialsView.setManaged(false);
+
+        ordersView.setVisible(false);
+        ordersView.setManaged(false);
+
+        employeesView.setVisible(false);
+        employeesView.setManaged(false);
+
+        inventoryFullView.setVisible(false);
+        inventoryFullView.setManaged(false);
+
+        menuView.setVisible(true);
+        menuView.setManaged(true);
+    }
+    
     @FXML
     private void showOrders(ActionEvent event) {
         dashboardView.setVisible(false);
@@ -88,6 +120,9 @@ public class ManagerCtrl {
 
         inventoryFullView.setVisible(false);
         inventoryFullView.setManaged(false);
+
+        menuView.setVisible(false);
+        menuView.setManaged(false);
     }
 
     @FXML
@@ -106,6 +141,9 @@ public class ManagerCtrl {
 
         inventoryFullView.setVisible(false);
         inventoryFullView.setManaged(false);
+
+        menuView.setVisible(false);
+        menuView.setManaged(false);
     }
 
     @FXML
@@ -124,6 +162,9 @@ public class ManagerCtrl {
 
         inventoryFullView.setVisible(true);
         inventoryFullView.setManaged(true);
+
+        menuView.setVisible(false);
+        menuView.setManaged(false);
     }
 
     @FXML
@@ -404,6 +445,189 @@ public class ManagerCtrl {
                 new Alert(Alert.AlertType.ERROR,
                     "Please enter a valid non-negative quantity.")
                     .showAndWait();
+            }
+        });
+    }
+
+
+
+
+    public class MenuItem {
+        private final IntegerProperty id;
+        private final StringProperty name;
+        private final DoubleProperty price;
+
+        public MenuItem(int id, String name, double price) {
+            this.id = new SimpleIntegerProperty(id);
+            this.name = new SimpleStringProperty(name);
+            this.price = new SimpleDoubleProperty(price);
+        }
+
+        public int getId() { return id.get(); }
+        public String getName() { return name.get(); }
+        public double getPrice() { return price.get(); }
+
+        public void setName(String value) { name.set(value); }
+        public void setPrice(double value) { price.set(value); }
+    }
+
+    @FXML private VBox menuView;
+
+    @FXML private TableView<MenuItem> menuTable;
+
+    @FXML private TableColumn<MenuItem, Number> menuIdColumn;
+    @FXML private TableColumn<MenuItem, String> menuNameColumn;
+    @FXML private TableColumn<MenuItem, Number> menuPriceColumn;
+
+    private final ObservableList<MenuItem> menuItems = FXCollections.observableArrayList();
+
+    private void initializeMenu() {
+        menuIdColumn.setCellValueFactory(
+            data -> new SimpleIntegerProperty(data.getValue().getId())
+        );
+
+        menuNameColumn.setCellValueFactory(
+            data -> new SimpleStringProperty(data.getValue().getName())
+        );
+
+        menuPriceColumn.setCellValueFactory(
+            data -> new SimpleDoubleProperty(data.getValue().getPrice())
+        );
+
+        menuTable.setItems(menuItems);
+    }
+
+    private void loadMenuItems() {
+        menuItems.clear();
+
+        try (BufferedReader reader =
+                new BufferedReader(new FileReader("items.csv"))) {
+
+            String line;
+            reader.readLine(); // Skip header
+
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",", -1);
+
+                int id = Integer.parseInt(data[0].trim());
+                String name = data[1].trim();
+                double price = Double.parseDouble(data[2].trim());
+
+                menuItems.add(new MenuItem(id, name, price));
+            }
+
+        } catch (IOException | NumberFormatException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void addMenuItem() {
+        Dialog<MenuItem> dialog = new Dialog<>();
+        dialog.setTitle("Add Menu Item");
+
+        ButtonType addButton =
+            new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+
+        dialog.getDialogPane().getButtonTypes().addAll(
+            addButton, ButtonType.CANCEL
+        );
+
+        TextField nameField = new TextField();
+        nameField.setPromptText("Drink name");
+
+        TextField priceField = new TextField();
+        priceField.setPromptText("Price");
+
+        VBox form = new VBox(10,
+            new Label("Drink Name"), nameField,
+            new Label("Price"), priceField
+        );
+
+        dialog.getDialogPane().setContent(form);
+
+        dialog.setResultConverter(button -> {
+            if (button == addButton) {
+                try {
+                    String name = nameField.getText().trim();
+                    double price = Double.parseDouble(
+                        priceField.getText().trim()
+                    );
+
+                    if (name.isEmpty() || !Double.isFinite(price) || price < 0) {
+                        return null;
+                    }
+
+                    int nextId = menuItems.stream()
+                        .mapToInt(MenuItem::getId)
+                        .max().orElse(-1) + 1;
+
+                    return new MenuItem(nextId, name, price);
+
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(menuItems::add);
+    }
+
+    @FXML
+    private void updateMenuItem() {
+        MenuItem selected =
+            menuTable.getSelectionModel().getSelectedItem();
+
+        if (selected == null) {
+            new Alert(Alert.AlertType.WARNING,
+                "Please select a menu item first.")
+                .showAndWait();
+            return;
+        }
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Update Menu Item");
+
+        dialog.getDialogPane().getButtonTypes().addAll(
+            ButtonType.OK, ButtonType.CANCEL
+        );
+
+        TextField nameField =
+            new TextField(selected.getName());
+
+        TextField priceField =
+            new TextField(String.valueOf(selected.getPrice()));
+
+        VBox form = new VBox(10,
+            new Label("Drink Name"), nameField,
+            new Label("Price"), priceField
+        );
+
+        dialog.getDialogPane().setContent(form);
+
+        dialog.showAndWait().ifPresent(button -> {
+            if (button == ButtonType.OK) {
+                try {
+                    String name = nameField.getText().trim();
+                    double price = Double.parseDouble(
+                        priceField.getText().trim()
+                    );
+
+                    if (name.isEmpty() || !Double.isFinite(price) || price < 0) {
+                        throw new IllegalArgumentException();
+                    }
+
+                    selected.setName(name);
+                    selected.setPrice(price);
+
+                    menuTable.refresh();
+
+                } catch (IllegalArgumentException e) {
+                    new Alert(Alert.AlertType.ERROR,
+                        "Enter a valid name and non-negative price.")
+                        .showAndWait();
+                }
             }
         });
     }
