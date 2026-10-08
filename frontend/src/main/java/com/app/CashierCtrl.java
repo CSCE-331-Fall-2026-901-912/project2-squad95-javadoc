@@ -51,6 +51,7 @@ public class CashierCtrl extends Application implements Initializable {
     @FXML
     private TilePane menuItemsPane;
 
+    @FXML
     public void initialize1() {
 
         System.out.println(new java.io.File("items.csv").getAbsolutePath());
@@ -86,7 +87,7 @@ public class CashierCtrl extends Application implements Initializable {
         }
     }
 
-    @Override 
+    //@Override 
     @FXML
     private TilePane menuPane;
     ObservableList<ShopMenuItem> menuItems = FXCollections.observableArrayList();
@@ -109,7 +110,8 @@ public class CashierCtrl extends Application implements Initializable {
         }
     }
 
-    @FXML 
+
+    @Override
     public void initialize(URL location, ResourceBundle resourceBundle) {
         // ordersList isn't available when start() is called, so
         // populate it here instead
@@ -129,7 +131,7 @@ public class CashierCtrl extends Application implements Initializable {
         orderItemsList.setItems(itemIDs);
 
         initialize1();
-        populateMenuPane();
+        //populateMenuPane();
     }
 
     @Override
