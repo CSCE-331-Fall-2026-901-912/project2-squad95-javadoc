@@ -44,6 +44,9 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
+import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.ToggleGroup;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
@@ -63,10 +66,16 @@ public class CashierCtrl extends Application implements Initializable {
     private TilePane menuItemsPane;
     ObservableList<ShopMenuItem> menuItems = FXCollections.observableArrayList();
 
+    @FXML
+    private Label orderPreviewLabel;
+
     private Button selectedDrink = null;
 
     private double selectedDrinkPrice = 0.0;
     private double toppingTotal = 0.0;
+
+    private String selectedSugar = "100%";
+    private String selectedIce = "100%";
 
     public void initialize1() {
 
@@ -175,13 +184,14 @@ public class CashierCtrl extends Application implements Initializable {
         confirmButton.setOnAction(event -> {
             double totalPrice = selectedDrinkPrice + toppingTotal[0];
 
-            System.out.println("Drink: " + selectedDrink.getText());
-            System.out.printf("Drink Price: $%.2f%n", selectedDrinkPrice);
-            System.out.println("Toppings: " + selectedToppings);
-            System.out.printf("Toppings Price: $%.2f%n", toppingTotal[0]);
-            System.out.printf("Total Price: $%.2f%n", totalPrice);
+            String orderInfo = String.format("Drink: %s%n%n" + "Drink Price: $%.2f%n%n" + "Toppings: %s%n%n" + "Toppings Price: $%.2f%n%n" + "Total Price: $%.2f",
+                selectedDrink.getText(), selectedDrinkPrice, selectedToppings, toppingTotal[0], totalPrice);
+
+            orderPreviewLabel.setText(orderInfo);
 
             popup.close();
+
+            showSugarPopup(selectedToppings, toppingTotal[0]);
         });
 
         VBox root = new VBox(20, toppingsPane, confirmButton);
@@ -193,6 +203,128 @@ public class CashierCtrl extends Application implements Initializable {
         popup.initModality(Modality.APPLICATION_MODAL);
         popup.showAndWait();
     }
+
+
+    private void showSugarPopup(Set<String> toppings, double toppingsPrice) {
+        Stage popup = new Stage();
+        popup.setTitle("Select Sugar Level");
+
+        VBox root = new VBox(15);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+
+        Label title = new Label("Choose Sugar Level");
+
+        String[] sugarLevels = {
+            "0%", "25%", "50%", "75%", "100%"
+        };
+
+        ToggleGroup group = new ToggleGroup();
+
+        for (String level : sugarLevels) {
+            RadioButton button = new RadioButton(level);
+            button.setToggleGroup(group);
+
+            if (level.equals("100%")) {
+                button.setSelected(true);
+            }
+
+            root.getChildren().add(button);
+        }
+
+        Button confirmButton = new Button("Confirm");
+
+        confirmButton.setOnAction(event -> {
+            RadioButton selected =
+                (RadioButton) group.getSelectedToggle();
+
+            selectedSugar = selected.getText();
+
+            popup.close();
+            showIcePopup(toppings, toppingsPrice);
+        });
+
+        root.getChildren().add(0, title);
+        root.getChildren().add(confirmButton);
+
+        popup.setScene(new Scene(root, 350, 350));
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.show();
+    }
+
+
+    private void showIcePopup(Set<String> toppings, double toppingsPrice) {
+        Stage popup = new Stage();
+        popup.setTitle("Select Ice Level");
+
+        VBox root = new VBox(15);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+
+        Label title = new Label("Choose Ice Level");
+
+        String[] iceLevels = {
+            "No Ice", "Less Ice", "Regular Ice", "Extra Ice"
+        };
+
+        ToggleGroup group = new ToggleGroup();
+
+        for (String level : iceLevels) {
+            RadioButton button = new RadioButton(level);
+            button.setToggleGroup(group);
+
+            if (level.equals("Regular Ice")) {
+                button.setSelected(true);
+            }
+
+            root.getChildren().add(button);
+        }
+
+        Button confirmButton = new Button("Confirm");
+
+        confirmButton.setOnAction(event -> {
+            RadioButton selected =
+                (RadioButton) group.getSelectedToggle();
+
+            selectedIce = selected.getText();
+
+            double totalPrice = selectedDrinkPrice + toppingsPrice;
+
+            String orderInfo = String.format(
+                "Drink: %s%n" +
+                "Drink Price: $%.2f%n" +
+                "Toppings: %s%n" +
+                "Toppings Price: $%.2f%n" +
+                "Sugar Level: %s%n" +
+                "Ice Level: %s%n" +
+                "Total Price: $%.2f",
+                selectedDrink.getText(),
+                selectedDrinkPrice,
+                String.join(", ", toppings),
+                toppingsPrice,
+                selectedSugar,
+                selectedIce,
+                totalPrice
+            );
+
+            orderPreviewLabel.setText(orderInfo);
+
+            popup.close();
+        });
+
+        root.getChildren().add(0, title);
+        root.getChildren().add(confirmButton);
+
+        popup.setScene(new Scene(root, 350, 350));
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.show();
+    }
+
+
+
+
+
+
 
 
 
