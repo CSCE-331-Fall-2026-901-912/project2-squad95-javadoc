@@ -13,9 +13,8 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.FlowPane?>
 
-<GridPane prefHeight="720.0" prefWidth="1280.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/26">
+<GridPane prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.app.CashierCtrl">
   <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="295.3333740234375" minWidth="10.0" percentWidth="25.0" prefWidth="142.33334350585938" />
     <ColumnConstraints hgrow="SOMETIMES" maxWidth="381.0" minWidth="10.0" percentWidth="50.0" prefWidth="301.33335367838544" />
@@ -32,8 +31,8 @@
       <ScrollPane hbarPolicy="NEVER" pannable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
          <content>
             <TilePane fx:id="menuItemsPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumns="3" prefHeight="300.0" prefRows="3" prefTileHeight="100.0" prefTileWidth="100.0" prefWidth="639.0">
-               <!-- <children> -->
-                  <!-- <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Pearl Milk Tea" wrapText="True" />
+               <!-- <children>
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Pearl Milk Tea" wrapText="True" />
                   <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Green Tea" wrapText="True" />
                   <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Black Tea" wrapText="True" />
                   <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Oolong Tea" wrapText="True" />
@@ -54,36 +53,29 @@
                   <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Honey Lemonade" wrapText="True" />
                   <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Strawberry Coconut" wrapText="True" />
                   <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Matcha Fresh Milk" wrapText="True" />
-                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Coffee Creama" wrapText="True" /> -->
-               <!-- </children> -->
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Coffee Creama" wrapText="True" />
+               </children> -->
             </TilePane>
          </content>
       </ScrollPane>
-      <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Checkout" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+      <Button fx:id="checkoutButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Checkout" GridPane.columnIndex="2" GridPane.rowIndex="4" />
       <ToolBar maxHeight="1.7976931348623157E308" prefHeight="57.0" prefWidth="1280.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
         <items>
-          <Button mnemonicParsing="false" prefHeight="58.0" prefWidth="77.0" text="i do a thing" />
+          <Button mnemonicParsing="false" prefHeight="58.0" prefWidth="77.0" text="Manager" onAction="#switchToManager"/>
         </items>
       </ToolBar>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="4">
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20" GridPane.rowIndex="4">
          <children>
-            <Button mnemonicParsing="false" prefHeight="73.0" prefWidth="102.0" text="New" />
-            <Button mnemonicParsing="false" prefHeight="73.0" prefWidth="104.0" text="Cancel" />
+            <Button fx:id="newOrderButton" mnemonicParsing="false" prefHeight="73.0" prefWidth="102.0" text="New" />
+            <Button fx:id="deleteOrderButton" mnemonicParsing="false" prefHeight="73.0" prefWidth="104.0" text="Delete" />
          </children>
       </HBox>
-      <SplitPane dividerPositions="0.24058577405857745" prefHeight="160.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.rowSpan="2147483647">
+      <SplitPane dividerPositions="0.4342105263157894" prefHeight="160.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.rowSpan="2147483647">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                <children>
-                  <Button layoutX="48.0" layoutY="99.0" mnemonicParsing="false" text="Notes" />
-                  <Label layoutX="60.0" layoutY="5.0" text="Size:" />
-                  <HBox layoutX="13.0" layoutY="39.0" prefHeight="45.0" prefWidth="118.0">
-                     <children>
-                        <Button mnemonicParsing="false" prefHeight="49.0" prefWidth="44.0" text="S" />
-                        <Button mnemonicParsing="false" prefHeight="49.0" prefWidth="44.0" text="M" />
-                        <Button mnemonicParsing="false" prefHeight="49.0" prefWidth="44.0" text="L" />
-                     </children>
-                  </HBox>
+                  <Label layoutX="12.0" layoutY="7.0" text="Order Preview" />
+                  <Label fx:id="orderPreviewLabel" layoutX="12.0" layoutY="40.0" prefWidth="250.0" wrapText="true" text="No order selected" alignment="TOP_LEFT"/>
                </children>
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
