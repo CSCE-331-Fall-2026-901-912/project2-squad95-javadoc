@@ -26,6 +26,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.print.PrinterJob;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -127,7 +128,6 @@ public class ManagerCtrl {
 
     private void loadTotalRevenue() {
         String sql = "SELECT SUM(subtotal) FROM orders;";
-
         
         try (Connection conn = Database.getConnection();
              Statement stmt = conn.createStatement();
@@ -167,10 +167,31 @@ public class ManagerCtrl {
         }
     }
 
+    private void printNode() {
+        
+    }
+
     private void initializeFinancials() {
         loadTotalRevenue();
         loadOrdersToday();
         loadRevenueTrend();
+
+        printReportButton.setOnAction( (event) -> {
+            PrinterJob job = PrinterJob.createPrinterJob();
+            if (job != null) {
+                // Show system print dialog; user selects 'Save as PDF' / 'Print to PDF'
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                boolean proceed = job.showPrintDialog(stage);
+                if (proceed) {
+                    boolean success = job.printPage(finRevenueTrendChart);
+                    System.out.println("printing...");
+                    if (success) {
+                        job.endJob();
+                    }
+                }
+            }
+            System.out.println("the print failed");
+        });
     }
     
     private void refreshFinanicals() {
