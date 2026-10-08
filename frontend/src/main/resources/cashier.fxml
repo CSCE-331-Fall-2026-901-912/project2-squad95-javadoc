@@ -13,9 +13,8 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.FlowPane?>
 
-<GridPane prefHeight="720.0" prefWidth="1280.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/26">
+<GridPane prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1">
   <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="295.3333740234375" minWidth="10.0" percentWidth="25.0" prefWidth="142.33334350585938" />
     <ColumnConstraints hgrow="SOMETIMES" maxWidth="381.0" minWidth="10.0" percentWidth="50.0" prefWidth="301.33335367838544" />
@@ -32,8 +31,8 @@
       <ScrollPane hbarPolicy="NEVER" pannable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
          <content>
             <TilePane fx:id="menuItemsPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumns="3" prefHeight="300.0" prefRows="3" prefTileHeight="100.0" prefTileWidth="100.0" prefWidth="639.0">
-               <!-- <children> -->
-                  <!-- <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Pearl Milk Tea" wrapText="True" />
+               <!-- <children>
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Pearl Milk Tea" wrapText="True" />
                   <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Green Tea" wrapText="True" />
                   <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Black Tea" wrapText="True" />
                   <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Oolong Tea" wrapText="True" />
@@ -54,8 +53,8 @@
                   <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Honey Lemonade" wrapText="True" />
                   <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Strawberry Coconut" wrapText="True" />
                   <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Matcha Fresh Milk" wrapText="True" />
-                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Coffee Creama" wrapText="True" /> -->
-               <!-- </children> -->
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Coffee Creama" wrapText="True" />
+               </children> -->
             </TilePane>
          </content>
       </ScrollPane>
@@ -67,7 +66,7 @@
       </ToolBar>
       <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="4">
          <children>
-            <Button mnemonicParsing="false" prefHeight="73.0" prefWidth="102.0" text="New" />
+            <Button fx:id="newOrderButton" mnemonicParsing="false" prefHeight="73.0" prefWidth="102.0" text="New" />
             <Button mnemonicParsing="false" prefHeight="73.0" prefWidth="104.0" text="Cancel" />
          </children>
       </HBox>
