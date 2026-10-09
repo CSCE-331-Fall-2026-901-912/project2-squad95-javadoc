@@ -301,7 +301,6 @@ public class ManagerCtrl {
         }
 
         public void loadData() {
-            // TODO: make this less garbage
             String sql = "WITH item_counts AS (\r\n" + //
                         "       SELECT order_id,\r\n" + //
                         "              COUNT(id) as items_in_order\r\n" + //
@@ -349,8 +348,6 @@ public class ManagerCtrl {
     HourlySalesSummaryTable reportTable = new HourlySalesSummaryTable();
     
     // https://stackoverflow.com/questions/22789449/export-stage-into-pdf
-    // TODO: need to figure out how to make tables expand fully and how
-    // to make images not get cut off
     private void promptExportToPDF(Node node) {
         SnapshotParameters params = new SnapshotParameters();
         // what if no scaling the snapshot :D
@@ -362,13 +359,24 @@ public class ManagerCtrl {
             PDPage page = new PDPage();
             doc.addPage(page);
 
+            // 72 points per inch, returned lengths are in points
+            final float MARGIN = 36;
+            float pageWidth = page.getMediaBox().getWidth() - (MARGIN * 2);;
+            float pageHeight = page.getMediaBox().getWidth() - (MARGIN * 2);;
+
             PDImageXObject pdImage = LosslessFactory.createFromImage(doc, bufImg);
 
-            final float MARGIN = 36;
             float imageWidth = bufImg.getWidth();
             float imageHeight = bufImg.getHeight();
 
+            float imageScale = Math.min(pageWidth / imageWidth, 
+                                        pageHeight / imageHeight);
+            
+            imageWidth *= imageScale;
+            imageHeight *= imageScale;
+
             float xPos = MARGIN;
+            // The y-axis starts at the "bottom" and writes "down"
             float yPos = page.getMediaBox().getHeight() - MARGIN - imageHeight;
 
             try(PDPageContentStream contentStream = new PDPageContentStream(doc, page)) {
@@ -408,24 +416,21 @@ public class ManagerCtrl {
             Stage popup = new Stage();
             popup.setTitle("X-report");
 
-            Button closeButton = new Button("Confirm");
+            Button closeButton = new Button("Close");
             closeButton.setOnAction(e -> {
                 popup.close();
             });
 
-            Label xReportLabel = new Label("X-report");
-
             Button printButton = new Button("Export to PDF");
             printButton.setOnAction(e -> {
+                final double REC_PRINT_WIDTH = 750;
+                reportTable.getView().setMinWidth(REC_PRINT_WIDTH);
                 promptExportToPDF(reportTable.getView());
+                // use computed size
+                reportTable.getView().setMinWidth(-1);
             });
 
-            VBox root = new VBox(20, 
-                xReportLabel, 
-                reportTable.getView(), 
-                closeButton,
-                printButton
-            );
+            VBox root = new VBox(20, reportTable.getView(), printButton, closeButton);
 
             root.setPadding(new Insets(20));
             root.setAlignment(Pos.CENTER);
@@ -436,23 +441,9 @@ public class ManagerCtrl {
             popup.showAndWait();
         });
 
-        printReportButton.setOnAction( (event) -> {
-            PrinterJob job = PrinterJob.createPrinterJob();
-            if (job != null) {
-                // Show system print dialog; user selects 'Save as PDF' / 'Print to PDF'
-                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                
-                boolean proceed = job.showPrintDialog(stage);
-                if (proceed) {
-                    boolean success = job.printPage(finRevenueTrendChart);
-                    System.out.println("printing...");
-                    if (success) {
-                        job.endJob();
-                    }
-                }
-            } else {
-                System.out.println("the print failed");
-            }
+        printReportButton.setOnAction(e -> {
+            // bare minimum
+            promptExportToPDF(financialsView);
         });
     }
     
