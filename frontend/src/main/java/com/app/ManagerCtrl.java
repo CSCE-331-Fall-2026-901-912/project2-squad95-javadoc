@@ -5,8 +5,23 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
 import java.sql.Date;
+import java.util.Calendar;
 import java.util.List;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import javafx.scene.image.WritableImage;
+import javafx.embed.swing.SwingFXUtils;
+
+import java.awt.Window;
+import java.awt.image.BufferedImage;
+import java.io.File;
 
 import org.postgresql.core.SetupQueryRunner;
 
@@ -47,12 +62,17 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.WritableImage;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.transform.Transform;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
 import javax.print.*;
 import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
@@ -326,7 +346,53 @@ public class ManagerCtrl {
         }
     }
 
-    HourlySalesSummaryTable reportTableView = new HourlySalesSummaryTable();
+    HourlySalesSummaryTable reportTable = new HourlySalesSummaryTable();
+    
+    // https://stackoverflow.com/questions/22789449/export-stage-into-pdf
+    // TODO: need to figure out how to make tables expand fully and how
+    // to make images not get cut off
+    private void promptExportToPDF(Node node) {
+        SnapshotParameters params = new SnapshotParameters();
+        // what if no scaling the snapshot :D
+
+        WritableImage fxImg = node.snapshot(params, null);
+        BufferedImage bufImg = SwingFXUtils.fromFXImage(fxImg, null);
+
+        try(PDDocument doc = new PDDocument()) {
+            PDPage page = new PDPage();
+            doc.addPage(page);
+
+            PDImageXObject pdImage = LosslessFactory.createFromImage(doc, bufImg);
+
+            final float MARGIN = 36;
+            float imageWidth = bufImg.getWidth();
+            float imageHeight = bufImg.getHeight();
+
+            float xPos = MARGIN;
+            float yPos = page.getMediaBox().getHeight() - MARGIN - imageHeight;
+
+            try(PDPageContentStream contentStream = new PDPageContentStream(doc, page)) {
+                contentStream.drawImage(pdImage, xPos, yPos, imageWidth, imageHeight);
+            }
+
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Document");
+            var currentDate = Calendar.getInstance().getTime();
+            fileChooser.setInitialFileName("summary-report " + currentDate.toString() + ".pdf");
+
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("PDF Files (*.pdf)", "*.pdf")
+            );
+
+            File selectedFile = fileChooser.showSaveDialog(null);
+            if (selectedFile == null) return;
+            doc.save(selectedFile);
+
+        } catch(IOException e) {
+            System.err.println("Something went wrong while printing!");
+            e.printStackTrace();
+        } 
+    }
 
     private void initializeFinancials() {
         loadTotalRevenue();
@@ -336,7 +402,7 @@ public class ManagerCtrl {
 
         // load data only once to reduce latency when opening x-report each time
         // may need to explicitly refresh somewhere else, on defined intervals
-        reportTableView.loadData();
+        reportTable.loadData();
 
         xReportButton.setOnAction( event -> { 
             Stage popup = new Stage();
@@ -347,14 +413,26 @@ public class ManagerCtrl {
                 popup.close();
             });
 
-            // TODO: add print button
+            Label xReportLabel = new Label("X-report");
 
-            VBox root = new VBox(20, reportTableView.getView(), closeButton);
+            Button printButton = new Button("Export to PDF");
+            printButton.setOnAction(e -> {
+                promptExportToPDF(reportTable.getView());
+            });
+
+            VBox root = new VBox(20, 
+                xReportLabel, 
+                reportTable.getView(), 
+                closeButton,
+                printButton
+            );
+
             root.setPadding(new Insets(20));
             root.setAlignment(Pos.CENTER);
             popup.setScene(new Scene(root, 500, 450));
 
             popup.initModality(Modality.NONE);
+            popup.setTitle("X-report");
             popup.showAndWait();
         });
 
@@ -363,6 +441,7 @@ public class ManagerCtrl {
             if (job != null) {
                 // Show system print dialog; user selects 'Save as PDF' / 'Print to PDF'
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                
                 boolean proceed = job.showPrintDialog(stage);
                 if (proceed) {
                     boolean success = job.printPage(finRevenueTrendChart);
@@ -371,8 +450,9 @@ public class ManagerCtrl {
                         job.endJob();
                     }
                 }
+            } else {
+                System.out.println("the print failed");
             }
-            System.out.println("the print failed");
         });
     }
     
