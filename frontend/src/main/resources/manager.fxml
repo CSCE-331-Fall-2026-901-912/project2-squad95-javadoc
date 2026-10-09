@@ -109,10 +109,10 @@
                     <VBox spacing="10" alignment="BOTTOM_RIGHT" prefWidth="400" HBox.hgrow="ALWAYS">
                         <TableView fx:id="financialsTable" prefHeight="450" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn text="Day" prefWidth="80"/>
-                                <TableColumn text="total order" prefWidth="100"/>
-                                <TableColumn text="amount" prefWidth="100"/>
-                                <TableColumn text="meets goal" prefWidth="100"/>
+                                <TableColumn fx:id="finDayCol" text="Day" prefWidth="80"/>
+                                <TableColumn fx:id="finTotalOrdersCol" text="total order" prefWidth="100"/>
+                                <TableColumn fx:id="finAmountCol" text="amount" prefWidth="100"/>
+                                <TableColumn fx:id="finMetGoalCol" text="meets goal" prefWidth="100"/>
                             </columns>
                         </TableView>
                         <Button fx:id="printReportButton" text="Print" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #333; -fx-background-color: white; -fx-padding: 5 25; -fx-font-size: 14px;"/>

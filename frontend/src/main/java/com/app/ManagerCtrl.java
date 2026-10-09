@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Date;
 import java.util.List;
 
 import org.postgresql.core.SetupQueryRunner;
@@ -20,6 +21,7 @@ import com.app.models.Order;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -33,6 +35,7 @@ import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -105,7 +108,20 @@ public class ManagerCtrl {
     }
 
     @FXML private Button printReportButton;
-    @FXML private TableView<Order> financialsTable;
+
+    class OrdersDayRow { 
+        public Date date;
+        public Integer totalOrders;
+        public Double totalRevenue;
+        public String metSalesGoal;
+    }
+
+    @FXML private TableView<OrdersDayRow> financialsTable;
+    @FXML TableColumn<OrdersDayRow, Date> finDayCol;
+    @FXML TableColumn<OrdersDayRow, Integer> finTotalOrdersCol;
+    @FXML TableColumn<OrdersDayRow, Double> finAmountCol;
+    @FXML TableColumn<OrdersDayRow, String> finMetGoalCol;
+
     @FXML private Label finOrdersTotalLabel;
     @FXML private Label finRevenueTotalLabel;
     @FXML private BarChart<String, Number> finRevenueTrendChart;
@@ -167,6 +183,48 @@ public class ManagerCtrl {
         }
     }
 
+    private void LoadTotalOrdersByDate() {
+        String sql = "SELECT CAST(DATE AS date) AS date,\r\n" + //
+                     "       COUNT(id) AS totalOrders,\r\n" + //
+                     "       SUM(subtotal) AS totalRevenue\r\n" + //
+                     "FROM orders\r\n" + //
+                     "GROUP BY CAST(DATE AS date)\r\n" + //
+                     "ORDER BY date DESC\r\n" + //
+                     "LIMIT 365;";
+                     
+        try (Connection conn = Database.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+            
+            // TODO: move to dedicate init() function
+            finDayCol.setCellValueFactory(data -> 
+                new SimpleObjectProperty<>(data.getValue().date));
+            finTotalOrdersCol.setCellValueFactory(data -> 
+                new SimpleObjectProperty<>(data.getValue().totalOrders));
+            finAmountCol.setCellValueFactory(data -> 
+                new SimpleObjectProperty<>(data.getValue().totalRevenue));
+            // TODO: determine if "met sales goal column" should be done
+            finMetGoalCol.setCellValueFactory(data -> 
+                new SimpleObjectProperty<>("No"));
+            
+            // TODO: either move this out of the function or use a different collection
+            ObservableList<OrdersDayRow> entries = FXCollections.observableArrayList();
+            
+            while (rs.next()) {
+                OrdersDayRow newEntry = new OrdersDayRow();
+                newEntry.date = rs.getDate("date");
+                newEntry.totalOrders = rs.getInt("totalOrders");
+                newEntry.totalRevenue = rs.getDouble("totalRevenue");
+                entries.add(newEntry);
+            }
+
+            financialsTable.getItems().setAll(entries);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void printNode() {
         
     }
@@ -175,6 +233,7 @@ public class ManagerCtrl {
         loadTotalRevenue();
         loadOrdersToday();
         loadRevenueTrend();
+        LoadTotalOrdersByDate();
 
         printReportButton.setOnAction( (event) -> {
             PrinterJob job = PrinterJob.createPrinterJob();
