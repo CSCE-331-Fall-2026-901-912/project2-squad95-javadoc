@@ -28,6 +28,8 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.print.PrinterJob;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -51,6 +53,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import javax.print.*;
@@ -138,6 +141,8 @@ public class ManagerCtrl {
     @FXML private Label finRevenueTotalLabel;
     @FXML private BarChart<String, Number> finRevenueTrendChart;
 
+    @FXML private Button xReportButton;
+
     // Database Queries
     private void loadOrdersToday() {
         String sql = "SELECT COUNT(id) FROM orders WHERE date = CURRENT_DATE;";
@@ -196,6 +201,8 @@ public class ManagerCtrl {
     }
 
     private void LoadTotalOrdersByDate() {
+        // Note: make sure to keep the fields in the 
+        // class and SQL statement identical
         String sql = "SELECT CAST(DATE AS date) AS date,\r\n" + //
                      "       COUNT(id) AS totalOrders,\r\n" + //
                      "       SUM(subtotal) AS totalRevenue\r\n" + //
@@ -237,15 +244,122 @@ public class ManagerCtrl {
         }
     }
 
-    private void printNode() {
-        
+    class HourlySalesSummary {
+        public Integer hour;
+        public Integer transactionCount;
+        public Integer itemsSold;
+        public Double totalRevenue;
+        public Double averageRevenue;
     }
+
+    class HourlySalesSummaryTable {
+        private ObservableList<HourlySalesSummary> entries = FXCollections.observableArrayList();
+        private TableView<HourlySalesSummary> view;
+
+        HourlySalesSummaryTable() {
+            view = new TableView<HourlySalesSummary>();
+
+            var hourCol = new TableColumn<HourlySalesSummary, Integer>("Hour");
+            var transactionsCol = new TableColumn<HourlySalesSummary, Integer>("Transactions");
+            var itemsSoldCol = new TableColumn<HourlySalesSummary, Integer>("Items sold");
+            var totalRevenueCol = new TableColumn<HourlySalesSummary, Double>("Total Revenue");
+            var avgRevenueCol = new TableColumn<HourlySalesSummary, Double>("Avg. Revenue Per Transaction");
+            
+            hourCol.setCellValueFactory(data -> 
+                new SimpleObjectProperty<>(data.getValue().hour));
+            transactionsCol.setCellValueFactory(data -> 
+                new SimpleObjectProperty<>(data.getValue().transactionCount));
+            itemsSoldCol.setCellValueFactory(data -> 
+                new SimpleObjectProperty<>(data.getValue().itemsSold));
+            totalRevenueCol.setCellValueFactory(data -> 
+                new SimpleObjectProperty<>(data.getValue().totalRevenue));
+            avgRevenueCol.setCellValueFactory(data -> 
+                new SimpleObjectProperty<>(data.getValue().averageRevenue));        
+            
+            view.getColumns().add(hourCol);
+            view.getColumns().add(transactionsCol);
+            view.getColumns().add(itemsSoldCol);
+            view.getColumns().add(totalRevenueCol);
+            view.getColumns().add(avgRevenueCol);
+        }
+
+        public void loadData() {
+            // TODO: make this less garbage
+            String sql = "WITH item_counts AS (\r\n" + //
+                        "       SELECT order_id,\r\n" + //
+                        "              COUNT(id) as items_in_order\r\n" + //
+                        "       FROM order_items\r\n" + //
+                        "       GROUP BY order_id\r\n" + //
+                        ")\r\n" + //
+                        "SELECT date,\r\n" + //
+                        "       EXTRACT(HOUR FROM CAST(time as TIME)) as hour,\r\n" + //
+                        "       COUNT(orders.id) as total_orders,\r\n" + //
+                        "       SUM(orders.subtotal) as total_revenue,\r\n" + //
+                        "       SUM(ic.items_in_order) as item_count\r\n" + //
+                        "FROM orders\r\n" + //
+                        "LEFT JOIN item_counts as ic\r\n" + //
+                        "       ON ic.order_id = orders.id\r\n" + //
+                        "WHERE date = CURRENT_DATE\r\n" + //
+                        "GROUP BY date, hour\r\n" + //
+                        "ORDER BY date DESC, hour DESC;";
+
+            try (Connection conn = Database.getConnection();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+
+                while (rs.next()) {
+                    HourlySalesSummary newEntry = new HourlySalesSummary();
+                    newEntry.hour = rs.getInt("hour");
+                    newEntry.transactionCount = rs.getInt("total_orders");
+                    newEntry.itemsSold = rs.getInt("item_count");
+                    newEntry.totalRevenue = rs.getDouble("total_revenue");
+                    newEntry.averageRevenue = 
+                        newEntry.totalRevenue / newEntry.transactionCount;
+                    entries.add(newEntry);
+                }        
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            
+            view.getItems().setAll(entries);
+        }
+
+        public TableView<HourlySalesSummary> getView() {
+            return view;
+        }
+    }
+
+    HourlySalesSummaryTable reportTableView = new HourlySalesSummaryTable();
 
     private void initializeFinancials() {
         loadTotalRevenue();
         loadOrdersToday();
         loadRevenueTrend();
         LoadTotalOrdersByDate();
+
+        // load data only once to reduce latency when opening x-report each time
+        // may need to explicitly refresh somewhere else, on defined intervals
+        reportTableView.loadData();
+
+        xReportButton.setOnAction( event -> { 
+            Stage popup = new Stage();
+            popup.setTitle("X-report");
+
+            Button closeButton = new Button("Confirm");
+            closeButton.setOnAction(e -> {
+                popup.close();
+            });
+
+            // TODO: add print button
+
+            VBox root = new VBox(20, reportTableView.getView(), closeButton);
+            root.setPadding(new Insets(20));
+            root.setAlignment(Pos.CENTER);
+            popup.setScene(new Scene(root, 500, 450));
+
+            popup.initModality(Modality.NONE);
+            popup.showAndWait();
+        });
 
         printReportButton.setOnAction( (event) -> {
             PrinterJob job = PrinterJob.createPrinterJob();

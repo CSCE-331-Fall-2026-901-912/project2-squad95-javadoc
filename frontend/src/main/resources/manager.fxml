@@ -105,6 +105,11 @@
                             <xAxis><CategoryAxis/></xAxis>
                             <yAxis><NumberAxis/></yAxis>
                         </BarChart>
+                        <HBox prefHeight="100.0" prefWidth="200.0">
+                            <children>
+                                <Button mnemonicParsing="false" text="X-report" textAlignment="CENTER" fx:id="xReportButton" />
+                            </children>
+                        </HBox>
                     </VBox>
                     <VBox spacing="10" alignment="BOTTOM_RIGHT" prefWidth="400" HBox.hgrow="ALWAYS">
                         <TableView fx:id="financialsTable" prefHeight="450" VBox.vgrow="ALWAYS">
