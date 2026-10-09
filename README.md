@@ -3,7 +3,7 @@ This contains the code for Project 2 of Squad 95, containing Kenny Le, Ethan Fau
 
 This project uses Gradle as a build tool and JavaFX as an application framework. 
 
-Current Status: Release 1
+Current Status: Release 2
 
 # Building/Running the GUI App
 

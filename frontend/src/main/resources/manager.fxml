@@ -91,12 +91,12 @@
                         <HBox spacing="20">
                             <VBox styleClass="kpi-card kpi-green" alignment="CENTER" prefWidth="190" prefHeight="100">
                                 <Label text="Revenue" style="-fx-font-size: 18px;"/>
-                                <Label text="\$24,680" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                                <Label fx:id="finRevenueTotalLabel" text="\$24,680" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
                                 <Label text="+12%" style="-fx-font-size: 16px;"/>
                             </VBox>
                             <VBox styleClass="kpi-card kpi-red" alignment="CENTER" prefWidth="190" prefHeight="100">
                                 <Label text="Sales Goal" style="-fx-font-size: 18px;"/>
-                                <Label text="\$26,000" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                                <Label fx:id="finOrdersTotalLabel" text="\$26,000" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
                                 <Label text="-8%" style="-fx-font-size: 16px;"/>
                             </VBox>
                         </HBox>
@@ -109,13 +109,13 @@
                     <VBox spacing="10" alignment="BOTTOM_RIGHT" prefWidth="400" HBox.hgrow="ALWAYS">
                         <TableView fx:id="financialsTable" prefHeight="450" VBox.vgrow="ALWAYS">
                             <columns>
-                                <TableColumn text="Day" prefWidth="80"/>
-                                <TableColumn text="total order" prefWidth="100"/>
-                                <TableColumn text="amount" prefWidth="100"/>
-                                <TableColumn text="meets goal" prefWidth="100"/>
+                                <TableColumn fx:id="finDayCol" text="Day" prefWidth="80"/>
+                                <TableColumn fx:id="finTotalOrdersCol" text="total order" prefWidth="100"/>
+                                <TableColumn fx:id="finAmountCol" text="amount" prefWidth="100"/>
+                                <TableColumn fx:id="finMetGoalCol" text="meets goal" prefWidth="100"/>
                             </columns>
                         </TableView>
-                        <Button text="Print" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #333; -fx-background-color: white; -fx-padding: 5 25; -fx-font-size: 14px;"/>
+                        <Button fx:id="printReportButton" text="Print" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #333; -fx-background-color: white; -fx-padding: 5 25; -fx-font-size: 14px;"/>
                     </VBox>
                 </HBox>
 

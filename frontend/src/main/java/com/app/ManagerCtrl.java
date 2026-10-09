@@ -1,8 +1,14 @@
 package com.app;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Date;
 import java.util.List;
+
+import org.postgresql.core.SetupQueryRunner;
 
 import com.app.controllers.EmployeeDAO;
 import com.app.controllers.InventoryDAO;
@@ -10,19 +16,23 @@ import com.app.controllers.ItemDAO;
 import com.app.models.EmployeeRow;
 import com.app.models.InventoryItem;
 import com.app.models.Item;
+import com.app.models.Order;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.print.PrinterJob;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+<<<<<<< HEAD
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -32,10 +42,21 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+=======
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+>>>>>>> a4a2abf4ce5339475a9ee9df6ce9c0ac9554cd91
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
+import javax.print.*;
+import javax.print.attribute.*;
+import javax.print.attribute.standard.*;
+
 
 public class ManagerCtrl {
 
@@ -54,6 +75,7 @@ public class ManagerCtrl {
     @FXML
     public void initialize() {
         showOnly(dashboardView);
+        initializeFinancials();
         initializeEmployees();
         initializeInventory();
         initializeMenu();
@@ -95,6 +117,162 @@ public class ManagerCtrl {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setScene(new Scene(root));
         stage.show();
+    }
+
+    @FXML private Button printReportButton;
+
+    class OrdersDayRow { 
+        public Date date;
+        public Integer totalOrders;
+        public Double totalRevenue;
+        public String metSalesGoal;
+    }
+
+    @FXML private TableView<OrdersDayRow> financialsTable;
+    @FXML TableColumn<OrdersDayRow, Date> finDayCol;
+    @FXML TableColumn<OrdersDayRow, Integer> finTotalOrdersCol;
+    @FXML TableColumn<OrdersDayRow, Double> finAmountCol;
+    @FXML TableColumn<OrdersDayRow, String> finMetGoalCol;
+
+    @FXML private Label finOrdersTotalLabel;
+    @FXML private Label finRevenueTotalLabel;
+    @FXML private BarChart<String, Number> finRevenueTrendChart;
+
+    // Database Queries
+    private void loadOrdersToday() {
+        String sql = "SELECT COUNT(id) FROM orders WHERE date = CURRENT_DATE;";
+
+        try (Connection conn = Database.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                finOrdersTotalLabel.setText(String.valueOf(rs.getInt(1)));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadTotalRevenue() {
+        String sql = "SELECT SUM(subtotal) FROM orders;";
+        
+        try (Connection conn = Database.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+             
+            if (rs.next()) {
+                double totalRevenue = rs.getDouble(1);
+                finRevenueTotalLabel.setText(String.format("$%,.2f", totalRevenue));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadRevenueTrend() {
+        String sql = "SELECT TO_CHAR(date, 'Mon') AS month, SUM(subtotal) AS revenue " +
+                     "FROM orders " +
+                     "GROUP BY TO_CHAR(date, 'Mon'), EXTRACT(MONTH FROM date) " +
+                     "ORDER BY EXTRACT(MONTH FROM date);";
+
+        try (Connection conn = Database.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            XYChart.Series<String, Number> series = new XYChart.Series<>();
+            series.setName("2025 Revenue Trend");
+
+            while (rs.next()) {
+                series.getData().add(new XYChart.Data<>(rs.getString("month"), rs.getDouble("revenue")));
+            }
+
+            finRevenueTrendChart.getData().clear();
+            finRevenueTrendChart.getData().add(series);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void LoadTotalOrdersByDate() {
+        String sql = "SELECT CAST(DATE AS date) AS date,\r\n" + //
+                     "       COUNT(id) AS totalOrders,\r\n" + //
+                     "       SUM(subtotal) AS totalRevenue\r\n" + //
+                     "FROM orders\r\n" + //
+                     "GROUP BY CAST(DATE AS date)\r\n" + //
+                     "ORDER BY date DESC\r\n" + //
+                     "LIMIT 365;";
+                     
+        try (Connection conn = Database.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+            
+            // TODO: move to dedicate init() function
+            finDayCol.setCellValueFactory(data -> 
+                new SimpleObjectProperty<>(data.getValue().date));
+            finTotalOrdersCol.setCellValueFactory(data -> 
+                new SimpleObjectProperty<>(data.getValue().totalOrders));
+            finAmountCol.setCellValueFactory(data -> 
+                new SimpleObjectProperty<>(data.getValue().totalRevenue));
+            // TODO: determine if "met sales goal column" should be done
+            finMetGoalCol.setCellValueFactory(data -> 
+                new SimpleObjectProperty<>("No"));
+            
+            // TODO: either move this out of the function or use a different collection
+            ObservableList<OrdersDayRow> entries = FXCollections.observableArrayList();
+            
+            while (rs.next()) {
+                OrdersDayRow newEntry = new OrdersDayRow();
+                newEntry.date = rs.getDate("date");
+                newEntry.totalOrders = rs.getInt("totalOrders");
+                newEntry.totalRevenue = rs.getDouble("totalRevenue");
+                entries.add(newEntry);
+            }
+
+            financialsTable.getItems().setAll(entries);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void printNode() {
+        
+    }
+
+    private void initializeFinancials() {
+        loadTotalRevenue();
+        loadOrdersToday();
+        loadRevenueTrend();
+        LoadTotalOrdersByDate();
+
+        printReportButton.setOnAction( (event) -> {
+            PrinterJob job = PrinterJob.createPrinterJob();
+            if (job != null) {
+                // Show system print dialog; user selects 'Save as PDF' / 'Print to PDF'
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                boolean proceed = job.showPrintDialog(stage);
+                if (proceed) {
+                    boolean success = job.printPage(finRevenueTrendChart);
+                    System.out.println("printing...");
+                    if (success) {
+                        job.endJob();
+                    }
+                }
+            }
+            System.out.println("the print failed");
+        });
+    }
+    
+    private void refreshFinanicals() {
+        try { 
+            loadTotalRevenue();
+            loadOrdersToday();
+            loadRevenueTrend();
+        } catch (Exception e) {
+            dbError(e);
+        }
     }
 
 

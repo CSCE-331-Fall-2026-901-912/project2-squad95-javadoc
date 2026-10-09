@@ -93,7 +93,8 @@ public class CashierCtrl extends Application implements Initializable {
     // the working id used for tracking the currently selected
     // order. this should be transformed into a different id
     // for inserting into the database when submitted
-    private static int currProgOrderId = 0;
+    final static int NO_ORDER_SELECTED = -1;
+    private static int currProgOrderId = NO_ORDER_SELECTED;
 
     // the id of the most recently created order. used for creating new orders
     private static int latestProgOrderId = 0; 
@@ -118,6 +119,7 @@ public class CashierCtrl extends Application implements Initializable {
             // break early if no list item is selected
             if (currSelectedOrder == null) { 
                 orderItemsList.setItems(null);
+                currProgOrderId = NO_ORDER_SELECTED;
                 return; 
             }
 
@@ -126,10 +128,10 @@ public class CashierCtrl extends Application implements Initializable {
             orderItemsList.setItems(currSelectedOrder.orderItems());
         });
 
-        // TODO for phase 4: interaction for selecting an order's item 
+        // TODO for phase 4: delete/modify existing order item 
     }
 
-    private boolean removeFirstOrderItemOfId(int targetId) {
+    private boolean removeFirstOrderOfId(int targetId) {
         // Linear search, because id =/= list index
         // would be better to use an observable map later on
         for (int i = 0; i < orderEntries.size(); ++i) {
@@ -153,13 +155,13 @@ public class CashierCtrl extends Application implements Initializable {
             }
         }
 
-        String errorMessage = String.format("Failed to remove order of ID %d", currProgOrderId);
+        String errorMessage = String.format("Failed to get order of ID %d", currProgOrderId);
         System.err.println(errorMessage);
         return -1;
     }
 
     private void onDeleteOrder(ActionEvent event) {
-        removeFirstOrderItemOfId(currProgOrderId);
+        removeFirstOrderOfId(currProgOrderId);
     } 
 
     @FXML
@@ -197,7 +199,6 @@ public class CashierCtrl extends Application implements Initializable {
 
                     button.setStyle("-fx-background-color: lightgreen;");
 
-
                     selectedDrink = button;
                     selectedDrinkPrice = price;
 
@@ -216,203 +217,6 @@ public class CashierCtrl extends Application implements Initializable {
         }
     }
 
-
-    // private void showToppingsPopup() {
-    //     //System.out.println("POPUP STARTED");
-    //     //double[] toppingTotal = {0.0};
-    //     Stage popup = new Stage();
-    //     popup.setTitle("Select Toppings");
-
-    //     FlowPane toppingsPane = new FlowPane();
-    //     toppingsPane.setHgap(10);
-    //     toppingsPane.setVgap(10);
-    //     toppingsPane.setPadding(new Insets(20));
-    //     toppingsPane.setPrefWrapLength(400);
-
-    //     Set<String> selectedToppings = new HashSet<>();
-    //     double[] toppingTotal = {0.0};
-
-    //     try (BufferedReader reader =
-    //             new BufferedReader(new FileReader("toppings.csv"))) {
-
-    //         String line;
-    //         reader.readLine();
-
-    //         while ((line = reader.readLine()) != null) {
-    //             String[] data = line.split(",");
-
-    //             String name = data[1];
-    //             double price = Double.parseDouble(data[2]);
-
-    //             Button button = new Button(name);
-    //             button.setPrefSize(120, 60);
-    //             button.setWrapText(true);
-    //             button.setStyle("-fx-background-color: lightgray;");
-
-    //             button.setOnAction(event -> {
-    //                 if (selectedToppings.contains(name)) {
-    //                     selectedToppings.remove(name);
-    //                     toppingTotal[0] -= price;
-    //                     button.setStyle("-fx-background-color: lightgray;");
-    //                 } else {
-    //                     selectedToppings.add(name);
-    //                     toppingTotal[0] += price;
-    //                     button.setStyle("-fx-background-color: lightgreen;");
-    //                 }
-    //             });
-
-    //             toppingsPane.getChildren().add(button);
-    //         }
-
-    //     } catch (IOException e) {
-    //         e.printStackTrace();
-    //     }
-
-    //     Button confirmButton = new Button("Confirm");
-
-    //     confirmButton.setOnAction(event -> {
-    //         double totalPrice = selectedDrinkPrice + toppingTotal[0];
-
-    //         String orderInfo = String.format("Drink: %s%n%n" + "Drink Price: $%.2f%n%n" + "Toppings: %s%n%n" + "Toppings Price: $%.2f%n%n" + "Total Price: $%.2f",
-    //             selectedDrink.getText(), selectedDrinkPrice, selectedToppings, toppingTotal[0], totalPrice);
-
-    //         orderPreviewLabel.setText(orderInfo);
-
-    //         popup.close();
-
-    //         showSugarPopup(selectedToppings, toppingTotal[0]);
-    //     });
-
-    //     VBox root = new VBox(20, toppingsPane, confirmButton);
-    //     root.setPadding(new Insets(20));
-    //     root.setAlignment(Pos.CENTER);
-
-    //     Scene scene = new Scene(root, 500, 450);
-    //     popup.setScene(scene);
-    //     popup.initModality(Modality.APPLICATION_MODAL);
-    //     popup.showAndWait();
-    // }
-
-
-    // private void showSugarPopup(Set<String> toppings, double toppingsPrice) {
-    //     Stage popup = new Stage();
-    //     popup.setTitle("Select Sugar Level");
-
-    //     VBox root = new VBox(15);
-    //     root.setPadding(new Insets(20));
-    //     root.setAlignment(Pos.CENTER);
-
-    //     Label title = new Label("Choose Sugar Level");
-
-    //     String[] sugarLevels = {
-    //         "0%", "25%", "50%", "75%", "100%"
-    //     };
-
-    //     ToggleGroup group = new ToggleGroup();
-
-    //     for (String level : sugarLevels) {
-    //         RadioButton button = new RadioButton(level);
-    //         button.setToggleGroup(group);
-
-    //         if (level.equals("100%")) {
-    //             button.setSelected(true);
-    //         }
-
-    //         root.getChildren().add(button);
-    //     }
-
-    //     Button confirmButton = new Button("Confirm");
-
-    //     confirmButton.setOnAction(event -> {
-    //         RadioButton selected =
-    //             (RadioButton) group.getSelectedToggle();
-
-    //         selectedSugar = selected.getText();
-
-    //         popup.close();
-    //         showIcePopup(toppings, toppingsPrice);
-    //     });
-
-    //     root.getChildren().add(0, title);
-    //     root.getChildren().add(confirmButton);
-
-    //     popup.setScene(new Scene(root, 350, 350));
-    //     popup.initModality(Modality.APPLICATION_MODAL);
-    //     popup.show();
-    // }
-
-
-    // private void showIcePopup(Set<String> toppings, double toppingsPrice) {
-    //     Stage popup = new Stage();
-    //     popup.setTitle("Select Ice Level");
-
-    //     VBox root = new VBox(15);
-    //     root.setPadding(new Insets(20));
-    //     root.setAlignment(Pos.CENTER);
-
-    //     Label title = new Label("Choose Ice Level");
-
-    //     String[] iceLevels = {
-    //         "No Ice", "Less Ice", "Regular Ice", "Extra Ice"
-    //     };
-
-    //     ToggleGroup group = new ToggleGroup();
-
-    //     for (String level : iceLevels) {
-    //         RadioButton button = new RadioButton(level);
-    //         button.setToggleGroup(group);
-
-    //         if (level.equals("Regular Ice")) {
-    //             button.setSelected(true);
-    //         }
-
-    //         root.getChildren().add(button);
-    //     }
-
-    //     Button confirmButton = new Button("Confirm");
-
-    //     confirmButton.setOnAction(event -> {
-    //         RadioButton selected =
-    //             (RadioButton) group.getSelectedToggle();
-
-    //         selectedIce = selected.getText();
-
-    //         double totalPrice = selectedDrinkPrice + toppingsPrice;
-
-    //         String orderInfo = String.format(
-    //             "Drink: %s%n" +
-    //             "Drink Price: $%.2f%n" +
-    //             "Toppings: %s%n" +
-    //             "Toppings Price: $%.2f%n" +
-    //             "Sugar Level: %s%n" +
-    //             "Ice Level: %s%n" +
-    //             "Total Price: $%.2f",
-    //             selectedDrink.getText(),
-    //             selectedDrinkPrice,
-    //             String.join(", ", toppings),
-    //             toppingsPrice,
-    //             selectedSugar,
-    //             selectedIce,
-    //             totalPrice
-    //         );
-
-    //         orderPreviewLabel.setText(orderInfo);
-
-    //         // TODO: orderitem doesn't fill in all req info, need to complete  
-    //         OrderItem completedOrderItem = new OrderItem(selectedDrink.getText());
-    //         addItemToCurrOrder(completedOrderItem);
-
-    //         popup.close();
-    //     });
-
-    //     root.getChildren().add(0, title);
-    //     root.getChildren().add(confirmButton);
-
-    //     popup.setScene(new Scene(root, 350, 350));
-    //     popup.initModality(Modality.APPLICATION_MODAL);
-    //     popup.show();
-    // }
-
     private void addItemToCurrOrder(OrderItem item) {
         int currOrderIndex = getOrderIndexOfId(currProgOrderId);
         // handle case where no order is selected 
@@ -420,6 +224,7 @@ public class CashierCtrl extends Application implements Initializable {
         orderEntries.get(currOrderIndex).orderItems().add(item);
     }
 
+    // TODO: speed up manager switching because it's a PITA to load for debugging everytime
     @FXML
     private void switchToManager(ActionEvent event) throws IOException {
         FXMLLoader loader = new FXMLLoader(
@@ -435,197 +240,198 @@ public class CashierCtrl extends Application implements Initializable {
         stage.setScene(scene);
         stage.show();
     }
-private void onCheckout(ActionEvent event) {
-    int idx = getOrderIndexOfId(currProgOrderId);
-    if (idx < 0) {
-        new Alert(Alert.AlertType.WARNING, "Select an order first.").showAndWait();
-        return;
-    }
-    Order order = orderEntries.get(idx);
-    if (order.orderItems().isEmpty()) {
-        new Alert(Alert.AlertType.WARNING, "This order is empty.").showAndWait();
-        return;
-    }
 
-    checkoutButton.setDisable(true);
-    Task<OrderReceipt> task = new Task<>() {
-        @Override protected OrderReceipt call() throws Exception {
-            return orderDAO.checkout(order, Session.employeeId, Session.taxRate);
+    private void onCheckout(ActionEvent event) {
+        int idx = getOrderIndexOfId(currProgOrderId);
+        if (idx < 0) {
+            new Alert(Alert.AlertType.WARNING, "Select an order first.").showAndWait();
+            return;
         }
-    };
-    task.setOnSucceeded(e -> {
-        checkoutButton.setDisable(false);
-        OrderReceipt r = task.getValue();
-        removeFirstOrderItemOfId(order.id());
-        new Alert(Alert.AlertType.INFORMATION, String.format(
-            "Order #%d placed.%nSubtotal: $%.2f%nTax: $%.2f%nTotal: $%.2f",
-            r.orderId(), r.subtotal(), r.tax(), r.grandTotal())).showAndWait();
-    });
-    task.setOnFailed(e -> {
-        checkoutButton.setDisable(false);
-        showError(task.getException());
-    });
-    new Thread(task).start();
-}
+        Order order = orderEntries.get(idx);
+        if (order.orderItems().isEmpty()) {
+            new Alert(Alert.AlertType.WARNING, "This order is empty.").showAndWait();
+            return;
+        }
 
-private void showToppingsPopup() {
-    Stage popup = new Stage();
-    popup.setTitle("Select Toppings");
-
-    FlowPane toppingsPane = new FlowPane(10, 10);
-    toppingsPane.setPadding(new Insets(20));
-    toppingsPane.setPrefWrapLength(400);
-
-    Set<Topping> selectedToppings = new LinkedHashSet<>();
-
-    for (Topping t : toppings) {
-        Button button = new Button(t.name() + "\n$" + String.format("%.2f", t.basePrice()));
-        button.setPrefSize(120, 60);
-        button.setWrapText(true);
-        button.setStyle("-fx-background-color: lightgray;");
-        button.setOnAction(event -> {
-            if (selectedToppings.remove(t)) {
-                button.setStyle("-fx-background-color: lightgray;");
-            } else {
-                selectedToppings.add(t);
-                button.setStyle("-fx-background-color: lightgreen;");
+        checkoutButton.setDisable(true);
+        Task<OrderReceipt> task = new Task<>() {
+            @Override protected OrderReceipt call() throws Exception {
+                return orderDAO.checkout(order, Session.employeeId, Session.taxRate);
             }
+        };
+        task.setOnSucceeded(e -> {
+            checkoutButton.setDisable(false);
+            OrderReceipt r = task.getValue();
+            removeFirstOrderOfId(order.id());
+            new Alert(Alert.AlertType.INFORMATION, String.format(
+                "Order #%d placed.%nSubtotal: $%.2f%nTax: $%.2f%nTotal: $%.2f",
+                r.orderId(), r.subtotal(), r.tax(), r.grandTotal())).showAndWait();
         });
-        toppingsPane.getChildren().add(button);
+        task.setOnFailed(e -> {
+            checkoutButton.setDisable(false);
+            showError(task.getException());
+        });
+        new Thread(task).start();
     }
 
-    Button confirmButton = new Button("Confirm");
-    confirmButton.setOnAction(event -> {
-        popup.close();
-        showSugarPopup(selectedToppings);
-    });
+    private void showToppingsPopup() {
+        Stage popup = new Stage();
+        popup.setTitle("Select Toppings");
 
-    VBox root = new VBox(20, toppingsPane, confirmButton);
-    root.setPadding(new Insets(20));
-    root.setAlignment(Pos.CENTER);
-    popup.setScene(new Scene(root, 500, 450));
-    popup.initModality(Modality.APPLICATION_MODAL);
-    popup.showAndWait();
-}
+        FlowPane toppingsPane = new FlowPane(10, 10);
+        toppingsPane.setPadding(new Insets(20));
+        toppingsPane.setPrefWrapLength(400);
 
-private void showSugarPopup(Set<Topping> chosenToppings) {
-    Stage popup = new Stage();
-    popup.setTitle("Select Sugar Level");
-    VBox root = new VBox(15);
-    root.setPadding(new Insets(20));
-    root.setAlignment(Pos.CENTER);
-    root.getChildren().add(new Label("Choose Sugar Level"));
+        Set<Topping> selectedToppings = new LinkedHashSet<>();
 
-    ToggleGroup group = new ToggleGroup();
-    for (String level : new String[]{"0%", "25%", "50%", "75%", "100%"}) {
-        RadioButton rb = new RadioButton(level);
-        rb.setToggleGroup(group);
-        if (level.equals("100%")) rb.setSelected(true);
-        root.getChildren().add(rb);
+        for (Topping t : toppings) {
+            Button button = new Button(t.name() + "\n$" + String.format("%.2f", t.basePrice()));
+            button.setPrefSize(120, 60);
+            button.setWrapText(true);
+            button.setStyle("-fx-background-color: lightgray;");
+            button.setOnAction(event -> {
+                if (selectedToppings.remove(t)) {
+                    button.setStyle("-fx-background-color: lightgray;");
+                } else {
+                    selectedToppings.add(t);
+                    button.setStyle("-fx-background-color: lightgreen;");
+                }
+            });
+            toppingsPane.getChildren().add(button);
+        }
+
+        Button confirmButton = new Button("Confirm");
+        confirmButton.setOnAction(event -> {
+            popup.close();
+            showSugarPopup(selectedToppings);
+        });
+
+        VBox root = new VBox(20, toppingsPane, confirmButton);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+        popup.setScene(new Scene(root, 500, 450));
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.showAndWait();
     }
 
-    Button confirmButton = new Button("Confirm");
-    confirmButton.setOnAction(event -> {
-        selectedSugar = ((RadioButton) group.getSelectedToggle()).getText();
-        popup.close();
-        showIcePopup(chosenToppings);
-    });
-    root.getChildren().add(confirmButton);
+    private void showSugarPopup(Set<Topping> chosenToppings) {
+        Stage popup = new Stage();
+        popup.setTitle("Select Sugar Level");
+        VBox root = new VBox(15);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+        root.getChildren().add(new Label("Choose Sugar Level"));
 
-    popup.setScene(new Scene(root, 350, 350));
-    popup.initModality(Modality.APPLICATION_MODAL);
-    popup.show();
-}
+        ToggleGroup group = new ToggleGroup();
+        for (String level : new String[]{"0%", "25%", "50%", "75%", "100%"}) {
+            RadioButton rb = new RadioButton(level);
+            rb.setToggleGroup(group);
+            if (level.equals("100%")) rb.setSelected(true);
+            root.getChildren().add(rb);
+        }
 
-private void showIcePopup(Set<Topping> chosenToppings) {
-    Stage popup = new Stage();
-    popup.setTitle("Select Ice Level");
-    VBox root = new VBox(15);
-    root.setPadding(new Insets(20));
-    root.setAlignment(Pos.CENTER);
-    root.getChildren().add(new Label("Choose Ice Level"));
+        Button confirmButton = new Button("Confirm");
+        confirmButton.setOnAction(event -> {
+            selectedSugar = ((RadioButton) group.getSelectedToggle()).getText();
+            popup.close();
+            showIcePopup(chosenToppings);
+        });
+        root.getChildren().add(confirmButton);
 
-    ToggleGroup group = new ToggleGroup();
-    for (String level : new String[]{"No Ice", "Less Ice", "Regular Ice", "Extra Ice"}) {
-        RadioButton rb = new RadioButton(level);
-        rb.setToggleGroup(group);
-        if (level.equals("Regular Ice")) rb.setSelected(true);
-        root.getChildren().add(rb);
+        popup.setScene(new Scene(root, 350, 350));
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.show();
     }
 
-    Button confirmButton = new Button("Confirm");
-    confirmButton.setOnAction(event -> {
-        selectedIce = ((RadioButton) group.getSelectedToggle()).getText();
+    private void showIcePopup(Set<Topping> chosenToppings) {
+        Stage popup = new Stage();
+        popup.setTitle("Select Ice Level");
+        VBox root = new VBox(15);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+        root.getChildren().add(new Label("Choose Ice Level"));
 
-        OrderItem completed = new OrderItem(selectedItem, selectedIce, selectedSugar,
-                                            List.copyOf(chosenToppings));
+        ToggleGroup group = new ToggleGroup();
+        for (String level : new String[]{"No Ice", "Less Ice", "Regular Ice", "Extra Ice"}) {
+            RadioButton rb = new RadioButton(level);
+            rb.setToggleGroup(group);
+            if (level.equals("Regular Ice")) rb.setSelected(true);
+            root.getChildren().add(rb);
+        }
 
-        orderPreviewLabel.setText(String.format(
+        Button confirmButton = new Button("Confirm");
+        confirmButton.setOnAction(event -> {
+            selectedIce = ((RadioButton) group.getSelectedToggle()).getText();
+
+            OrderItem completed = new OrderItem(selectedItem, selectedIce, selectedSugar,
+                                                List.copyOf(chosenToppings));
+            
+            orderPreviewLabel.setText(String.format(
             "Drink: %s%nDrink Price: $%.2f%nToppings: %s%nSugar Level: %s%nIce Level: %s%nTotal Price: $%.2f",
             selectedItem.name(), completed.price(),
             chosenToppings.isEmpty() ? "None"
                 : chosenToppings.stream().map(Topping::name).collect(Collectors.joining(", ")),
             selectedSugar, selectedIce, completed.totalPrice()));
 
-        addItemToCurrOrder(completed);
-        popup.close();
-    });
-    root.getChildren().add(confirmButton);
-
-    popup.setScene(new Scene(root, 350, 350));
-    popup.initModality(Modality.APPLICATION_MODAL);
-    popup.show();
-}
-
-
-
-    final static int TEMP_ITEMS_COUNT = 32;
-
-    private void loadMenu() {
-    Task<List<Item>> task = new Task<>() {
-        @Override protected List<Item> call() throws Exception {
-            toppings = toppingDAO.getAll();
-            return itemDAO.getAll();
-        }
-    };
-    task.setOnSucceeded(e -> populateMenuPane(task.getValue()));
-    task.setOnFailed(e -> showError(task.getException()));
-    new Thread(task).start();
-}
-
-private void populateMenuPane(List<Item> items) {
-    menuItemsPane.getChildren().clear();
-    for (Item item : items) {
-        Button button = new Button(item.name() + "\n$" + String.format("%.2f", item.basePrice()));
-        button.setPrefSize(100, 60);
-        button.setWrapText(true);
-        button.setStyle("-fx-background-color: lightgray;");
-        button.setOnAction(event -> {
-            if (selectedDrink != null) selectedDrink.setStyle("-fx-background-color: lightgray;");
-            button.setStyle("-fx-background-color: lightgreen;");
-            selectedDrink = button;
-            selectedItem = item;
-            showToppingsPopup();
+            addItemToCurrOrder(completed);
+            popup.close();
         });
-        menuItemsPane.getChildren().add(button);
-    }
-}
+        root.getChildren().add(confirmButton);
 
-private static void showError(Throwable ex) {
-    ex.printStackTrace();
-    Platform.runLater(() -> new Alert(Alert.AlertType.ERROR, "Database error: " + ex.getMessage()).showAndWait());
-}
+        popup.setScene(new Scene(root, 350, 350));
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.show();
+    }
+    
+    
+    private void loadMenu() {
+        Task<List<Item>> task = new Task<>() {
+            @Override protected List<Item> call() throws Exception {
+                toppings = toppingDAO.getAll();
+                return itemDAO.getAll();
+            }
+        };
+        task.setOnSucceeded(e -> populateMenuPane(task.getValue()));
+        task.setOnFailed(e -> showError(task.getException()));
+        new Thread(task).start();
+    }
+    
+    private void populateMenuPane(List<Item> items) {
+        menuItemsPane.getChildren().clear();
+        for (Item item : items) {
+            Button button = new Button(item.name() + "\n$" + String.format("%.2f", item.basePrice()));
+            button.setPrefSize(100, 60);
+            button.setWrapText(true);
+            button.setStyle("-fx-background-color: lightgray;");
+            button.setOnAction(event -> {
+                boolean validOrderSelected = currProgOrderId != NO_ORDER_SELECTED;
+                if (!validOrderSelected) {
+                    new Alert(Alert.AlertType.WARNING,
+                        "Please select an order first.").showAndWait();
+                    return;
+                }
+
+                if (selectedDrink != null) selectedDrink.setStyle("-fx-background-color: lightgray;");
+                button.setStyle("-fx-background-color: lightgreen;");
+                selectedDrink = button;
+                selectedItem = item;
+                showToppingsPopup();
+            });
+            menuItemsPane.getChildren().add(button);
+        }
+    }
+
+    private static void showError(Throwable ex) {
+        ex.printStackTrace();
+        Platform.runLater(() -> new Alert(Alert.AlertType.ERROR, "Database error: " + ex.getMessage()).showAndWait());
+    }
 
     @Override
-    public void initialize(URL location, ResourceBundle resourceBundle) {
-        // TODO phase 4: give actions to listview that switches the 
-        // global context for other menus  
+    public void initialize(URL location, ResourceBundle resourceBundle) { 
         // https://blueskyworkshop.com/topics/Java-Pages/fx-ListView-Basics/
         ordersList.setItems(orderEntries);
 
         loadMenu();
-        //initializeDrinks();
-        //populateMenuPane();
 
         // ordersList isn't available when start() is called, so
         // populate it here instead
@@ -638,9 +444,9 @@ private static void showError(Throwable ex) {
     @Override
     public void start(Stage primaryStage) throws Exception {
         // Set the controller manually to avoid needing to respecify fx:controller 
-        // attribute again for every .fxml import
+        // attribute again for every .fxml import. fx:controller must not be set though
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/cashier.fxml"));
-        //loader.setController(new CashierCtrl());
+        // loader.setController(new CashierCtrl());
         Parent root = loader.load();
     
         Scene scene = new Scene(root, 1280, 720);
@@ -652,7 +458,6 @@ private static void showError(Throwable ex) {
     }
 
     public static void main(String[] args) {
-        
         launch();
     }
 
