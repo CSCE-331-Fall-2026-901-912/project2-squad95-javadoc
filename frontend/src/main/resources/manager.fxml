@@ -38,14 +38,14 @@
                 <VBox fx:id="dashboardView" spacing="20">
                     <HBox spacing="20">
                         <VBox styleClass="kpi-card kpi-green" alignment="CENTER" prefWidth="250" prefHeight="100">
-                            <Label text="Revenue" style="-fx-font-size: 18px;"/>
-                            <Label fx:id="revenueTotalLabel" text="\$24,680" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-                            <Label text="+12%" style="-fx-font-size: 16px;"/>
+                            <Label text="Today's Revenue" style="-fx-font-size: 18px;"/>
+                            <Label fx:id="revenueTotalLabel" text="\$0" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                            <Label text="0%" style="-fx-font-size: 16px;"/>
                         </VBox>
                         <VBox styleClass="kpi-card kpi-red" alignment="CENTER" prefWidth="250" prefHeight="100">
                             <Label text="Orders today" style="-fx-font-size: 18px;"/>
-                            <Label fx:id="ordersTotalLabel" text="42" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-                            <Label text="-8%" style="-fx-font-size: 16px;"/>
+                            <Label fx:id="ordersTotalLabel" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                            <Label text="0%" style="-fx-font-size: 16px;"/>
                         </VBox>
                     </HBox>
                     <HBox spacing="20" VBox.vgrow="ALWAYS">
@@ -90,7 +90,7 @@
                     <VBox spacing="20" prefWidth="400">
                         <HBox spacing="20">
                             <VBox styleClass="kpi-card kpi-green" alignment="CENTER" prefWidth="190" prefHeight="100">
-                                <Label text="Revenue" style="-fx-font-size: 18px;"/>
+                                <Label text="Total Revenue" style="-fx-font-size: 18px;"/>
                                 <Label fx:id="finRevenueTotalLabel" text="\$24,680" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
                                 <Label text="+12%" style="-fx-font-size: 16px;"/>
                             </VBox>

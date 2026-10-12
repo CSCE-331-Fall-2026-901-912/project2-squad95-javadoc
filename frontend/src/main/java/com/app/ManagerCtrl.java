@@ -119,6 +119,8 @@ public class ManagerCtrl {
         public Double totalRevenue;
         public String metSalesGoal;
     }
+    @FXML private Label ordersTotalLabel;
+    @FXML private Label revenueTotalLabel;
 
     @FXML private TableView<OrdersDayRow> financialsTable;
     @FXML TableColumn<OrdersDayRow, Date> finDayCol;
@@ -142,6 +144,7 @@ public class ManagerCtrl {
 
     // Database Queries
     private void loadOrdersToday() {
+        // today's orders for Dashboard
         String sql = "SELECT COUNT(id) FROM orders WHERE date = CURRENT_DATE;";
 
         try (Connection conn = Database.getConnection();
@@ -149,7 +152,10 @@ public class ManagerCtrl {
              ResultSet rs = stmt.executeQuery(sql)) {
 
             if (rs.next()) {
-                finOrdersTotalLabel.setText(String.valueOf(rs.getInt(1)));
+                String count = String.valueOf(rs.getInt(1));
+                
+                // Update Dashboard tab only
+                if (ordersTotalLabel != null) ordersTotalLabel.setText(count);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -157,27 +163,45 @@ public class ManagerCtrl {
     }
 
     private void loadTotalRevenue() {
-        String sql = "SELECT SUM(subtotal) FROM orders;";
-        
+        // total revenue for Financials
+        String sqlTotal = "SELECT SUM(subtotal) FROM orders;";
         try (Connection conn = Database.getConnection();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             ResultSet rs = stmt.executeQuery(sqlTotal)) {
              
             if (rs.next()) {
                 double totalRevenue = rs.getDouble(1);
-                finRevenueTotalLabel.setText(String.format("$%,.2f", totalRevenue));
+                if (finRevenueTotalLabel != null) {
+                    finRevenueTotalLabel.setText(String.format("$%,.2f", totalRevenue));
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+
+        // today's revenue for Dashboard
+        String sqlToday = "SELECT SUM(subtotal) FROM orders WHERE date = CURRENT_DATE;";
+        try (Connection conn = Database.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sqlToday)) {
+             
+            if (rs.next()) {
+                double todayRevenue = rs.getDouble(1);
+                if (revenueTotalLabel != null) {
+                    revenueTotalLabel.setText(String.format("$%,.2f", todayRevenue));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }   
 
     private void loadRevenueTrend() {
         String sql = "SELECT TO_CHAR(date, 'Mon') AS month, SUM(subtotal) AS revenue " +
                      "FROM orders " +
                      "GROUP BY TO_CHAR(date, 'Mon'), EXTRACT(MONTH FROM date) " +
                      "ORDER BY EXTRACT(MONTH FROM date);";
-                     
+
         try (Connection conn = Database.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
