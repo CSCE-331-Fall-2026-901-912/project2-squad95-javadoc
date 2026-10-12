@@ -120,11 +120,16 @@
                                 <TableColumn fx:id="finMetGoalCol" text="meets goal" prefWidth="100"/>
                             </columns>
                         </TableView>
-                        <Button fx:id="printReportButton" text="Print" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #333; -fx-background-color: white; -fx-padding: 5 25; -fx-font-size: 14px;"/>
+                        <Button fx:id="printReportButton" mnemonicParsing="false" text="Print" textAlignment="CENTER"/>
                     </VBox>
                 </HBox>
-
-                
+                <HBox prefHeight="100.0" prefWidth="200.0" spacing="10">
+                <children>
+                    <Button mnemonicParsing="false" text="X-report" textAlignment="CENTER" fx:id="xReportButton" />
+                    <Button mnemonicParsing="false" text="Sales report" textAlignment="CENTER" fx:id="salesReportBtn" />
+                </children>
+                </HBox>
+  
                 <!-- Menu Management -->
                 <VBox fx:id="menuView" spacing="20" visible="false" managed="false">
                     <Label text="Menu Management" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>

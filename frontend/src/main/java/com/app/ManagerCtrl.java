@@ -139,6 +139,13 @@ public class ManagerCtrl {
     @FXML private BarChart<String, Number> finRevenueTrendChart;
 
     @FXML private Button xReportButton;
+    @FXML private Button salesReportBtn;
+
+    public static class SalesReportRow {
+        public String itemName;
+        public Integer quantitySold;
+        public Double totalRevenue;
+    }
 
     // Database Queries
     private void loadOrdersToday() {
@@ -353,6 +360,69 @@ public class ManagerCtrl {
             root.setPadding(new Insets(20));
             root.setAlignment(Pos.CENTER);
             popup.setScene(new Scene(root, 500, 450));
+
+            popup.initModality(Modality.NONE);
+            popup.showAndWait();
+        });
+
+        salesReportBtn.setOnAction(event -> {
+            Stage popup = new Stage();
+            popup.setTitle("Sales Report By Item");
+
+            DatePicker startDatePicker = new DatePicker(java.time.LocalDate.now().minusDays(30));
+            DatePicker endDatePicker = new DatePicker(java.time.LocalDate.now());
+            Button loadButton = new Button("Load Sales");
+
+            HBox controls = new HBox(10, new Label("Start:"), startDatePicker, new Label("End:"), endDatePicker, loadButton);
+            controls.setAlignment(Pos.CENTER);
+
+            TableView<SalesReportRow> table = new TableView<>();
+            TableColumn<SalesReportRow, String> nameCol = new TableColumn<>("Item Name");
+            nameCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().itemName));
+            
+            TableColumn<SalesReportRow, Integer> qtyCol = new TableColumn<>("Quantity Sold");
+            qtyCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().quantitySold));
+            
+            TableColumn<SalesReportRow, String> revCol = new TableColumn<>("Total Revenue");
+            revCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("$%,.2f", data.getValue().totalRevenue)));
+
+            table.getColumns().addAll(nameCol, qtyCol, revCol);
+
+            loadButton.setOnAction(e -> {
+                ObservableList<SalesReportRow> data = FXCollections.observableArrayList();
+                
+                String sql = "SELECT i.name, COUNT(oi.id) as quantity, SUM(oi.price_at_order) as revenue " +
+                             "FROM order_items oi " +
+                             "JOIN orders o ON oi.order_id = o.id " +
+                             "JOIN items i ON oi.item_id = i.id " +
+                             "WHERE o.date >= '" + java.sql.Date.valueOf(startDatePicker.getValue()) + "' " +
+                             "AND o.date <= '" + java.sql.Date.valueOf(endDatePicker.getValue()) + "' " +
+                             "GROUP BY i.name ORDER BY revenue DESC;";
+                
+                try (Connection conn = Database.getConnection();
+                     Statement stmt = conn.createStatement();
+                     ResultSet rs = stmt.executeQuery(sql)) {
+                     
+                    while (rs.next()) {
+                        SalesReportRow row = new SalesReportRow();
+                        row.itemName = rs.getString("name");
+                        row.quantitySold = rs.getInt("quantity");
+                        row.totalRevenue = rs.getDouble("revenue");
+                        data.add(row);
+                    }
+                    table.setItems(data);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            });
+
+            Button closeButton = new Button("Close");
+            closeButton.setOnAction(e -> popup.close());
+
+            VBox root = new VBox(20, controls, table, closeButton);
+            root.setPadding(new Insets(20));
+            root.setAlignment(Pos.CENTER);
+            popup.setScene(new Scene(root, 600, 500));
 
             popup.initModality(Modality.NONE);
             popup.showAndWait();
