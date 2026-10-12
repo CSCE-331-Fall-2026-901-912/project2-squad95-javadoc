@@ -110,6 +110,7 @@
                             <children>
                                 <Button mnemonicParsing="false" text="X-report" textAlignment="CENTER" fx:id="xReportButton" />
                                 <Button mnemonicParsing="false" text="Sales Report" textAlignment="CENTER" fx:id="salesReportButton" />
+                                <Button mnemonicParsing="false" text="Restock report" textAlignment="CENTER" fx:id="restockReportBtn" />
                             </children>
                         </HBox>
                         
