@@ -27,6 +27,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.print.PageLayout;
 import javafx.print.PrinterJob;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -418,16 +419,34 @@ public class ManagerCtrl {
             printButton.setOnAction(e -> {
                 PrinterJob job = PrinterJob.createPrinterJob();
                 if (job != null) {
-                    Label titleLabel = new Label("Sales Report");
-                    titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
-                    Label datesLabel = new Label("from " + startDatePicker.getValue() + " to " + endDatePicker.getValue());
-                    datesLabel.setStyle("-fx-font-size: 16px; -fx-padding: 0 0 10 0;");
-
                     Stage popupStage = (Stage) printButton.getScene().getWindow();
                     boolean proceed = job.showPrintDialog(popupStage);
                     if (proceed) {
-                        boolean success = job.printPage(table);
+                        Label titleLabel = new Label("Sales Report");
+                        titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+                        Label datesLabel = new Label("From " + startDatePicker.getValue() + " to " + endDatePicker.getValue());
+                        datesLabel.setStyle("-fx-font-size: 16px; -fx-padding: 0 0 10 0;");
+
+                        // had to remove table to preserve format for printing 
+                        VBox parent = (VBox) table.getParent();
+                        int tableIndex = parent.getChildren().indexOf(table);
+                        parent.getChildren().remove(table);
+
+                        VBox printContainer = new VBox(10, titleLabel, datesLabel, table);
+                        PageLayout pageLayout = job.getJobSettings().getPageLayout();
+                        double pageWidth = pageLayout.getPrintableWidth();
+                        double pageHeight = pageLayout.getPrintableHeight();
+                        
+                        printContainer.setPrefSize(pageWidth, pageHeight);
+                        VBox.setVgrow(table, javafx.scene.layout.Priority.ALWAYS);
+                        
+                        printContainer.applyCss();
+                        printContainer.layout();
+
+                        boolean success = job.printPage(printContainer);
                         System.out.println("printing...");
+                        printContainer.getChildren().remove(table);
+                        parent.getChildren().add(tableIndex, table);
                         if (success) {
                             job.endJob();
                         }
