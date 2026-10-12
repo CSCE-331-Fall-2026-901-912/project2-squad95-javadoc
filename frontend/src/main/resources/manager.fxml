@@ -105,11 +105,14 @@
                             <xAxis><CategoryAxis/></xAxis>
                             <yAxis><NumberAxis/></yAxis>
                         </BarChart>
-                        <HBox prefHeight="100.0" prefWidth="200.0">
+                        
+                        <HBox prefHeight="100.0" prefWidth="200.0" spacing="10">
                             <children>
                                 <Button mnemonicParsing="false" text="X-report" textAlignment="CENTER" fx:id="xReportButton" />
+                                <Button mnemonicParsing="false" text="Sales report" textAlignment="CENTER" fx:id="salesReportButton" />
                             </children>
                         </HBox>
+                        
                     </VBox>
                     <VBox spacing="10" alignment="BOTTOM_RIGHT" prefWidth="400" HBox.hgrow="ALWAYS">
                         <TableView fx:id="financialsTable" prefHeight="450" VBox.vgrow="ALWAYS">
@@ -120,14 +123,7 @@
                                 <TableColumn fx:id="finMetGoalCol" text="meets goal" prefWidth="100"/>
                             </columns>
                         </TableView>
-                        <Button fx:id="printReportButton" mnemonicParsing="false" text="Print" textAlignment="CENTER"/>
                     </VBox>
-                </HBox>
-                <HBox prefHeight="100.0" prefWidth="200.0" spacing="10">
-                <children>
-                    <Button mnemonicParsing="false" text="X-report" textAlignment="CENTER" fx:id="xReportButton" />
-                    <Button mnemonicParsing="false" text="Sales report" textAlignment="CENTER" fx:id="salesReportBtn" />
-                </children>
                 </HBox>
   
                 <!-- Menu Management -->
@@ -177,10 +173,10 @@
                 <!-- Employees -->
                 <VBox fx:id="employeesView" spacing="20" visible="false" managed="false">
                     <HBox spacing="30">
-                        <VBox styleClass="kpi-card kpi-green" alignment="CENTER" prefWidth="220" prefHeight="120">
+                        <!-- <VBox styleClass="kpi-card kpi-green" alignment="CENTER" prefWidth="220" prefHeight="120">
                             <Label text="Total Man Hours" style="-fx-font-size: 18px;"/>
                             <Label text="###" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-                        </VBox>
+                        </VBox>  i dont think we are using this now-->
                         <VBox HBox.hgrow="ALWAYS">
                             <Label text="Top cashiers" alignment="CENTER" maxWidth="Infinity" style="-fx-font-size: 18px;"/>
                             <BarChart fx:id="empTopCashiersChart" prefHeight="150">

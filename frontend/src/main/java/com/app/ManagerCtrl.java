@@ -2,13 +2,11 @@ package com.app;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Date;
 import java.util.List;
-
-import org.postgresql.core.SetupQueryRunner;
 
 import com.app.controllers.EmployeeDAO;
 import com.app.controllers.InventoryDAO;
@@ -16,7 +14,6 @@ import com.app.controllers.ItemDAO;
 import com.app.models.EmployeeRow;
 import com.app.models.InventoryItem;
 import com.app.models.Item;
-import com.app.models.Order;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -34,28 +31,24 @@ import javafx.print.PrinterJob;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.XYChart;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import javax.print.*;
-import javax.print.attribute.*;
-import javax.print.attribute.standard.*;
 
 
 public class ManagerCtrl {
@@ -119,8 +112,6 @@ public class ManagerCtrl {
         stage.show();
     }
 
-    @FXML private Button printReportButton;
-
     class OrdersDayRow { 
         public Date date;
         public Integer totalOrders;
@@ -139,7 +130,7 @@ public class ManagerCtrl {
     @FXML private BarChart<String, Number> finRevenueTrendChart;
 
     @FXML private Button xReportButton;
-    @FXML private Button salesReportBtn;
+    @FXML private Button salesReportButton;
 
     public static class SalesReportRow {
         public String itemName;
@@ -207,18 +198,18 @@ public class ManagerCtrl {
     private void LoadTotalOrdersByDate() {
         // Note: make sure to keep the fields in the 
         // class and SQL statement identical
-        String sql = "SELECT CAST(DATE AS date) AS date,\r\n" + //
-                     "       COUNT(id) AS totalOrders,\r\n" + //
-                     "       SUM(subtotal) AS totalRevenue\r\n" + //
-                     "FROM orders\r\n" + //
-                     "GROUP BY CAST(DATE AS date)\r\n" + //
-                     "ORDER BY date DESC\r\n" + //
+        String sql = "SELECT CAST(DATE AS date) AS date,\r\n" + 
+                     "       COUNT(id) AS totalOrders,\r\n" + 
+                     "       SUM(subtotal) AS totalRevenue\r\n" + 
+                     "FROM orders\r\n" + 
+                     "GROUP BY CAST(DATE AS date)\r\n" + 
+                     "ORDER BY date DESC\r\n" + 
                      "LIMIT 365;";
                      
         try (Connection conn = Database.getConnection();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
-            
+
             // TODO: move to dedicate init() function
             finDayCol.setCellValueFactory(data -> 
                 new SimpleObjectProperty<>(data.getValue().date));
@@ -288,23 +279,23 @@ public class ManagerCtrl {
         }
 
         public void loadData() {
-            // TODO: make this less garbage
-            String sql = "WITH item_counts AS (\r\n" + //
-                        "       SELECT order_id,\r\n" + //
-                        "              COUNT(id) as items_in_order\r\n" + //
-                        "       FROM order_items\r\n" + //
-                        "       GROUP BY order_id\r\n" + //
-                        ")\r\n" + //
-                        "SELECT date,\r\n" + //
-                        "       EXTRACT(HOUR FROM CAST(time as TIME)) as hour,\r\n" + //
-                        "       COUNT(orders.id) as total_orders,\r\n" + //
-                        "       SUM(orders.subtotal) as total_revenue,\r\n" + //
-                        "       SUM(ic.items_in_order) as item_count\r\n" + //
-                        "FROM orders\r\n" + //
-                        "LEFT JOIN item_counts as ic\r\n" + //
-                        "       ON ic.order_id = orders.id\r\n" + //
-                        "WHERE date = CURRENT_DATE\r\n" + //
-                        "GROUP BY date, hour\r\n" + //
+            // TODO: is this less garbage
+            String sql = "WITH item_counts AS (\r\n" + 
+                        "       SELECT order_id,\r\n" + 
+                        "              COUNT(id) as items_in_order\r\n" + 
+                        "       FROM order_items\r\n" + 
+                        "       GROUP BY order_id\r\n" + 
+                        ")\r\n" + 
+                        "SELECT date,\r\n" + 
+                        "       EXTRACT(HOUR FROM CAST(time as TIME)) as hour,\r\n" + 
+                        "       COUNT(orders.id) as total_orders,\r\n" + 
+                        "       SUM(orders.subtotal) as total_revenue,\r\n" + 
+                        "       SUM(ic.items_in_order) as item_count\r\n" + 
+                        "FROM orders\r\n" + 
+                        "LEFT JOIN item_counts as ic\r\n" + 
+                        "       ON ic.order_id = orders.id\r\n" + 
+                        "WHERE date = CURRENT_DATE\r\n" + 
+                        "GROUP BY date, hour\r\n" + 
                         "ORDER BY date DESC, hour DESC;";
 
             try (Connection conn = Database.getConnection();
@@ -354,7 +345,7 @@ public class ManagerCtrl {
                 popup.close();
             });
 
-            // TODO: add print button
+            // print button
 
             VBox root = new VBox(20, reportTableView.getView(), closeButton);
             root.setPadding(new Insets(20));
@@ -365,13 +356,17 @@ public class ManagerCtrl {
             popup.showAndWait();
         });
 
-        salesReportBtn.setOnAction(event -> {
+        salesReportButton.setOnAction(event -> {
             Stage popup = new Stage();
             popup.setTitle("Sales Report By Item");
 
-            DatePicker startDatePicker = new DatePicker(java.time.LocalDate.now().minusDays(30));
-            DatePicker endDatePicker = new DatePicker(java.time.LocalDate.now());
-            Button loadButton = new Button("Load Sales");
+            DatePicker startDatePicker = new DatePicker();
+            DatePicker endDatePicker = new DatePicker();
+
+            startDatePicker.setValue(java.time.LocalDate.of(2025, 1, 1));
+            endDatePicker.setValue(java.time.LocalDate.of(2025, 12, 31));
+            
+            Button loadButton = new Button("Select");
 
             HBox controls = new HBox(10, new Label("Start:"), startDatePicker, new Label("End:"), endDatePicker, loadButton);
             controls.setAlignment(Pos.CENTER);
@@ -379,12 +374,15 @@ public class ManagerCtrl {
             TableView<SalesReportRow> table = new TableView<>();
             TableColumn<SalesReportRow, String> nameCol = new TableColumn<>("Item Name");
             nameCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().itemName));
+            nameCol.setPrefWidth(150);
             
-            TableColumn<SalesReportRow, Integer> qtyCol = new TableColumn<>("Quantity Sold");
+            TableColumn<SalesReportRow, Integer> qtyCol = new TableColumn<>("Total Sold");
             qtyCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().quantitySold));
+            qtyCol.setPrefWidth(100);
             
             TableColumn<SalesReportRow, String> revCol = new TableColumn<>("Total Revenue");
             revCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("$%,.2f", data.getValue().totalRevenue)));
+            revCol.setPrefWidth(125);
 
             table.getColumns().addAll(nameCol, qtyCol, revCol);
 
@@ -416,33 +414,38 @@ public class ManagerCtrl {
                 }
             });
 
-            Button closeButton = new Button("Close");
-            closeButton.setOnAction(e -> popup.close());
+            Button printButton = new Button("Print");
+            printButton.setOnAction(e -> {
+                PrinterJob job = PrinterJob.createPrinterJob();
+                if (job != null) {
+                    Label titleLabel = new Label("Sales Report");
+                    titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+                    Label datesLabel = new Label("from " + startDatePicker.getValue() + " to " + endDatePicker.getValue());
+                    datesLabel.setStyle("-fx-font-size: 16px; -fx-padding: 0 0 10 0;");
 
-            VBox root = new VBox(20, controls, table, closeButton);
+                    Stage popupStage = (Stage) printButton.getScene().getWindow();
+                    boolean proceed = job.showPrintDialog(popupStage);
+                    if (proceed) {
+                        boolean success = job.printPage(table);
+                        System.out.println("printing...");
+                        if (success) {
+                            job.endJob();
+                        }
+                    }
+                }
+            });
+
+            HBox bottomControls = new HBox(10, printButton);
+            bottomControls.setAlignment(Pos.CENTER);
+
+            VBox root = new VBox(20, controls, table, bottomControls);
+            VBox.setVgrow(table, javafx.scene.layout.Priority.ALWAYS);
             root.setPadding(new Insets(20));
             root.setAlignment(Pos.CENTER);
-            popup.setScene(new Scene(root, 600, 500));
+            popup.setScene(new Scene(root, 600, 690));
 
             popup.initModality(Modality.NONE);
             popup.showAndWait();
-        });
-
-        printReportButton.setOnAction( (event) -> {
-            PrinterJob job = PrinterJob.createPrinterJob();
-            if (job != null) {
-                // Show system print dialog; user selects 'Save as PDF' / 'Print to PDF'
-                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                boolean proceed = job.showPrintDialog(stage);
-                if (proceed) {
-                    boolean success = job.printPage(finRevenueTrendChart);
-                    System.out.println("printing...");
-                    if (success) {
-                        job.endJob();
-                    }
-                }
-            }
-            System.out.println("the print failed");
         });
     }
     
