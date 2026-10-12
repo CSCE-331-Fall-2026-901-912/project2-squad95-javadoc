@@ -74,6 +74,7 @@ public class ManagerCtrl {
         initializeInventory();
         initializeMenu();
         refreshEmployees();
+        LoadTopEmployees();
         refreshInventory();
         refreshMenu();
     }
@@ -135,6 +136,9 @@ public class ManagerCtrl {
 
     @FXML private Button xReportButton;
     @FXML private Button salesReportButton;
+
+    @FXML private BarChart<Number, String> topCashiersChart;
+    @FXML private BarChart<Number, String> empTopCashiersChart; 
 
     public static class SalesReportRow {
         public String itemName;
@@ -520,14 +524,28 @@ public class ManagerCtrl {
     @FXML private TableColumn<EmployeeRow, Number> hoursColumn;
     @FXML private TableColumn<EmployeeRow, Number> salesColumn;
     @FXML private TableColumn<EmployeeRow, Boolean> managerColumn;
+
+    @FXML private TableView<EmployeeRow> employeeTable;
+    @FXML private TableColumn<EmployeeRow, String> dashCashierCol;
+    @FXML private TableColumn<EmployeeRow, Number> dashHoursCol;
+    @FXML private TableColumn<EmployeeRow, Number> dashSalesCol;
+    @FXML private TableColumn<EmployeeRow, Boolean> dashManagerCol;
+    
     private final ObservableList<EmployeeRow> employees = FXCollections.observableArrayList();
 
     private void initializeEmployees() {
         cashierColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
         salesColumn.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().sales()));
         managerColumn.setCellValueFactory(d -> new SimpleBooleanProperty(d.getValue().isManager()));
-        hoursColumn.setVisible(false); // no hours data in the schema; remove from the FXML if unused
+        //hoursColumn.setVisible(false); // no hours data in the schema
         employeesFullTable.setItems(employees);
+
+        if (dashCashierCol != null) {
+            dashCashierCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
+            dashSalesCol.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().sales()));
+            dashManagerCol.setCellValueFactory(d -> new SimpleBooleanProperty(d.getValue().isManager()));
+            employeeTable.setItems(employees);
+        }
     }
 
     private void refreshEmployees() {
@@ -600,7 +618,40 @@ public class ManagerCtrl {
             dbError(e);
         }
     }
+    private void LoadTopEmployees() {
+        String sql = "SELECT e.name, SUM(o.subtotal) AS total_sales " +
+                     "FROM orders o JOIN employees e ON o.employee_id = e.id " +
+                     "GROUP BY e.name " +
+                     "ORDER BY total_sales ASC;";
 
+        try (Connection conn = Database.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            XYChart.Series<Number, String> dashSeries = new XYChart.Series<>();
+            dashSeries.setName("Total Sales");
+            XYChart.Series<Number, String> empSeries = new XYChart.Series<>();
+            empSeries.setName("Total Sales");
+
+            while (rs.next()) {
+                double sales = rs.getDouble("total_sales");
+                String name = rs.getString("name");
+                
+                dashSeries.getData().add(new XYChart.Data<>(sales, name));
+                empSeries.getData().add(new XYChart.Data<>(sales, name));
+            }
+            if (topCashiersChart != null) {
+                topCashiersChart.getData().clear();
+                topCashiersChart.getData().add(dashSeries);
+            }
+            if (empTopCashiersChart != null) {
+                empTopCashiersChart.getData().clear();
+                empTopCashiersChart.getData().add(empSeries);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 
     @FXML private TableView<InventoryItem> inventoryFullTable;

@@ -185,7 +185,6 @@
                             </BarChart>
                         </VBox>
                     </HBox>
-                    
                     <TableView fx:id="employeesFullTable" VBox.vgrow="ALWAYS" prefHeight="300">
                         <columns>
                             <TableColumn fx:id="cashierColumn" text="Cashier" prefWidth="150"/>
@@ -194,7 +193,6 @@
                             <TableColumn fx:id="managerColumn" text="Manager" prefWidth="100"/>
                         </columns>
                     </TableView>
-
                     <HBox spacing="20">
                         <Button text="Add User" onAction="#addEmployee"/>
 
