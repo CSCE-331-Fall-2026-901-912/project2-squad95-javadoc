@@ -139,6 +139,7 @@ public class ManagerCtrl {
     @FXML private BarChart<String, Number> finRevenueTrendChart;
 
     @FXML private Button xReportButton;
+    @FXML private Button restockReportBtn;
 
     // Database Queries
     private void loadOrdersToday() {
