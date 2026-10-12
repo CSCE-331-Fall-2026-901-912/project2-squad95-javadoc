@@ -165,7 +165,7 @@ public class ManagerCtrl {
             e.printStackTrace();
         }
     }
-
+ 
     private void loadTotalRevenue() {
         // total revenue for Financials
         String sqlTotal = "SELECT SUM(subtotal) FROM orders;";
@@ -363,7 +363,7 @@ public class ManagerCtrl {
         }
     }
 
-    HourlySalesSummaryTable reportTableView = new HourlySalesSummaryTable();
+    HourlySalesSummaryTable reportTableView = new HourlySalesSummaryTable(); 
 
     private void initializeFinancials() {
         loadTotalRevenue();
