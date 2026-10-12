@@ -129,6 +129,7 @@ public class ManagerCtrl {
     @FXML private Label finOrdersTotalLabel;
     @FXML private Label finRevenueTotalLabel;
     @FXML private BarChart<String, Number> finRevenueTrendChart;
+    @FXML private BarChart<String, Number> revenueTrendChart;
 
     @FXML private Button xReportButton;
     @FXML private Button salesReportButton;
@@ -176,21 +177,30 @@ public class ManagerCtrl {
                      "FROM orders " +
                      "GROUP BY TO_CHAR(date, 'Mon'), EXTRACT(MONTH FROM date) " +
                      "ORDER BY EXTRACT(MONTH FROM date);";
-
+                     
         try (Connection conn = Database.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
-            XYChart.Series<String, Number> series = new XYChart.Series<>();
-            series.setName("2025 Revenue Trend");
+            XYChart.Series<String, Number> finSeries = new XYChart.Series<>();
+            finSeries.setName("2025 Revenue Trend");
+            XYChart.Series<String, Number> dashSeries = new XYChart.Series<>();
+            dashSeries.setName("2025 Revenue Trend");
 
             while (rs.next()) {
-                series.getData().add(new XYChart.Data<>(rs.getString("month"), rs.getDouble("revenue")));
+                String month = rs.getString("month");
+                double revenue = rs.getDouble("revenue");
+                finSeries.getData().add(new XYChart.Data<>(month, revenue));
+                dashSeries.getData().add(new XYChart.Data<>(month, revenue));
             }
-
+            //  Financials
             finRevenueTrendChart.getData().clear();
-            finRevenueTrendChart.getData().add(series);
-
+            finRevenueTrendChart.getData().add(finSeries);
+            // Dashboard
+            if (revenueTrendChart != null) {
+                revenueTrendChart.getData().clear();
+                revenueTrendChart.getData().add(dashSeries);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -359,7 +369,7 @@ public class ManagerCtrl {
 
         salesReportButton.setOnAction(event -> {
             Stage popup = new Stage();
-            popup.setTitle("Sales Report By Item");
+            popup.setTitle("Sales Report");
 
             DatePicker startDatePicker = new DatePicker();
             DatePicker endDatePicker = new DatePicker();
@@ -385,7 +395,9 @@ public class ManagerCtrl {
             revCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("$%,.2f", data.getValue().totalRevenue)));
             revCol.setPrefWidth(125);
 
-            table.getColumns().addAll(nameCol, qtyCol, revCol);
+            table.getColumns().add(nameCol);
+            table.getColumns().add(qtyCol);
+            table.getColumns().add(revCol);
 
             loadButton.setOnAction(e -> {
                 ObservableList<SalesReportRow> data = FXCollections.observableArrayList();

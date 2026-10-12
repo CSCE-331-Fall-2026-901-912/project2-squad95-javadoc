@@ -109,7 +109,7 @@
                         <HBox prefHeight="100.0" prefWidth="200.0" spacing="10">
                             <children>
                                 <Button mnemonicParsing="false" text="X-report" textAlignment="CENTER" fx:id="xReportButton" />
-                                <Button mnemonicParsing="false" text="Sales report" textAlignment="CENTER" fx:id="salesReportButton" />
+                                <Button mnemonicParsing="false" text="Sales Report" textAlignment="CENTER" fx:id="salesReportButton" />
                             </children>
                         </HBox>
                         
