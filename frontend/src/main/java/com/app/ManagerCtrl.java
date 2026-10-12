@@ -331,6 +331,71 @@ public class ManagerCtrl {
 
     HourlySalesSummaryTable reportTableView = new HourlySalesSummaryTable();
 
+    // Restock Reports
+    public static class RestockEntries {
+        public Integer id;
+        public String name;
+        public String unit;
+        public Integer stock;
+        public Integer minStock;
+    }
+
+    //currently programmed like x report
+    public static class RestockTable {
+        private ObservableList<RestockEntries> entries = FXCollections.observableArrayList();
+        private TabView<RestockEntries> view;
+        public RestockTable() {
+            view = new TableView<>();
+
+            var idColumn = new TableColumn<RestockEntries, Integer>("ID");
+            idColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().id));
+
+            var nameColumn = new TableColumn<RestockEntries, String>("Name");
+            nameColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().name));
+
+            var unitColumn = new TableColumn<RestockEntries, String>("Unit");
+            unitColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().unit));
+
+            var stockColumn = new TableColumn<RestockEntries, Integer>("Stock");
+            stockColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().stock));
+
+            var minStockColumn = new TableColumn<RestockEntries, Integer>("Min Stock");
+            minStockColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().minStock));
+
+            view.getColumns().add(idColumn);
+            view.getColumns().add(nameColumn);
+            view.getColumns().add(unitColumn);
+            view.getColumns().add(stockColumn);
+            view.getColumns().add(minStockColumn);
+        }
+
+        public void loadData() {
+            entries.clear();
+            String sql = "SELECT id, name, unit, stock, min_stock FROM inventory WHERE stock < min_stock ORDER BY id";
+            try (Connection conn = Database.getConnection();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    RestockEntries entry = new RestockEntries();
+                    entry.id = rs.getInt("id");
+                    entry.name = rs.getString("name");
+                    entry.unit = rs.getString("unit");
+                    entry.stock = rs.getInt("stock");
+                    entry.minStock = rs.getInt("min_stock");
+                    entries.add(entry);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            view.getItems().setAll(entries);
+        }
+        public TableView<RestockEntries> getView() {
+            return view;
+        }
+    }
+
+    RestockTable restockReportTableView = new RestockTable();
+
     private void initializeFinancials() {
         loadTotalRevenue();
         loadOrdersToday();
@@ -353,6 +418,27 @@ public class ManagerCtrl {
             // TODO: add print button
 
             VBox root = new VBox(20, reportTableView.getView(), closeButton);
+            root.setPadding(new Insets(20));
+            root.setAlignment(Pos.CENTER);
+            popup.setScene(new Scene(root, 500, 450));
+
+            popup.initModality(Modality.NONE);
+            popup.showAndWait();
+        });
+
+        restockReportTableView.loadData();
+        restockReportBtn.setOnAction( event -> { 
+            restockReportTableView.loadData();
+            
+            Stage popup = new Stage();
+            popup.setTitle("Restock Report");
+
+            Button closeButton = new Button("Confirm");
+            closeButton.setOnAction(e -> {
+                popup.close();
+            });
+
+            VBox root = new VBox(20, restockReportTableView.getView(), closeButton);
             root.setPadding(new Insets(20));
             root.setAlignment(Pos.CENTER);
             popup.setScene(new Scene(root, 500, 450));
