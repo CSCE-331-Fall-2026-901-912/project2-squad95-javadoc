@@ -321,6 +321,10 @@ public class ManagerCtrl {
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(sql)) {
 
+                // view can be reloaded, so cleanup outdated entries
+                // an error can happen after clearing, but oh well
+                entries.clear(); 
+                
                 while (rs.next()) {
                     HourlySalesSummary newEntry = new HourlySalesSummary();
                     newEntry.hour = rs.getInt("hour");
@@ -334,7 +338,7 @@ public class ManagerCtrl {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-            
+
             view.getItems().setAll(entries);
         }
 
@@ -399,7 +403,54 @@ public class ManagerCtrl {
             e.printStackTrace();
         } 
     }
-    
+
+    private String getCurrentTimeDateText() {
+        Date currDate = new Date(System.currentTimeMillis());
+        Time currTime = new Time(System.currentTimeMillis());
+        String labelFormat = "Generated report for %s since %s";
+        return labelFormat.formatted(currDate, currTime);
+    }    
+
+    private void createXReportPopupWindow(ActionEvent event) {
+        Stage popup = new Stage();
+        popup.setTitle("X-report");
+
+        Button closeButton = new Button("Close");
+        closeButton.setOnAction(e -> {
+            popup.close();
+        });
+
+        Label reportDateLabel = new Label( getCurrentTimeDateText() );
+
+        VBox printableContain = new VBox(20, reportDateLabel, reportTable.getView()); 
+
+        Button printButton = new Button("Export to PDF");
+        printButton.setOnAction(e -> {
+            final double REC_PRINT_WIDTH = 750;
+            reportTable.getView().setMinWidth(REC_PRINT_WIDTH);
+            promptExportToPDF(printableContain);
+            // use computed size
+            reportTable.getView().setMinWidth(-1);
+        });
+
+        Button refreshButton = new Button("Refresh");
+        refreshButton.setOnAction(e -> {
+            reportTable.loadData();
+            reportDateLabel.setText(getCurrentTimeDateText());
+        });
+
+        HBox btnContain = new HBox(20, printButton, refreshButton, closeButton);
+        btnContain.setAlignment(Pos.BASELINE_RIGHT);
+        VBox root = new VBox(20, printableContain, btnContain);
+
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.CENTER);
+        popup.setScene(new Scene(root, 500, 450));
+
+        popup.initModality(Modality.NONE);
+        popup.setTitle("X-report");
+        popup.showAndWait();
+    }
 
     // Sales Reports
     @FXML private Button salesReportButton;
@@ -492,34 +543,7 @@ public class ManagerCtrl {
         // may need to explicitly refresh somewhere else, on defined intervals
         reportTable.loadData();
 
-        xReportButton.setOnAction( event -> { 
-            Stage popup = new Stage();
-            popup.setTitle("X-report");
-
-            Button closeButton = new Button("Close");
-            closeButton.setOnAction(e -> {
-                popup.close();
-            });
-
-            Button printButton = new Button("Export to PDF");
-            printButton.setOnAction(e -> {
-                final double REC_PRINT_WIDTH = 750;
-                reportTable.getView().setMinWidth(REC_PRINT_WIDTH);
-                promptExportToPDF(reportTable.getView());
-                // use computed size
-                reportTable.getView().setMinWidth(-1);
-            });
-
-            VBox root = new VBox(20, reportTable.getView(), printButton, closeButton);
-
-            root.setPadding(new Insets(20));
-            root.setAlignment(Pos.CENTER);
-            popup.setScene(new Scene(root, 500, 450));
-
-            popup.initModality(Modality.NONE);
-            popup.setTitle("X-report");
-            popup.showAndWait();
-        });
+        xReportButton.setOnAction( this::createXReportPopupWindow );
 
         restockReportTableView.loadData();
         restockReportBtn.setOnAction( event -> { 
