@@ -5,6 +5,22 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.util.Calendar;
+import java.util.List;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import javafx.scene.image.WritableImage;
+import javafx.embed.swing.SwingFXUtils;
+
+import java.awt.Window;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.sql.Date;
 import java.util.List;
 
@@ -47,12 +63,17 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.WritableImage;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.transform.Transform;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
 import javax.print.*;
 import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
@@ -156,7 +177,7 @@ public class ManagerCtrl {
             e.printStackTrace();
         }
     }
-
+ 
     private void loadTotalRevenue() {
         String sql = "SELECT SUM(subtotal) FROM orders;";
         
@@ -282,6 +303,22 @@ public class ManagerCtrl {
         }
 
         public void loadData() {
+            String sql = "WITH item_counts AS (\r\n" + 
+                        "       SELECT order_id,\r\n" + 
+                        "              COUNT(id) as items_in_order\r\n" + 
+                        "       FROM order_items\r\n" + 
+                        "       GROUP BY order_id\r\n" + 
+                        ")\r\n" + 
+                        "SELECT date,\r\n" + 
+                        "       EXTRACT(HOUR FROM CAST(time as TIME)) as hour,\r\n" + 
+                        "       COUNT(orders.id) as total_orders,\r\n" + 
+                        "       SUM(orders.subtotal) as total_revenue,\r\n" + 
+                        "       SUM(ic.items_in_order) as item_count\r\n" + 
+                        "FROM orders\r\n" + 
+                        "LEFT JOIN item_counts as ic\r\n" + 
+                        "       ON ic.order_id = orders.id\r\n" + 
+                        "WHERE date = CURRENT_DATE\r\n" + 
+                        "GROUP BY date, hour\r\n" + 
             // TODO: make this less garbage
             String sql = "WITH item_counts AS (\r\n" + //
                         "       SELECT order_id,\r\n" + //
@@ -327,7 +364,63 @@ public class ManagerCtrl {
         }
     }
 
-    HourlySalesSummaryTable reportTableView = new HourlySalesSummaryTable();
+    HourlySalesSummaryTable reportTable = new HourlySalesSummaryTable();
+    
+    // https://stackoverflow.com/questions/22789449/export-stage-into-pdf
+    private void promptExportToPDF(Node node) {
+        SnapshotParameters params = new SnapshotParameters();
+        // what if no scaling the snapshot :D
+
+        WritableImage fxImg = node.snapshot(params, null);
+        BufferedImage bufImg = SwingFXUtils.fromFXImage(fxImg, null);
+
+        try(PDDocument doc = new PDDocument()) {
+            PDPage page = new PDPage();
+            doc.addPage(page);
+
+            // 72 points per inch, returned lengths are in points
+            final float MARGIN = 36;
+            float pageWidth = page.getMediaBox().getWidth() - (MARGIN * 2);;
+            float pageHeight = page.getMediaBox().getWidth() - (MARGIN * 2);;
+
+            PDImageXObject pdImage = LosslessFactory.createFromImage(doc, bufImg);
+
+            float imageWidth = bufImg.getWidth();
+            float imageHeight = bufImg.getHeight();
+
+            float imageScale = Math.min(pageWidth / imageWidth, 
+                                        pageHeight / imageHeight);
+            
+            imageWidth *= imageScale;
+            imageHeight *= imageScale;
+
+            float xPos = MARGIN;
+            // The y-axis starts at the "bottom" and writes "down"
+            float yPos = page.getMediaBox().getHeight() - MARGIN - imageHeight;
+
+            try(PDPageContentStream contentStream = new PDPageContentStream(doc, page)) {
+                contentStream.drawImage(pdImage, xPos, yPos, imageWidth, imageHeight);
+            }
+
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Document");
+            var currentDate = Calendar.getInstance().getTime();
+            fileChooser.setInitialFileName("summary-report " + currentDate.toString() + ".pdf");
+
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("PDF Files (*.pdf)", "*.pdf")
+            );
+
+            File selectedFile = fileChooser.showSaveDialog(null);
+            if (selectedFile == null) return;
+            doc.save(selectedFile);
+
+        } catch(IOException e) {
+            System.err.println("Something went wrong while printing!");
+            e.printStackTrace();
+        } 
+    }
+    
 
     // Restock Reports
     public static class RestockEntries {
@@ -402,25 +495,35 @@ public class ManagerCtrl {
 
         // load data only once to reduce latency when opening x-report each time
         // may need to explicitly refresh somewhere else, on defined intervals
-        reportTableView.loadData();
+        reportTable.loadData();
 
         xReportButton.setOnAction( event -> { 
             Stage popup = new Stage();
             popup.setTitle("X-report");
 
-            Button closeButton = new Button("Confirm");
+            Button closeButton = new Button("Close");
             closeButton.setOnAction(e -> {
                 popup.close();
             });
 
+            Button printButton = new Button("Export to PDF");
+            printButton.setOnAction(e -> {
+                final double REC_PRINT_WIDTH = 750;
+                reportTable.getView().setMinWidth(REC_PRINT_WIDTH);
+                promptExportToPDF(reportTable.getView());
+                // use computed size
+                reportTable.getView().setMinWidth(-1);
+            });
+
+            VBox root = new VBox(20, reportTable.getView(), printButton, closeButton);
             // TODO: add print button
 
-            VBox root = new VBox(20, reportTableView.getView(), closeButton);
             root.setPadding(new Insets(20));
             root.setAlignment(Pos.CENTER);
             popup.setScene(new Scene(root, 500, 450));
 
             popup.initModality(Modality.NONE);
+            popup.setTitle("X-report");
             popup.showAndWait();
         });
 
