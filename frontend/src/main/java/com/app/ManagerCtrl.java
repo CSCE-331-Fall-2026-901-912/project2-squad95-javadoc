@@ -388,7 +388,9 @@ public class ManagerCtrl {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save Document");
             var currentDate = Calendar.getInstance().getTime();
-            fileChooser.setInitialFileName("summary-report " + currentDate.toString() + ".pdf");
+            String dateStr = currentDate.toString();
+            dateStr = dateStr.replace(':', '-');
+            fileChooser.setInitialFileName("summary-report " + dateStr + ".pdf");
 
             fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("PDF Files (*.pdf)", "*.pdf")
