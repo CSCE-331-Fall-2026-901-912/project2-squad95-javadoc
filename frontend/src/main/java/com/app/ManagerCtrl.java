@@ -5,6 +5,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Date;
+import java.util.List;
+
+import org.postgresql.core.SetupQueryRunner;
 import java.sql.Time;
 import java.util.Calendar;
 import java.util.List;
@@ -47,18 +51,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.print.PrinterJob;
+import javafx.print.PageLayout;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
@@ -319,23 +315,6 @@ public class ManagerCtrl {
                         "       ON ic.order_id = orders.id\r\n" + 
                         "WHERE date = CURRENT_DATE\r\n" + 
                         "GROUP BY date, hour\r\n" + 
-            // TODO: make this less garbage
-            String sql = "WITH item_counts AS (\r\n" + //
-                        "       SELECT order_id,\r\n" + //
-                        "              COUNT(id) as items_in_order\r\n" + //
-                        "       FROM order_items\r\n" + //
-                        "       GROUP BY order_id\r\n" + //
-                        ")\r\n" + //
-                        "SELECT date,\r\n" + //
-                        "       EXTRACT(HOUR FROM CAST(time as TIME)) as hour,\r\n" + //
-                        "       COUNT(orders.id) as total_orders,\r\n" + //
-                        "       SUM(orders.subtotal) as total_revenue,\r\n" + //
-                        "       SUM(ic.items_in_order) as item_count\r\n" + //
-                        "FROM orders\r\n" + //
-                        "LEFT JOIN item_counts as ic\r\n" + //
-                        "       ON ic.order_id = orders.id\r\n" + //
-                        "WHERE date = CURRENT_DATE\r\n" + //
-                        "GROUP BY date, hour\r\n" + //
                         "ORDER BY date DESC, hour DESC;";
 
             try (Connection conn = Database.getConnection();
@@ -421,6 +400,22 @@ public class ManagerCtrl {
         } 
     }
     
+
+    // Sales Reports
+    @FXML private Button salesReportButton;
+
+    @FXML private BarChart<Number, String> topCashiersChart;
+    @FXML private BarChart<Number, String> empTopCashiersChart; 
+
+    public static class SalesReportRow {
+        public String itemName;
+        public Integer quantitySold;
+        public Double totalRevenue;
+    }
+
+
+
+
 
     // Restock Reports
     public static class RestockEntries {
@@ -516,7 +511,6 @@ public class ManagerCtrl {
             });
 
             VBox root = new VBox(20, reportTable.getView(), printButton, closeButton);
-            // TODO: add print button
 
             root.setPadding(new Insets(20));
             root.setAlignment(Pos.CENTER);
@@ -564,6 +558,122 @@ public class ManagerCtrl {
             }
             System.out.println("the print failed");
         });
+    
+        // TODO: break ts up pls
+        salesReportButton.setOnAction(event -> {
+            Stage popup = new Stage();
+            popup.setTitle("Sales Report");
+
+            DatePicker startDatePicker = new DatePicker();
+            DatePicker endDatePicker = new DatePicker();
+
+            startDatePicker.setValue(java.time.LocalDate.of(2025, 1, 1));
+            endDatePicker.setValue(java.time.LocalDate.of(2025, 12, 31));
+            
+            Button loadButton = new Button("Select");
+
+            HBox controls = new HBox(10, new Label("Start:"), startDatePicker, new Label("End:"), endDatePicker, loadButton);
+            controls.setAlignment(Pos.CENTER);
+
+            TableView<SalesReportRow> table = new TableView<>();
+            TableColumn<SalesReportRow, String> nameCol = new TableColumn<>("Item Name");
+            nameCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().itemName));
+            nameCol.setPrefWidth(150);
+            
+            TableColumn<SalesReportRow, Integer> qtyCol = new TableColumn<>("Total Sold");
+            qtyCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().quantitySold));
+            qtyCol.setPrefWidth(100);
+            
+            TableColumn<SalesReportRow, String> revCol = new TableColumn<>("Total Revenue");
+            revCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("$%,.2f", data.getValue().totalRevenue)));
+            revCol.setPrefWidth(125);
+
+            table.getColumns().add(nameCol);
+            table.getColumns().add(qtyCol);
+            table.getColumns().add(revCol);
+
+            loadButton.setOnAction(e -> {
+                ObservableList<SalesReportRow> data = FXCollections.observableArrayList();
+                
+                String sql = "SELECT i.name, COUNT(oi.id) as quantity, SUM(oi.price_at_order) as revenue " +
+                                "FROM order_items oi " +
+                                "JOIN orders o ON oi.order_id = o.id " +
+                                "JOIN items i ON oi.item_id = i.id " +
+                                "WHERE o.date >= '" + java.sql.Date.valueOf(startDatePicker.getValue()) + "' " +
+                                "AND o.date <= '" + java.sql.Date.valueOf(endDatePicker.getValue()) + "' " +
+                                "GROUP BY i.name ORDER BY revenue DESC;";
+                
+                try (Connection conn = Database.getConnection();
+                        Statement stmt = conn.createStatement();
+                        ResultSet rs = stmt.executeQuery(sql)) {
+                        
+                    while (rs.next()) {
+                        SalesReportRow row = new SalesReportRow();
+                        row.itemName = rs.getString("name");
+                        row.quantitySold = rs.getInt("quantity");
+                        row.totalRevenue = rs.getDouble("revenue");
+                        data.add(row);
+                    }
+                    table.setItems(data);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            });
+
+            Button printButton = new Button("Print");
+            printButton.setOnAction(e -> {
+                PrinterJob job = PrinterJob.createPrinterJob();
+
+                if (job == null) return;
+
+                Stage popupStage = (Stage) printButton.getScene().getWindow();
+                boolean proceed = job.showPrintDialog(popupStage);
+
+                if (!proceed) return;
+
+                Label titleLabel = new Label("Sales Report");
+                titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+                Label datesLabel = new Label("From " + startDatePicker.getValue() + " to " + endDatePicker.getValue());
+                datesLabel.setStyle("-fx-font-size: 16px; -fx-padding: 0 0 10 0;");
+
+                // had to remove table to preserve format for printing 
+                VBox parent = (VBox) table.getParent();
+                int tableIndex = parent.getChildren().indexOf(table);
+                parent.getChildren().remove(table);
+
+                VBox printContainer = new VBox(10, titleLabel, datesLabel, table);
+                PageLayout pageLayout = job.getJobSettings().getPageLayout();
+                double pageWidth = pageLayout.getPrintableWidth();
+                double pageHeight = pageLayout.getPrintableHeight();
+                
+                printContainer.setPrefSize(pageWidth, pageHeight);
+                VBox.setVgrow(table, javafx.scene.layout.Priority.ALWAYS);
+                
+                printContainer.applyCss();
+                printContainer.layout();
+
+                boolean success = job.printPage(printContainer);
+                System.out.println("printing...");
+                printContainer.getChildren().remove(table);
+                parent.getChildren().add(tableIndex, table);
+                if (success) {
+                    job.endJob();
+                }
+            });
+
+            HBox bottomControls = new HBox(10, printButton);
+            bottomControls.setAlignment(Pos.CENTER);
+
+            VBox root = new VBox(20, controls, table, bottomControls);
+            VBox.setVgrow(table, javafx.scene.layout.Priority.ALWAYS);
+            root.setPadding(new Insets(20));
+            root.setAlignment(Pos.CENTER);
+            popup.setScene(new Scene(root, 600, 690));
+
+            popup.initModality(Modality.NONE);
+            popup.showAndWait();
+        });
+      
     }
     
     private void refreshFinanicals() {
