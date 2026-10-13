@@ -38,14 +38,14 @@
                 <VBox fx:id="dashboardView" spacing="20">
                     <HBox spacing="20">
                         <VBox styleClass="kpi-card kpi-green" alignment="CENTER" prefWidth="250" prefHeight="100">
-                            <Label text="Today's Revenue" style="-fx-font-size: 18px;"/>
-                            <Label fx:id="revenueTotalLabel" text="\$0" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-                            <Label text="0%" style="-fx-font-size: 16px;"/>
+                            <Label text="Revenue" style="-fx-font-size: 18px;"/>
+                            <Label fx:id="revenueTotalLabel" text="\$24,680" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                            <Label text="+12%" style="-fx-font-size: 16px;"/>
                         </VBox>
                         <VBox styleClass="kpi-card kpi-red" alignment="CENTER" prefWidth="250" prefHeight="100">
                             <Label text="Orders today" style="-fx-font-size: 18px;"/>
-                            <Label fx:id="ordersTotalLabel" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-                            <Label text="0%" style="-fx-font-size: 16px;"/>
+                            <Label fx:id="ordersTotalLabel" text="42" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                            <Label text="-8%" style="-fx-font-size: 16px;"/>
                         </VBox>
                     </HBox>
                     <HBox spacing="20" VBox.vgrow="ALWAYS">
@@ -90,7 +90,7 @@
                     <VBox spacing="20" prefWidth="400">
                         <HBox spacing="20">
                             <VBox styleClass="kpi-card kpi-green" alignment="CENTER" prefWidth="190" prefHeight="100">
-                                <Label text="Total Revenue" style="-fx-font-size: 18px;"/>
+                                <Label text="Revenue" style="-fx-font-size: 18px;"/>
                                 <Label fx:id="finRevenueTotalLabel" text="\$24,680" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
                                 <Label text="+12%" style="-fx-font-size: 16px;"/>
                             </VBox>
@@ -105,14 +105,12 @@
                             <xAxis><CategoryAxis/></xAxis>
                             <yAxis><NumberAxis/></yAxis>
                         </BarChart>
-                        
-                        <HBox prefHeight="100.0" prefWidth="200.0" spacing="10">
+                        <HBox prefHeight="100.0" prefWidth="200.0">
                             <children>
                                 <Button mnemonicParsing="false" text="X-report" textAlignment="CENTER" fx:id="xReportButton" />
-                                <Button mnemonicParsing="false" text="Sales Report" textAlignment="CENTER" fx:id="salesReportButton" />
+                                <Button mnemonicParsing="false" text="Restock report" textAlignment="CENTER" fx:id="restockReportBtn" />
                             </children>
                         </HBox>
-                        
                     </VBox>
                     <VBox spacing="10" alignment="BOTTOM_RIGHT" prefWidth="400" HBox.hgrow="ALWAYS">
                         <TableView fx:id="financialsTable" prefHeight="450" VBox.vgrow="ALWAYS">
@@ -123,9 +121,11 @@
                                 <TableColumn fx:id="finMetGoalCol" text="meets goal" prefWidth="100"/>
                             </columns>
                         </TableView>
+                        <Button fx:id="printReportButton" text="Print" style="-fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #333; -fx-background-color: white; -fx-padding: 5 25; -fx-font-size: 14px;"/>
                     </VBox>
                 </HBox>
-  
+
+                
                 <!-- Menu Management -->
                 <VBox fx:id="menuView" spacing="20" visible="false" managed="false">
                     <Label text="Menu Management" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
@@ -173,10 +173,10 @@
                 <!-- Employees -->
                 <VBox fx:id="employeesView" spacing="20" visible="false" managed="false">
                     <HBox spacing="30">
-                        <!-- <VBox styleClass="kpi-card kpi-green" alignment="CENTER" prefWidth="220" prefHeight="120">
+                        <VBox styleClass="kpi-card kpi-green" alignment="CENTER" prefWidth="220" prefHeight="120">
                             <Label text="Total Man Hours" style="-fx-font-size: 18px;"/>
                             <Label text="###" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-                        </VBox>  i dont think we are using this now-->
+                        </VBox>
                         <VBox HBox.hgrow="ALWAYS">
                             <Label text="Top cashiers" alignment="CENTER" maxWidth="Infinity" style="-fx-font-size: 18px;"/>
                             <BarChart fx:id="empTopCashiersChart" prefHeight="150">
@@ -185,6 +185,7 @@
                             </BarChart>
                         </VBox>
                     </HBox>
+                    
                     <TableView fx:id="employeesFullTable" VBox.vgrow="ALWAYS" prefHeight="300">
                         <columns>
                             <TableColumn fx:id="cashierColumn" text="Cashier" prefWidth="150"/>
@@ -193,6 +194,7 @@
                             <TableColumn fx:id="managerColumn" text="Manager" prefWidth="100"/>
                         </columns>
                     </TableView>
+
                     <HBox spacing="20">
                         <Button text="Add User" onAction="#addEmployee"/>
 
