@@ -341,7 +341,7 @@ public class ManagerCtrl {
     //currently programmed like x report
     public static class RestockTable {
         private ObservableList<RestockEntries> entries = FXCollections.observableArrayList();
-        private TabView<RestockEntries> view;
+        private TableView<RestockEntries> view;
         public RestockTable() {
             view = new TableView<>();
 
