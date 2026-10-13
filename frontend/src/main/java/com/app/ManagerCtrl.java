@@ -13,6 +13,7 @@ import java.sql.Time;
 import java.util.Calendar;
 import java.util.List;
 
+import javafx.embed.swing.SwingFXUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -505,17 +506,14 @@ public class ManagerCtrl {
         popup.showAndWait();
     }
 
-    // Sales Reports
-    @FXML private BarChart<Number, String> topCashiersChart;
-    @FXML private BarChart<Number, String> empTopCashiersChart;
-
+    private static final double MIN_STOCK = 10000.0;
     // Restock Reports
     public static class RestockEntries {
         public Integer id;
         public String name;
         public String unit;
-        public Integer stock;
-        public Integer minStock;
+        public Double stock;
+        public Double minStock;
     }
 
     //currently programmed like x report
@@ -534,10 +532,10 @@ public class ManagerCtrl {
             var unitColumn = new TableColumn<RestockEntries, String>("Unit");
             unitColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().unit));
 
-            var stockColumn = new TableColumn<RestockEntries, Integer>("Stock");
+            var stockColumn = new TableColumn<RestockEntries, Double>("Stock");
             stockColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().stock));
 
-            var minStockColumn = new TableColumn<RestockEntries, Integer>("Min Stock");
+            var minStockColumn = new TableColumn<RestockEntries, Double>("Min Stock");
             minStockColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().minStock));
 
             view.getColumns().add(idColumn);
@@ -549,7 +547,14 @@ public class ManagerCtrl {
 
         public void loadData() {
             entries.clear();
-            String sql = "SELECT id, name, unit, stock, min_stock FROM inventory WHERE stock < min_stock ORDER BY id";
+            String sql = "SELECT id, name, unit, stock, " +
+             MIN_STOCK + " AS min_stock " +
+             "FROM inventory " +
+             "WHERE stock < " + MIN_STOCK + " " +
+             "ORDER BY id";
+
+            System.out.println("Running Restock Report SQL: " + sql);
+
             try (Connection conn = Database.getConnection();
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(sql)) {
@@ -558,13 +563,20 @@ public class ManagerCtrl {
                     entry.id = rs.getInt("id");
                     entry.name = rs.getString("name");
                     entry.unit = rs.getString("unit");
-                    entry.stock = rs.getInt("stock");
-                    entry.minStock = rs.getInt("min_stock");
+                    entry.stock = rs.getDouble("stock");
+                    entry.minStock = rs.getDouble("min_stock");
+
+                    System.out.println("Loaded: " + entry.name +
+                               " | Stock: " + entry.stock);
+
                     entries.add(entry);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+
+            System.out.println("Total restock items: " + entries.size());
+
             view.getItems().setAll(entries);
         }
         public TableView<RestockEntries> getView() {
@@ -586,6 +598,8 @@ public class ManagerCtrl {
 
         xReportButton.setOnAction( this::createXReportPopupWindow );
 
+
+
         restockReportTableView.loadData();
         restockReportBtn.setOnAction( event -> { 
             restockReportTableView.loadData();
@@ -598,7 +612,16 @@ public class ManagerCtrl {
                 popup.close();
             });
 
-            VBox root = new VBox(20, restockReportTableView.getView(), closeButton);
+            Button printButton = new Button("Export to PDF");
+            printButton.setOnAction(e -> {
+                final double REC_PRINT_WIDTH = 750;
+                restockReportTableView.getView().setMinWidth(REC_PRINT_WIDTH);
+                promptExportToPDF(restockReportTableView.getView());
+                // use computed size
+                restockReportTableView.getView().setMinWidth(-1);
+            });
+
+            VBox root = new VBox(20, restockReportTableView.getView(), closeButton, printButton);
             root.setPadding(new Insets(20));
             root.setAlignment(Pos.CENTER);
             popup.setScene(new Scene(root, 500, 450));
@@ -830,6 +853,10 @@ public class ManagerCtrl {
             dbError(e);
         }
     }
+
+    @FXML BarChart<Number, String> topCashiersChart;
+    @FXML BarChart<Number, String> empTopCashiersChart;
+
     private void LoadTopEmployees() {
         String sql = "SELECT e.name, SUM(o.subtotal) AS total_sales " +
                      "FROM orders o JOIN employees e ON o.employee_id = e.id " +
