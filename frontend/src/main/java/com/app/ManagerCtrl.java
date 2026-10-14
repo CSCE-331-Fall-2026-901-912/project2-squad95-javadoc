@@ -5,17 +5,21 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.postgresql.core.SetupQueryRunner;
 
 import com.app.controllers.EmployeeDAO;
 import com.app.controllers.InventoryDAO;
 import com.app.controllers.ItemDAO;
+import com.app.controllers.RecipeDAO;
 import com.app.models.EmployeeRow;
 import com.app.models.InventoryItem;
 import com.app.models.Item;
 import com.app.models.Order;
+import com.app.models.Recipe;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -33,6 +37,7 @@ import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -48,6 +53,7 @@ public class ManagerCtrl {
     private final ItemDAO itemDAO = new ItemDAO();
     private final InventoryDAO inventoryDAO = new InventoryDAO();
     private final EmployeeDAO employeeDAO = new EmployeeDAO();
+    private final RecipeDAO recipeDAO = new RecipeDAO();
 
 
     @FXML private VBox dashboardView;
@@ -404,13 +410,13 @@ public class ManagerCtrl {
     @FXML private TableView<Item> menuTable;
     @FXML private TableColumn<Item, Number> menuIdColumn;
     @FXML private TableColumn<Item, String> menuNameColumn;
-    @FXML private TableColumn<Item, Number> menuPriceColumn;
+    @FXML private TableColumn<Item, String> menuPriceColumn;
     private final ObservableList<Item> menuItems = FXCollections.observableArrayList();
 
     private void initializeMenu() {
         menuIdColumn.setCellValueFactory(d -> new SimpleIntegerProperty(d.getValue().id()));
         menuNameColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
-        menuPriceColumn.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().basePrice()));
+        menuPriceColumn.setCellValueFactory(d -> new SimpleStringProperty(String.format("%.2f", d.getValue().basePrice())));
         menuTable.setItems(menuItems);
     }
 
@@ -424,7 +430,15 @@ public class ManagerCtrl {
 
     @FXML
     private void addMenuItem() {
-        Dialog<Item> dialog = new Dialog<>();
+        List<InventoryItem> inventory;
+        try {
+            inventory = inventoryDAO.getAll();
+        } catch (SQLException e) {
+            dbError(e);
+            return;
+        }
+
+        Dialog<Recipe> dialog = new Dialog<>();
         dialog.setTitle("Add Menu Item");
 
         ButtonType addButton = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
@@ -432,34 +446,49 @@ public class ManagerCtrl {
 
         TextField nameField = new TextField();
         nameField.setPromptText("Drink name");
-
         TextField priceField = new TextField();
         priceField.setPromptText("Price");
 
+        Map<InventoryItem, TextField> qtyFields = new LinkedHashMap<>();
+        GridPane recipeGrid = new GridPane();
+        recipeGrid.setHgap(10);
+        recipeGrid.setVgap(6);
+        int row = 0;
+        for (InventoryItem inv : inventory) {
+            TextField qty = new TextField();
+            qty.setPromptText("0");
+            qty.setPrefWidth(70);
+            qtyFields.put(inv, qty);
+            recipeGrid.addRow(row++, new Label(inv.name()), qty, new Label(inv.unit()));
+        }
+        ScrollPane scroll = new ScrollPane(recipeGrid);
+        scroll.setFitToWidth(true);
+        scroll.setPrefViewportHeight(250);
+
         VBox form = new VBox(10,
             new Label("Drink Name"), nameField,
-            new Label("Price"), priceField
+            new Label("Price"), priceField,
+            new Label("Recipe (amount used per drink)"), scroll
         );
         dialog.getDialogPane().setContent(form);
 
-        dialog.setResultConverter(button -> {
-            if (button != addButton) return null;
-            try {
-                String name = nameField.getText().trim();
-                double price = Double.parseDouble(priceField.getText().trim());
-
-                if (name.isEmpty() || !Double.isFinite(price) || price < 0) {
-                    return null;
-                }
-                return new Item(0, name, price);
-            } catch (NumberFormatException e) {
-                return null;
+        Node addNode = dialog.getDialogPane().lookupButton(addButton);
+        addNode.addEventFilter(ActionEvent.ACTION, ev -> {
+            if (buildRecipe(nameField, priceField, qtyFields) == null) {
+                ev.consume(); 
+                new Alert(Alert.AlertType.WARNING,
+                    "Enter a name, a non-negative price, and whole-number ingredient amounts (blank = 0). "
+                    + "At least one ingredient is required.").showAndWait();
             }
         });
 
-        dialog.showAndWait().ifPresent(item -> {
+        dialog.setResultConverter(button ->
+            button == addButton ? buildRecipe(nameField, priceField, qtyFields) : null);
+
+        dialog.showAndWait().ifPresent(recipe -> {
             try {
-                itemDAO.insert(item.name(), item.basePrice());
+                Item newItem = itemDAO.insert(recipe.item().name(), recipe.item().basePrice());
+                recipeDAO.insert(newItem, recipe.recipe());
                 refreshMenu();
             } catch (SQLException e) {
                 dbError(e);
@@ -467,6 +496,28 @@ public class ManagerCtrl {
         });
     }
 
+    private Recipe buildRecipe(TextField nameField, TextField priceField,
+                            Map<InventoryItem, TextField> qtyFields) {
+        try {
+            String name = nameField.getText().trim();
+            double price = Double.parseDouble(priceField.getText().trim());
+            if (name.isEmpty() || !Double.isFinite(price) || price < 0) return null;
+
+            Map<InventoryItem, Integer> quantities = new LinkedHashMap<>();
+            for (var entry : qtyFields.entrySet()) {
+                String text = entry.getValue().getText().trim();
+                if (text.isEmpty()) continue;
+                int qty = Integer.parseInt(text);
+                if (qty < 0) return null;
+                if (qty > 0) quantities.put(entry.getKey(), qty);
+            }
+            if (quantities.isEmpty()) return null;
+
+            return new Recipe(new Item(0, name, price), quantities);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
     @FXML
     private void updateMenuItem() {
         Item selected = menuTable.getSelectionModel().getSelectedItem();

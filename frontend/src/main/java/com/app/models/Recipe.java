@@ -2,4 +2,6 @@ package com.app.models;
 
 import java.util.Map;
 
-public record Recipe(int itemId, Map<InventoryItem, Integer> recipe) {}
+import com.app.models.Item;
+
+public record Recipe(Item item, Map<InventoryItem, Integer> recipe) {}
