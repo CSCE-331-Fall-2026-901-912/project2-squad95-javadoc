@@ -13,6 +13,7 @@ import java.sql.Time;
 import java.util.Calendar;
 import java.util.List;
 
+import javafx.embed.swing.SwingFXUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -57,10 +58,21 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.WritableImage;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -111,6 +123,7 @@ public class ManagerCtrl {
         initializeInventory();
         initializeMenu();
         refreshEmployees();
+        LoadTopEmployees();
         refreshInventory();
         refreshMenu();
     }
@@ -195,6 +208,8 @@ public class ManagerCtrl {
         public Double totalRevenue;
         public String metSalesGoal;
     }
+    @FXML private Label ordersTotalLabel;
+    @FXML private Label revenueTotalLabel;
 
     @FXML private TableView<OrdersDayRow> financialsTable;
     @FXML TableColumn<OrdersDayRow, Date> finDayCol;
@@ -205,15 +220,24 @@ public class ManagerCtrl {
     @FXML private Label finOrdersTotalLabel;
     @FXML private Label finRevenueTotalLabel;
     @FXML private BarChart<String, Number> finRevenueTrendChart;
+    @FXML private BarChart<String, Number> revenueTrendChart;
 
     @FXML private Button xReportButton;
     @FXML private Button restockReportBtn;
+    //@FXML private Button salesReportButton;
+
+    public static class SalesReportRow {
+        public String itemName;
+        public Integer quantitySold;
+        public Double totalRevenue;
+    }
 
     // Database Queries
     /** Loads the total number of orders for today and updates the label in the financials view.
      * 
      */
     private void loadOrdersToday() {
+        // today's orders for Dashboard
         String sql = "SELECT COUNT(id) FROM orders WHERE date = CURRENT_DATE;";
 
         try (Connection conn = Database.getConnection();
@@ -221,7 +245,10 @@ public class ManagerCtrl {
              ResultSet rs = stmt.executeQuery(sql)) {
 
             if (rs.next()) {
-                finOrdersTotalLabel.setText(String.valueOf(rs.getInt(1)));
+                String count = String.valueOf(rs.getInt(1));
+                
+                // Update Dashboard tab only
+                if (ordersTotalLabel != null) ordersTotalLabel.setText(count);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -232,20 +259,38 @@ public class ManagerCtrl {
      *
      */
     private void loadTotalRevenue() {
-        String sql = "SELECT SUM(subtotal) FROM orders;";
-        
+        // total revenue for Financials
+        String sqlTotal = "SELECT SUM(subtotal) FROM orders;";
         try (Connection conn = Database.getConnection();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+             ResultSet rs = stmt.executeQuery(sqlTotal)) {
              
             if (rs.next()) {
                 double totalRevenue = rs.getDouble(1);
-                finRevenueTotalLabel.setText(String.format("$%,.2f", totalRevenue));
+                if (finRevenueTotalLabel != null) {
+                    finRevenueTotalLabel.setText(String.format("$%,.2f", totalRevenue));
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+
+        // today's revenue for Dashboard
+        String sqlToday = "SELECT SUM(subtotal) FROM orders WHERE date = CURRENT_DATE;";
+        try (Connection conn = Database.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sqlToday)) {
+             
+            if (rs.next()) {
+                double todayRevenue = rs.getDouble(1);
+                if (revenueTotalLabel != null) {
+                    revenueTotalLabel.setText(String.format("$%,.2f", todayRevenue));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }   
 
     /** Loads the revenue trend data from the database and populates the finRevenueTrendChart with the results.
      * 
@@ -260,16 +305,25 @@ public class ManagerCtrl {
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
-            XYChart.Series<String, Number> series = new XYChart.Series<>();
-            series.setName("2025 Revenue Trend");
+            XYChart.Series<String, Number> finSeries = new XYChart.Series<>();
+            finSeries.setName("2025 Revenue Trend");
+            XYChart.Series<String, Number> dashSeries = new XYChart.Series<>();
+            dashSeries.setName("2025 Revenue Trend");
 
             while (rs.next()) {
-                series.getData().add(new XYChart.Data<>(rs.getString("month"), rs.getDouble("revenue")));
+                String month = rs.getString("month");
+                double revenue = rs.getDouble("revenue");
+                finSeries.getData().add(new XYChart.Data<>(month, revenue));
+                dashSeries.getData().add(new XYChart.Data<>(month, revenue));
             }
-
+            //  Financials
             finRevenueTrendChart.getData().clear();
-            finRevenueTrendChart.getData().add(series);
-
+            finRevenueTrendChart.getData().add(finSeries);
+            // Dashboard
+            if (revenueTrendChart != null) {
+                revenueTrendChart.getData().clear();
+                revenueTrendChart.getData().add(dashSeries);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -282,18 +336,18 @@ public class ManagerCtrl {
     private void LoadTotalOrdersByDate() {
         // Note: make sure to keep the fields in the 
         // class and SQL statement identical
-        String sql = "SELECT CAST(DATE AS date) AS date,\r\n" + //
-                     "       COUNT(id) AS totalOrders,\r\n" + //
-                     "       SUM(subtotal) AS totalRevenue\r\n" + //
-                     "FROM orders\r\n" + //
-                     "GROUP BY CAST(DATE AS date)\r\n" + //
-                     "ORDER BY date DESC\r\n" + //
+        String sql = "SELECT CAST(DATE AS date) AS date,\r\n" + 
+                     "       COUNT(id) AS totalOrders,\r\n" + 
+                     "       SUM(subtotal) AS totalRevenue\r\n" + 
+                     "FROM orders\r\n" + 
+                     "GROUP BY CAST(DATE AS date)\r\n" + 
+                     "ORDER BY date DESC\r\n" + 
                      "LIMIT 365;";
                      
         try (Connection conn = Database.getConnection();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
-            
+
             // TODO: move to dedicate init() function
             finDayCol.setCellValueFactory(data -> 
                 new SimpleObjectProperty<>(data.getValue().date));
@@ -398,7 +452,7 @@ public class ManagerCtrl {
                 // view can be reloaded, so cleanup outdated entries
                 // an error can happen after clearing, but oh well
                 entries.clear(); 
-                
+
                 while (rs.next()) {
                     HourlySalesSummary newEntry = new HourlySalesSummary();
                     newEntry.hour = rs.getInt("hour");
@@ -412,7 +466,7 @@ public class ManagerCtrl {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-
+            
             view.getItems().setAll(entries);
         }
         
@@ -472,7 +526,9 @@ public class ManagerCtrl {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save Document");
             var currentDate = Calendar.getInstance().getTime();
-            fileChooser.setInitialFileName("summary-report " + currentDate.toString() + ".pdf");
+            String dateStr = currentDate.toString();
+            dateStr = dateStr.replace(':', '-');
+            fileChooser.setInitialFileName("summary-report " + dateStr + ".pdf");
 
             fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("PDF Files (*.pdf)", "*.pdf")
@@ -548,26 +604,26 @@ public class ManagerCtrl {
     // Sales Reports
     @FXML private Button salesReportButton;
 
-    @FXML private BarChart<Number, String> topCashiersChart;
-    @FXML private BarChart<Number, String> empTopCashiersChart; 
     
     /** Represents a row of data held in the sales report table.
      */
-    public static class SalesReportRow {
-        public String itemName;
-        public Integer quantitySold;
-        public Double totalRevenue;
-    }
+    // public static class SalesReportRow {
+    //     public String itemName;
+    //     public Integer quantitySold;
+    //     public Double totalRevenue;
+    // }
 
     /** 
     * Initializes the base structure for Restock Entries and the Table
     */
+    private static final double MIN_STOCK = 10000.0;
+    // Restock Reports
     public static class RestockEntries {
         public Integer id;
         public String name;
         public String unit;
-        public Integer stock;
-        public Integer minStock;
+        public Double stock;
+        public Double minStock;
     }
 
     /**
@@ -592,10 +648,10 @@ public class ManagerCtrl {
             var unitColumn = new TableColumn<RestockEntries, String>("Unit");
             unitColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().unit));
 
-            var stockColumn = new TableColumn<RestockEntries, Integer>("Stock");
+            var stockColumn = new TableColumn<RestockEntries, Double>("Stock");
             stockColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().stock));
 
-            var minStockColumn = new TableColumn<RestockEntries, Integer>("Min Stock");
+            var minStockColumn = new TableColumn<RestockEntries, Double>("Min Stock");
             minStockColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().minStock));
 
             view.getColumns().add(idColumn);
@@ -610,7 +666,14 @@ public class ManagerCtrl {
          */
         public void loadData() {
             entries.clear();
-            String sql = "SELECT id, name, unit, stock, min_stock FROM inventory WHERE stock < min_stock ORDER BY id";
+            String sql = "SELECT id, name, unit, stock, " +
+             MIN_STOCK + " AS min_stock " +
+             "FROM inventory " +
+             "WHERE stock < " + MIN_STOCK + " " +
+             "ORDER BY id";
+
+            System.out.println("Running Restock Report SQL: " + sql);
+
             try (Connection conn = Database.getConnection();
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(sql)) {
@@ -619,13 +682,20 @@ public class ManagerCtrl {
                     entry.id = rs.getInt("id");
                     entry.name = rs.getString("name");
                     entry.unit = rs.getString("unit");
-                    entry.stock = rs.getInt("stock");
-                    entry.minStock = rs.getInt("min_stock");
+                    entry.stock = rs.getDouble("stock");
+                    entry.minStock = rs.getDouble("min_stock");
+
+                    System.out.println("Loaded: " + entry.name +
+                               " | Stock: " + entry.stock);
+
                     entries.add(entry);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+
+            System.out.println("Total restock items: " + entries.size());
+
             view.getItems().setAll(entries);
         }
         
@@ -652,6 +722,8 @@ public class ManagerCtrl {
 
         xReportButton.setOnAction( this::createXReportPopupWindow );
 
+
+
         restockReportTableView.loadData();
         restockReportBtn.setOnAction( event -> { 
             restockReportTableView.loadData();
@@ -664,7 +736,16 @@ public class ManagerCtrl {
                 popup.close();
             });
 
-            VBox root = new VBox(20, restockReportTableView.getView(), closeButton);
+            Button printButton = new Button("Export to PDF");
+            printButton.setOnAction(e -> {
+                final double REC_PRINT_WIDTH = 750;
+                restockReportTableView.getView().setMinWidth(REC_PRINT_WIDTH);
+                promptExportToPDF(restockReportTableView.getView());
+                // use computed size
+                restockReportTableView.getView().setMinWidth(-1);
+            });
+
+            VBox root = new VBox(20, restockReportTableView.getView(), closeButton, printButton);
             root.setPadding(new Insets(20));
             root.setAlignment(Pos.CENTER);
             popup.setScene(new Scene(root, 500, 450));
@@ -732,17 +813,17 @@ public class ManagerCtrl {
                 ObservableList<SalesReportRow> data = FXCollections.observableArrayList();
                 
                 String sql = "SELECT i.name, COUNT(oi.id) as quantity, SUM(oi.price_at_order) as revenue " +
-                                "FROM order_items oi " +
-                                "JOIN orders o ON oi.order_id = o.id " +
-                                "JOIN items i ON oi.item_id = i.id " +
-                                "WHERE o.date >= '" + java.sql.Date.valueOf(startDatePicker.getValue()) + "' " +
-                                "AND o.date <= '" + java.sql.Date.valueOf(endDatePicker.getValue()) + "' " +
-                                "GROUP BY i.name ORDER BY revenue DESC;";
+                             "FROM order_items oi " +
+                             "JOIN orders o ON oi.order_id = o.id " +
+                             "JOIN items i ON oi.item_id = i.id " +
+                             "WHERE o.date >= '" + java.sql.Date.valueOf(startDatePicker.getValue()) + "' " +
+                             "AND o.date <= '" + java.sql.Date.valueOf(endDatePicker.getValue()) + "' " +
+                             "GROUP BY i.name ORDER BY revenue DESC;";
                 
                 try (Connection conn = Database.getConnection();
-                        Statement stmt = conn.createStatement();
-                        ResultSet rs = stmt.executeQuery(sql)) {
-                        
+                     Statement stmt = conn.createStatement();
+                     ResultSet rs = stmt.executeQuery(sql)) {
+                     
                     while (rs.next()) {
                         SalesReportRow row = new SalesReportRow();
                         row.itemName = rs.getString("name");
@@ -759,41 +840,39 @@ public class ManagerCtrl {
             Button printButton = new Button("Print");
             printButton.setOnAction(e -> {
                 PrinterJob job = PrinterJob.createPrinterJob();
+                if (job != null) {
+                    Stage popupStage = (Stage) printButton.getScene().getWindow();
+                    boolean proceed = job.showPrintDialog(popupStage);
+                    if (proceed) {
+                        Label titleLabel = new Label("Sales Report");
+                        titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+                        Label datesLabel = new Label("From " + startDatePicker.getValue() + " to " + endDatePicker.getValue());
+                        datesLabel.setStyle("-fx-font-size: 16px; -fx-padding: 0 0 10 0;");
 
-                if (job == null) return;
+                        // had to remove table to preserve format for printing 
+                        VBox parent = (VBox) table.getParent();
+                        int tableIndex = parent.getChildren().indexOf(table);
+                        parent.getChildren().remove(table);
 
-                Stage popupStage = (Stage) printButton.getScene().getWindow();
-                boolean proceed = job.showPrintDialog(popupStage);
+                        VBox printContainer = new VBox(10, titleLabel, datesLabel, table);
+                        PageLayout pageLayout = job.getJobSettings().getPageLayout();
+                        double pageWidth = pageLayout.getPrintableWidth();
+                        double pageHeight = pageLayout.getPrintableHeight();
+                        
+                        printContainer.setPrefSize(pageWidth, pageHeight);
+                        VBox.setVgrow(table, javafx.scene.layout.Priority.ALWAYS);
+                        
+                        printContainer.applyCss();
+                        printContainer.layout();
 
-                if (!proceed) return;
-
-                Label titleLabel = new Label("Sales Report");
-                titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
-                Label datesLabel = new Label("From " + startDatePicker.getValue() + " to " + endDatePicker.getValue());
-                datesLabel.setStyle("-fx-font-size: 16px; -fx-padding: 0 0 10 0;");
-
-                // had to remove table to preserve format for printing 
-                VBox parent = (VBox) table.getParent();
-                int tableIndex = parent.getChildren().indexOf(table);
-                parent.getChildren().remove(table);
-
-                VBox printContainer = new VBox(10, titleLabel, datesLabel, table);
-                PageLayout pageLayout = job.getJobSettings().getPageLayout();
-                double pageWidth = pageLayout.getPrintableWidth();
-                double pageHeight = pageLayout.getPrintableHeight();
-                
-                printContainer.setPrefSize(pageWidth, pageHeight);
-                VBox.setVgrow(table, javafx.scene.layout.Priority.ALWAYS);
-                
-                printContainer.applyCss();
-                printContainer.layout();
-
-                boolean success = job.printPage(printContainer);
-                System.out.println("printing...");
-                printContainer.getChildren().remove(table);
-                parent.getChildren().add(tableIndex, table);
-                if (success) {
-                    job.endJob();
+                        boolean success = job.printPage(printContainer);
+                        System.out.println("printing...");
+                        printContainer.getChildren().remove(table);
+                        parent.getChildren().add(tableIndex, table);
+                        if (success) {
+                            job.endJob();
+                        }
+                    }
                 }
             });
 
@@ -809,7 +888,6 @@ public class ManagerCtrl {
             popup.initModality(Modality.NONE);
             popup.showAndWait();
         });
-      
     }
     
     /** refreshes the financials view by reloading the total revenue, orders today, 
@@ -832,6 +910,13 @@ public class ManagerCtrl {
     @FXML private TableColumn<EmployeeRow, Number> hoursColumn;
     @FXML private TableColumn<EmployeeRow, Number> salesColumn;
     @FXML private TableColumn<EmployeeRow, Boolean> managerColumn;
+
+    @FXML private TableView<EmployeeRow> employeeTable;
+    @FXML private TableColumn<EmployeeRow, String> dashCashierCol;
+    @FXML private TableColumn<EmployeeRow, Number> dashHoursCol;
+    @FXML private TableColumn<EmployeeRow, Number> dashSalesCol;
+    @FXML private TableColumn<EmployeeRow, Boolean> dashManagerCol;
+    
     private final ObservableList<EmployeeRow> employees = FXCollections.observableArrayList();
 
     /** Initializes the employees table view by setting up the cell value factories for each column and 
@@ -841,8 +926,15 @@ public class ManagerCtrl {
         cashierColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
         salesColumn.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().sales()));
         managerColumn.setCellValueFactory(d -> new SimpleBooleanProperty(d.getValue().isManager()));
-        hoursColumn.setVisible(false); // no hours data in the schema; remove from the FXML if unused
+        //hoursColumn.setVisible(false); // no hours data in the schema
         employeesFullTable.setItems(employees);
+
+        if (dashCashierCol != null) {
+            dashCashierCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
+            dashSalesCol.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().sales()));
+            dashManagerCol.setCellValueFactory(d -> new SimpleBooleanProperty(d.getValue().isManager()));
+            employeeTable.setItems(employees);
+        }
     }
 
     /** Refreshes the employees table view by retrieving the latest employee data from the
@@ -934,6 +1026,43 @@ public class ManagerCtrl {
         }
     }
 
+    @FXML BarChart<Number, String> topCashiersChart;
+    @FXML BarChart<Number, String> empTopCashiersChart;
+
+    private void LoadTopEmployees() {
+        String sql = "SELECT e.name, SUM(o.subtotal) AS total_sales " +
+                     "FROM orders o JOIN employees e ON o.employee_id = e.id " +
+                     "GROUP BY e.name " +
+                     "ORDER BY total_sales ASC;";
+
+        try (Connection conn = Database.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            XYChart.Series<Number, String> dashSeries = new XYChart.Series<>();
+            dashSeries.setName("Total Sales");
+            XYChart.Series<Number, String> empSeries = new XYChart.Series<>();
+            empSeries.setName("Total Sales");
+
+            while (rs.next()) {
+                double sales = rs.getDouble("total_sales");
+                String name = rs.getString("name");
+                
+                dashSeries.getData().add(new XYChart.Data<>(sales, name));
+                empSeries.getData().add(new XYChart.Data<>(sales, name));
+            }
+            if (topCashiersChart != null) {
+                topCashiersChart.getData().clear();
+                topCashiersChart.getData().add(dashSeries);
+            }
+            if (empTopCashiersChart != null) {
+                empTopCashiersChart.getData().clear();
+                empTopCashiersChart.getData().add(empSeries);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 
     @FXML private TableView<InventoryItem> inventoryFullTable;
