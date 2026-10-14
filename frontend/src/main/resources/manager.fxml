@@ -39,12 +39,10 @@
                         <VBox styleClass="kpi-card kpi-green" alignment="CENTER" prefWidth="250" prefHeight="100">
                             <Label text="Today's Revenue" style="-fx-font-size: 18px;"/>
                             <Label fx:id="revenueTotalLabel" text="\$0" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-                            <Label text="0%" style="-fx-font-size: 16px;"/>
                         </VBox>
                         <VBox styleClass="kpi-card kpi-red" alignment="CENTER" prefWidth="250" prefHeight="100">
                             <Label text="Orders today" style="-fx-font-size: 18px;"/>
                             <Label fx:id="ordersTotalLabel" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-                            <Label text="0%" style="-fx-font-size: 16px;"/>
                         </VBox>
                     </HBox>
                     <HBox spacing="20" VBox.vgrow="ALWAYS">
@@ -75,7 +73,6 @@
                         <TableView fx:id="employeeTable" prefHeight="250" HBox.hgrow="ALWAYS">
                             <columns>
                                 <TableColumn text="Cashier" prefWidth="100"/>
-                                <TableColumn text="Hours worked" prefWidth="100"/>
                                 <TableColumn text="Sales made" prefWidth="100"/>
                                 <TableColumn text="Manager" prefWidth="90"/>
                             </columns>
@@ -91,12 +88,10 @@
                             <VBox styleClass="kpi-card kpi-green" alignment="CENTER" prefWidth="190" prefHeight="100">
                                 <Label text="Total Revenue" style="-fx-font-size: 18px;"/>
                                 <Label fx:id="finRevenueTotalLabel" text="\$24,680" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-                                <Label text="+12%" style="-fx-font-size: 16px;"/>
                             </VBox>
                             <VBox styleClass="kpi-card kpi-red" alignment="CENTER" prefWidth="190" prefHeight="100">
-                                <Label text="Sales Goal" style="-fx-font-size: 18px;"/>
-                                <Label fx:id="finOrdersTotalLabel" text="\$26,000" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-                                <Label text="-8%" style="-fx-font-size: 16px;"/>
+                                <!-- To be removed? -->
+                                <!-- <Label fx:id="finOrdersTotalLabel" text="\$26,000" style="-fx-font-size: 24px; -fx-font-weight: bold;"/> -->
                             </VBox>
                         </HBox>
                         <Label text="Revenue trend" alignment="CENTER" prefWidth="400" style="-fx-font-size: 18px;"/>
@@ -147,7 +142,6 @@
                         <VBox styleClass="kpi-card kpi-red" alignment="CENTER" prefWidth="220" prefHeight="120">
                             <Label text="Orders today" style="-fx-font-size: 18px;"/>
                             <Label text="42" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-                            <Label text="-8%" style="-fx-font-size: 16px;"/>
                         </VBox>
                         <VBox HBox.hgrow="ALWAYS">
                             <Label text="Order trend" alignment="CENTER" maxWidth="Infinity" style="-fx-font-size: 18px;"/>
@@ -187,7 +181,6 @@
                     <TableView fx:id="employeesFullTable" VBox.vgrow="ALWAYS" prefHeight="300">
                         <columns>
                             <TableColumn fx:id="cashierColumn" text="Cashier" prefWidth="150"/>
-                            <TableColumn fx:id="hoursColumn" text="Hours worked" prefWidth="150"/>
                             <TableColumn fx:id="salesColumn" text="Sales made" prefWidth="150"/>
                             <TableColumn fx:id="managerColumn" text="Manager" prefWidth="100"/>
                         </columns>
