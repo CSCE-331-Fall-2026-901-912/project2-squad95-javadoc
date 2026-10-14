@@ -189,7 +189,7 @@ public class ManagerCtrl {
         stage.show();
     }
 
-    @FXML private Button printReportButton;
+    
     
     /**
      * Represents a row of data held in the financials table.
@@ -771,23 +771,7 @@ public class ManagerCtrl {
             popup.showAndWait();
         });
 
-        printReportButton.setOnAction( (event) -> {
-            PrinterJob job = PrinterJob.createPrinterJob();
-            if (job != null) {
-                // Show system print dialog; user selects 'Save as PDF' / 'Print to PDF'
-                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                boolean proceed = job.showPrintDialog(stage);
-                if (proceed) {
-                    boolean success = job.printPage(finRevenueTrendChart);
-                    System.out.println("printing...");
-                    if (success) {
-                        job.endJob();
-                    }
-                }
-            }
-            System.out.println("the print failed");
-        });
-    
+            
         /**
         * Creates a popup window displaying the sales report, which includes 
         * a table of sales data for items sold between the selected start and end dates. 
