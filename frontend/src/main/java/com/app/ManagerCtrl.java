@@ -10,7 +10,9 @@ import java.util.List;
 
 import org.postgresql.core.SetupQueryRunner;
 import java.sql.Time;
+import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.Currency;
 import java.util.List;
 
 import javafx.embed.swing.SwingFXUtils;
@@ -58,21 +60,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Alert;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.WritableImage;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -80,6 +71,7 @@ import javafx.scene.transform.Transform;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 import javax.imageio.ImageIO;
 import javax.print.*;
@@ -415,6 +407,28 @@ public class ManagerCtrl {
             avgRevenueCol.setCellValueFactory(data -> 
                 new SimpleObjectProperty<>(data.getValue().averageRevenue));        
             
+
+            NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
+            // ISO_4217 currency code
+            currencyFormat.setCurrency(Currency.getInstance("USD"));
+            // oh my god i cannot use var
+            Callback< TableColumn<HourlySalesSummary, Double>, TableCell<HourlySalesSummary, Double> >
+            moneyCellFactory = (tc) -> new TableCell<HourlySalesSummary, Double>() {
+                // https://stackoverflow.com/questions/48733121/javafx-format-double-in-tablecolumn
+                @Override
+                protected void updateItem(Double value, boolean empty) {
+                    super.updateItem(value, empty);
+                    if (empty) {
+                        setText(null);
+                    } else {
+                        setText(currencyFormat.format(value));
+                    }
+                }
+            };
+
+            totalRevenueCol.setCellFactory(moneyCellFactory);
+            avgRevenueCol.setCellFactory(moneyCellFactory);
+
             view.getColumns().add(hourCol);
             view.getColumns().add(transactionsCol);
             view.getColumns().add(itemsSoldCol);
@@ -427,6 +441,10 @@ public class ManagerCtrl {
          * report data of the current date. This updates the view as well.
          */
         public void loadData() {
+            // debugging aid; must wrap in quotes due to SQL syntax
+            // final String dateToLoad = "\'2025-10-10\'";
+            final String dateToLoad = "CURRENT_DATE";
+
             String sql = "WITH item_counts AS (\r\n" + 
                         "       SELECT order_id,\r\n" + 
                         "              COUNT(id) as items_in_order\r\n" + 
@@ -441,16 +459,16 @@ public class ManagerCtrl {
                         "FROM orders\r\n" + 
                         "LEFT JOIN item_counts as ic\r\n" + 
                         "       ON ic.order_id = orders.id\r\n" + 
-                        "WHERE date = CURRENT_DATE\r\n" + 
+                        "WHERE date = " + dateToLoad + " \r\n" + 
                         "GROUP BY date, hour\r\n" + 
-                        "ORDER BY date DESC, hour DESC;";
+                        "ORDER BY date DESC, hour ASC;";
 
             try (Connection conn = Database.getConnection();
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(sql)) {
 
                 // view can be reloaded, so cleanup outdated entries
-                // an error can happen after clearing, but oh well
+                // an error from next() can happen after clearing, but oh well
                 entries.clear(); 
 
                 while (rs.next()) {
@@ -501,8 +519,8 @@ public class ManagerCtrl {
 
             // 72 points per inch, returned lengths are in points
             final float MARGIN = 36;
-            float pageWidth = page.getMediaBox().getWidth() - (MARGIN * 2);;
-            float pageHeight = page.getMediaBox().getWidth() - (MARGIN * 2);;
+            float pageWidth = page.getMediaBox().getWidth() - (MARGIN * 2);
+            float pageHeight = page.getMediaBox().getWidth() - (MARGIN * 2);
 
             PDImageXObject pdImage = LosslessFactory.createFromImage(doc, bufImg);
 
@@ -717,7 +735,6 @@ public class ManagerCtrl {
         LoadTotalOrdersByDate();
 
         // load data only once to reduce latency when opening x-report each time
-        // may need to explicitly refresh somewhere else, on defined intervals
         reportTable.loadData();
 
         xReportButton.setOnAction( this::createXReportPopupWindow );
