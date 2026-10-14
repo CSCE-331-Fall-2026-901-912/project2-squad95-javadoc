@@ -5,27 +5,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Date;
-import java.util.List;
-
-import org.postgresql.core.SetupQueryRunner;
-import java.sql.Time;
-import java.util.Calendar;
-import java.util.List;
-
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
-import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
-import javafx.scene.image.WritableImage;
-import javafx.embed.swing.SwingFXUtils;
-
-import java.awt.Window;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.sql.Date;
 import java.util.List;
 
 import org.postgresql.core.SetupQueryRunner;
@@ -41,35 +20,24 @@ import com.app.models.Order;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.print.PrinterJob;
-import javafx.print.PageLayout;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.WritableImage;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.transform.Transform;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import javax.imageio.ImageIO;
 import javax.print.*;
 import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
@@ -106,9 +74,6 @@ public class ManagerCtrl {
         new Alert(Alert.AlertType.ERROR, "Database error: " + e.getMessage()).showAndWait();
     }
 
-    // ---------------------------------------------------------------
-    // Navigation
-    // ---------------------------------------------------------------
 
     private void showOnly(Region view) {
         for (Region r : List.of(dashboardView, financialsView, ordersView,
@@ -137,26 +102,10 @@ public class ManagerCtrl {
     }
 
     @FXML private Button printReportButton;
-
-    class OrdersDayRow { 
-        public Date date;
-        public Integer totalOrders;
-        public Double totalRevenue;
-        public String metSalesGoal;
-    }
-
-    @FXML private TableView<OrdersDayRow> financialsTable;
-    @FXML TableColumn<OrdersDayRow, Date> finDayCol;
-    @FXML TableColumn<OrdersDayRow, Integer> finTotalOrdersCol;
-    @FXML TableColumn<OrdersDayRow, Double> finAmountCol;
-    @FXML TableColumn<OrdersDayRow, String> finMetGoalCol;
-
+    @FXML private TableView<Order> financialsTable;
     @FXML private Label finOrdersTotalLabel;
     @FXML private Label finRevenueTotalLabel;
     @FXML private BarChart<String, Number> finRevenueTrendChart;
-
-    @FXML private Button xReportButton;
-    @FXML private Button restockReportBtn;
 
     // Database Queries
     private void loadOrdersToday() {
@@ -173,7 +122,7 @@ public class ManagerCtrl {
             e.printStackTrace();
         }
     }
- 
+
     private void loadTotalRevenue() {
         String sql = "SELECT SUM(subtotal) FROM orders;";
         
@@ -215,356 +164,14 @@ public class ManagerCtrl {
         }
     }
 
-    private void LoadTotalOrdersByDate() {
-        // Note: make sure to keep the fields in the 
-        // class and SQL statement identical
-        String sql = "SELECT CAST(DATE AS date) AS date,\r\n" + //
-                     "       COUNT(id) AS totalOrders,\r\n" + //
-                     "       SUM(subtotal) AS totalRevenue\r\n" + //
-                     "FROM orders\r\n" + //
-                     "GROUP BY CAST(DATE AS date)\r\n" + //
-                     "ORDER BY date DESC\r\n" + //
-                     "LIMIT 365;";
-                     
-        try (Connection conn = Database.getConnection();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql)) {
-            
-            // TODO: move to dedicate init() function
-            finDayCol.setCellValueFactory(data -> 
-                new SimpleObjectProperty<>(data.getValue().date));
-            finTotalOrdersCol.setCellValueFactory(data -> 
-                new SimpleObjectProperty<>(data.getValue().totalOrders));
-            finAmountCol.setCellValueFactory(data -> 
-                new SimpleObjectProperty<>(data.getValue().totalRevenue));
-            // TODO: determine if "met sales goal column" should be done
-            finMetGoalCol.setCellValueFactory(data -> 
-                new SimpleObjectProperty<>("No"));
-            
-            // TODO: either move this out of the function or use a different collection
-            ObservableList<OrdersDayRow> entries = FXCollections.observableArrayList();
-            
-            while (rs.next()) {
-                OrdersDayRow newEntry = new OrdersDayRow();
-                newEntry.date = rs.getDate("date");
-                newEntry.totalOrders = rs.getInt("totalOrders");
-                newEntry.totalRevenue = rs.getDouble("totalRevenue");
-                entries.add(newEntry);
-            }
-
-            financialsTable.getItems().setAll(entries);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private void printNode() {
+        
     }
-
-    class HourlySalesSummary {
-        public Integer hour;
-        public Integer transactionCount;
-        public Integer itemsSold;
-        public Double totalRevenue;
-        public Double averageRevenue;
-    }
-
-    class HourlySalesSummaryTable {
-        private ObservableList<HourlySalesSummary> entries = FXCollections.observableArrayList();
-        private TableView<HourlySalesSummary> view;
-
-        HourlySalesSummaryTable() {
-            view = new TableView<HourlySalesSummary>();
-
-            var hourCol = new TableColumn<HourlySalesSummary, Integer>("Hour");
-            var transactionsCol = new TableColumn<HourlySalesSummary, Integer>("Transactions");
-            var itemsSoldCol = new TableColumn<HourlySalesSummary, Integer>("Items sold");
-            var totalRevenueCol = new TableColumn<HourlySalesSummary, Double>("Total Revenue");
-            var avgRevenueCol = new TableColumn<HourlySalesSummary, Double>("Avg. Revenue Per Transaction");
-            
-            hourCol.setCellValueFactory(data -> 
-                new SimpleObjectProperty<>(data.getValue().hour));
-            transactionsCol.setCellValueFactory(data -> 
-                new SimpleObjectProperty<>(data.getValue().transactionCount));
-            itemsSoldCol.setCellValueFactory(data -> 
-                new SimpleObjectProperty<>(data.getValue().itemsSold));
-            totalRevenueCol.setCellValueFactory(data -> 
-                new SimpleObjectProperty<>(data.getValue().totalRevenue));
-            avgRevenueCol.setCellValueFactory(data -> 
-                new SimpleObjectProperty<>(data.getValue().averageRevenue));        
-            
-            view.getColumns().add(hourCol);
-            view.getColumns().add(transactionsCol);
-            view.getColumns().add(itemsSoldCol);
-            view.getColumns().add(totalRevenueCol);
-            view.getColumns().add(avgRevenueCol);
-        }
-
-        public void loadData() {
-            String sql = "WITH item_counts AS (\r\n" + 
-                        "       SELECT order_id,\r\n" + 
-                        "              COUNT(id) as items_in_order\r\n" + 
-                        "       FROM order_items\r\n" + 
-                        "       GROUP BY order_id\r\n" + 
-                        ")\r\n" + 
-                        "SELECT date,\r\n" + 
-                        "       EXTRACT(HOUR FROM CAST(time as TIME)) as hour,\r\n" + 
-                        "       COUNT(orders.id) as total_orders,\r\n" + 
-                        "       SUM(orders.subtotal) as total_revenue,\r\n" + 
-                        "       SUM(ic.items_in_order) as item_count\r\n" + 
-                        "FROM orders\r\n" + 
-                        "LEFT JOIN item_counts as ic\r\n" + 
-                        "       ON ic.order_id = orders.id\r\n" + 
-                        "WHERE date = CURRENT_DATE\r\n" + 
-                        "GROUP BY date, hour\r\n" + 
-                        "ORDER BY date DESC, hour DESC;";
-
-            try (Connection conn = Database.getConnection();
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(sql)) {
-
-                // view can be reloaded, so cleanup outdated entries
-                // an error can happen after clearing, but oh well
-                entries.clear(); 
-                
-                while (rs.next()) {
-                    HourlySalesSummary newEntry = new HourlySalesSummary();
-                    newEntry.hour = rs.getInt("hour");
-                    newEntry.transactionCount = rs.getInt("total_orders");
-                    newEntry.itemsSold = rs.getInt("item_count");
-                    newEntry.totalRevenue = rs.getDouble("total_revenue");
-                    newEntry.averageRevenue = 
-                        newEntry.totalRevenue / newEntry.transactionCount;
-                    entries.add(newEntry);
-                }        
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-            view.getItems().setAll(entries);
-        }
-
-        public TableView<HourlySalesSummary> getView() {
-            return view;
-        }
-    }
-
-    HourlySalesSummaryTable reportTable = new HourlySalesSummaryTable();
-    
-    // https://stackoverflow.com/questions/22789449/export-stage-into-pdf
-    private void promptExportToPDF(Node node) {
-        SnapshotParameters params = new SnapshotParameters();
-        // what if no scaling the snapshot :D
-
-        WritableImage fxImg = node.snapshot(params, null);
-        BufferedImage bufImg = SwingFXUtils.fromFXImage(fxImg, null);
-
-        try(PDDocument doc = new PDDocument()) {
-            PDPage page = new PDPage();
-            doc.addPage(page);
-
-            // 72 points per inch, returned lengths are in points
-            final float MARGIN = 36;
-            float pageWidth = page.getMediaBox().getWidth() - (MARGIN * 2);;
-            float pageHeight = page.getMediaBox().getWidth() - (MARGIN * 2);;
-
-            PDImageXObject pdImage = LosslessFactory.createFromImage(doc, bufImg);
-
-            float imageWidth = bufImg.getWidth();
-            float imageHeight = bufImg.getHeight();
-
-            float imageScale = Math.min(pageWidth / imageWidth, 
-                                        pageHeight / imageHeight);
-            
-            imageWidth *= imageScale;
-            imageHeight *= imageScale;
-
-            float xPos = MARGIN;
-            // The y-axis starts at the "bottom" and writes "down"
-            float yPos = page.getMediaBox().getHeight() - MARGIN - imageHeight;
-
-            try(PDPageContentStream contentStream = new PDPageContentStream(doc, page)) {
-                contentStream.drawImage(pdImage, xPos, yPos, imageWidth, imageHeight);
-            }
-
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Save Document");
-            var currentDate = Calendar.getInstance().getTime();
-            fileChooser.setInitialFileName("summary-report " + currentDate.toString() + ".pdf");
-
-            fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("PDF Files (*.pdf)", "*.pdf")
-            );
-
-            File selectedFile = fileChooser.showSaveDialog(null);
-            if (selectedFile == null) return;
-            doc.save(selectedFile);
-
-        } catch(IOException e) {
-            System.err.println("Something went wrong while printing!");
-            e.printStackTrace();
-        } 
-    }
-
-    private String getCurrentTimeDateText() {
-        Date currDate = new Date(System.currentTimeMillis());
-        Time currTime = new Time(System.currentTimeMillis());
-        String labelFormat = "Generated report for %s since %s";
-        return labelFormat.formatted(currDate, currTime);
-    }    
-
-    private void createXReportPopupWindow(ActionEvent event) {
-        Stage popup = new Stage();
-        popup.setTitle("X-report");
-
-        Button closeButton = new Button("Close");
-        closeButton.setOnAction(e -> {
-            popup.close();
-        });
-
-        Label reportDateLabel = new Label( getCurrentTimeDateText() );
-
-        VBox printableContain = new VBox(20, reportDateLabel, reportTable.getView()); 
-
-        Button printButton = new Button("Export to PDF");
-        printButton.setOnAction(e -> {
-            final double REC_PRINT_WIDTH = 750;
-            reportTable.getView().setMinWidth(REC_PRINT_WIDTH);
-            promptExportToPDF(printableContain);
-            // use computed size
-            reportTable.getView().setMinWidth(-1);
-        });
-
-        Button refreshButton = new Button("Refresh");
-        refreshButton.setOnAction(e -> {
-            reportTable.loadData();
-            reportDateLabel.setText(getCurrentTimeDateText());
-        });
-
-        HBox btnContain = new HBox(20, printButton, refreshButton, closeButton);
-        btnContain.setAlignment(Pos.BASELINE_RIGHT);
-        VBox root = new VBox(20, printableContain, btnContain);
-
-        root.setPadding(new Insets(20));
-        root.setAlignment(Pos.CENTER);
-        popup.setScene(new Scene(root, 500, 450));
-
-        popup.initModality(Modality.NONE);
-        popup.setTitle("X-report");
-        popup.showAndWait();
-    }
-
-    // Sales Reports
-    @FXML private Button salesReportButton;
-
-    @FXML private BarChart<Number, String> topCashiersChart;
-    @FXML private BarChart<Number, String> empTopCashiersChart; 
-
-    public static class SalesReportRow {
-        public String itemName;
-        public Integer quantitySold;
-        public Double totalRevenue;
-    }
-
-
-
-
-
-    // Restock Reports
-    public static class RestockEntries {
-        public Integer id;
-        public String name;
-        public String unit;
-        public Integer stock;
-        public Integer minStock;
-    }
-
-    //currently programmed like x report
-    public static class RestockTable {
-        private ObservableList<RestockEntries> entries = FXCollections.observableArrayList();
-        private TableView<RestockEntries> view;
-        public RestockTable() {
-            view = new TableView<>();
-
-            var idColumn = new TableColumn<RestockEntries, Integer>("ID");
-            idColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().id));
-
-            var nameColumn = new TableColumn<RestockEntries, String>("Name");
-            nameColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().name));
-
-            var unitColumn = new TableColumn<RestockEntries, String>("Unit");
-            unitColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().unit));
-
-            var stockColumn = new TableColumn<RestockEntries, Integer>("Stock");
-            stockColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().stock));
-
-            var minStockColumn = new TableColumn<RestockEntries, Integer>("Min Stock");
-            minStockColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().minStock));
-
-            view.getColumns().add(idColumn);
-            view.getColumns().add(nameColumn);
-            view.getColumns().add(unitColumn);
-            view.getColumns().add(stockColumn);
-            view.getColumns().add(minStockColumn);
-        }
-
-        public void loadData() {
-            entries.clear();
-            String sql = "SELECT id, name, unit, stock, min_stock FROM inventory WHERE stock < min_stock ORDER BY id";
-            try (Connection conn = Database.getConnection();
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(sql)) {
-                while (rs.next()) {
-                    RestockEntries entry = new RestockEntries();
-                    entry.id = rs.getInt("id");
-                    entry.name = rs.getString("name");
-                    entry.unit = rs.getString("unit");
-                    entry.stock = rs.getInt("stock");
-                    entry.minStock = rs.getInt("min_stock");
-                    entries.add(entry);
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            view.getItems().setAll(entries);
-        }
-        public TableView<RestockEntries> getView() {
-            return view;
-        }
-    }
-
-    RestockTable restockReportTableView = new RestockTable();
 
     private void initializeFinancials() {
         loadTotalRevenue();
         loadOrdersToday();
         loadRevenueTrend();
-        LoadTotalOrdersByDate();
-
-        // load data only once to reduce latency when opening x-report each time
-        // may need to explicitly refresh somewhere else, on defined intervals
-        reportTable.loadData();
-
-        xReportButton.setOnAction( this::createXReportPopupWindow );
-
-        restockReportTableView.loadData();
-        restockReportBtn.setOnAction( event -> { 
-            restockReportTableView.loadData();
-            
-            Stage popup = new Stage();
-            popup.setTitle("Restock Report");
-
-            Button closeButton = new Button("Confirm");
-            closeButton.setOnAction(e -> {
-                popup.close();
-            });
-
-            VBox root = new VBox(20, restockReportTableView.getView(), closeButton);
-            root.setPadding(new Insets(20));
-            root.setAlignment(Pos.CENTER);
-            popup.setScene(new Scene(root, 500, 450));
-
-            popup.initModality(Modality.NONE);
-            popup.showAndWait();
-        });
 
         printReportButton.setOnAction( (event) -> {
             PrinterJob job = PrinterJob.createPrinterJob();
@@ -582,122 +189,6 @@ public class ManagerCtrl {
             }
             System.out.println("the print failed");
         });
-    
-        // TODO: break ts up pls
-        salesReportButton.setOnAction(event -> {
-            Stage popup = new Stage();
-            popup.setTitle("Sales Report");
-
-            DatePicker startDatePicker = new DatePicker();
-            DatePicker endDatePicker = new DatePicker();
-
-            startDatePicker.setValue(java.time.LocalDate.of(2025, 1, 1));
-            endDatePicker.setValue(java.time.LocalDate.of(2025, 12, 31));
-            
-            Button loadButton = new Button("Select");
-
-            HBox controls = new HBox(10, new Label("Start:"), startDatePicker, new Label("End:"), endDatePicker, loadButton);
-            controls.setAlignment(Pos.CENTER);
-
-            TableView<SalesReportRow> table = new TableView<>();
-            TableColumn<SalesReportRow, String> nameCol = new TableColumn<>("Item Name");
-            nameCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().itemName));
-            nameCol.setPrefWidth(150);
-            
-            TableColumn<SalesReportRow, Integer> qtyCol = new TableColumn<>("Total Sold");
-            qtyCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().quantitySold));
-            qtyCol.setPrefWidth(100);
-            
-            TableColumn<SalesReportRow, String> revCol = new TableColumn<>("Total Revenue");
-            revCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("$%,.2f", data.getValue().totalRevenue)));
-            revCol.setPrefWidth(125);
-
-            table.getColumns().add(nameCol);
-            table.getColumns().add(qtyCol);
-            table.getColumns().add(revCol);
-
-            loadButton.setOnAction(e -> {
-                ObservableList<SalesReportRow> data = FXCollections.observableArrayList();
-                
-                String sql = "SELECT i.name, COUNT(oi.id) as quantity, SUM(oi.price_at_order) as revenue " +
-                                "FROM order_items oi " +
-                                "JOIN orders o ON oi.order_id = o.id " +
-                                "JOIN items i ON oi.item_id = i.id " +
-                                "WHERE o.date >= '" + java.sql.Date.valueOf(startDatePicker.getValue()) + "' " +
-                                "AND o.date <= '" + java.sql.Date.valueOf(endDatePicker.getValue()) + "' " +
-                                "GROUP BY i.name ORDER BY revenue DESC;";
-                
-                try (Connection conn = Database.getConnection();
-                        Statement stmt = conn.createStatement();
-                        ResultSet rs = stmt.executeQuery(sql)) {
-                        
-                    while (rs.next()) {
-                        SalesReportRow row = new SalesReportRow();
-                        row.itemName = rs.getString("name");
-                        row.quantitySold = rs.getInt("quantity");
-                        row.totalRevenue = rs.getDouble("revenue");
-                        data.add(row);
-                    }
-                    table.setItems(data);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            });
-
-            Button printButton = new Button("Print");
-            printButton.setOnAction(e -> {
-                PrinterJob job = PrinterJob.createPrinterJob();
-
-                if (job == null) return;
-
-                Stage popupStage = (Stage) printButton.getScene().getWindow();
-                boolean proceed = job.showPrintDialog(popupStage);
-
-                if (!proceed) return;
-
-                Label titleLabel = new Label("Sales Report");
-                titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
-                Label datesLabel = new Label("From " + startDatePicker.getValue() + " to " + endDatePicker.getValue());
-                datesLabel.setStyle("-fx-font-size: 16px; -fx-padding: 0 0 10 0;");
-
-                // had to remove table to preserve format for printing 
-                VBox parent = (VBox) table.getParent();
-                int tableIndex = parent.getChildren().indexOf(table);
-                parent.getChildren().remove(table);
-
-                VBox printContainer = new VBox(10, titleLabel, datesLabel, table);
-                PageLayout pageLayout = job.getJobSettings().getPageLayout();
-                double pageWidth = pageLayout.getPrintableWidth();
-                double pageHeight = pageLayout.getPrintableHeight();
-                
-                printContainer.setPrefSize(pageWidth, pageHeight);
-                VBox.setVgrow(table, javafx.scene.layout.Priority.ALWAYS);
-                
-                printContainer.applyCss();
-                printContainer.layout();
-
-                boolean success = job.printPage(printContainer);
-                System.out.println("printing...");
-                printContainer.getChildren().remove(table);
-                parent.getChildren().add(tableIndex, table);
-                if (success) {
-                    job.endJob();
-                }
-            });
-
-            HBox bottomControls = new HBox(10, printButton);
-            bottomControls.setAlignment(Pos.CENTER);
-
-            VBox root = new VBox(20, controls, table, bottomControls);
-            VBox.setVgrow(table, javafx.scene.layout.Priority.ALWAYS);
-            root.setPadding(new Insets(20));
-            root.setAlignment(Pos.CENTER);
-            popup.setScene(new Scene(root, 600, 690));
-
-            popup.initModality(Modality.NONE);
-            popup.showAndWait();
-        });
-      
     }
     
     private void refreshFinanicals() {
