@@ -74,7 +74,17 @@ import javax.print.*;
 import javax.print.attribute.*;
 import javax.print.attribute.standard.*;
 
-
+/** 
+* Creates a manager view window using JavaFX
+* @author Ethan Faulkner
+* @author Andrew Schrick
+* @author Kenny Le
+* @author Jeffrey Yu
+* @author Christopher Jermia
+* 
+*
+*
+*/
 public class ManagerCtrl {
 
     private final ItemDAO itemDAO = new ItemDAO();
@@ -90,6 +100,10 @@ public class ManagerCtrl {
     @FXML private VBox menuView;
 
     @FXML
+    /**
+     * Initializes manager view and queries necessary information from database
+     * 
+     */
     public void initialize() {
         showOnly(dashboardView);
         initializeFinancials();
@@ -100,16 +114,21 @@ public class ManagerCtrl {
         refreshInventory();
         refreshMenu();
     }
-
+    /**
+     * Creates an an alert for a database exception describing the exception
+     * @param e exception to be displayed
+     */
     private void dbError(Exception e) {
         e.printStackTrace();
         new Alert(Alert.AlertType.ERROR, "Database error: " + e.getMessage()).showAndWait();
     }
 
-    // ---------------------------------------------------------------
     // Navigation
-    // ---------------------------------------------------------------
 
+    /**
+     * Shows only the given view and hides all other views.
+     * @param view The view to show.
+     */
     private void showOnly(Region view) {
         for (Region r : List.of(dashboardView, financialsView, ordersView,
                                 employeesView, inventoryFullView, menuView)) {
@@ -118,14 +137,43 @@ public class ManagerCtrl {
             r.setManaged(on);
         }
     }
-
+    
+    /**
+     * Displays dashboard view
+     * @param e
+     */
     @FXML private void showDashboard(ActionEvent e)  { showOnly(dashboardView); }
+    /**
+     * Displays financials view
+     * @param e
+     */
     @FXML private void showFinancials(ActionEvent e) { showOnly(financialsView); }
+    /**
+     * Displays orders view
+     * @param e
+     */
     @FXML private void showOrders(ActionEvent e)     { showOnly(ordersView); }
+    /**
+     * Displays the employees in the store
+     * @param e
+     */
     @FXML private void showEmployees(ActionEvent e)  { showOnly(employeesView); }
+    /**
+     * Displays the list of inventory
+     * @param e
+     */
     @FXML private void showInventory(ActionEvent e)  { showOnly(inventoryFullView); }
+    /**
+     * Displays the menu view
+     * @param e
+     */
     @FXML private void showMenu(ActionEvent e)       { showOnly(menuView); }
-
+    
+    /**
+     * Switches to the cashier view when the "Switch to Cashier" button is clicked.
+     * @param event
+     * @throws IOException
+     */
     @FXML
     private void switchToCashier(ActionEvent event) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/cashier.fxml"));
@@ -137,7 +185,10 @@ public class ManagerCtrl {
     }
 
     @FXML private Button printReportButton;
-
+    
+    /**
+     * Represents a row of data held in the financials table.
+     */
     class OrdersDayRow { 
         public Date date;
         public Integer totalOrders;
@@ -159,6 +210,9 @@ public class ManagerCtrl {
     @FXML private Button restockReportBtn;
 
     // Database Queries
+    /** Loads the total number of orders for today and updates the label in the financials view.
+     * 
+     */
     private void loadOrdersToday() {
         String sql = "SELECT COUNT(id) FROM orders WHERE date = CURRENT_DATE;";
 
@@ -173,7 +227,10 @@ public class ManagerCtrl {
             e.printStackTrace();
         }
     }
- 
+    
+    /** Loads the total revenue from all orders and updates the label in the financials view.
+     *
+     */
     private void loadTotalRevenue() {
         String sql = "SELECT SUM(subtotal) FROM orders;";
         
@@ -190,6 +247,9 @@ public class ManagerCtrl {
         }
     }
 
+    /** Loads the revenue trend data from the database and populates the finRevenueTrendChart with the results.
+     * 
+     */
     private void loadRevenueTrend() {
         String sql = "SELECT TO_CHAR(date, 'Mon') AS month, SUM(subtotal) AS revenue " +
                      "FROM orders " +
@@ -215,6 +275,10 @@ public class ManagerCtrl {
         }
     }
 
+    /** Loads the total number of orders and total revenue for each date in the past year, 
+     * and populates the financialsTable with the results.
+     * 
+     */
     private void LoadTotalOrdersByDate() {
         // Note: make sure to keep the fields in the 
         // class and SQL statement identical
@@ -259,6 +323,9 @@ public class ManagerCtrl {
         }
     }
 
+    /**
+     * Represents a row of data held in the HourlySalesSummaryTable class.
+     */
     class HourlySalesSummary {
         public Integer hour;
         public Integer transactionCount;
@@ -267,6 +334,9 @@ public class ManagerCtrl {
         public Double averageRevenue;
     }
 
+    /**
+     * Contains both the data reprentation of the x-report and its view. 
+     */
     class HourlySalesSummaryTable {
         private ObservableList<HourlySalesSummary> entries = FXCollections.observableArrayList();
         private TableView<HourlySalesSummary> view;
@@ -298,6 +368,10 @@ public class ManagerCtrl {
             view.getColumns().add(avgRevenueCol);
         }
 
+        /**
+         * Clears, then populates the data held internally in the table object with
+         * report data of the current date. This updates the view as well.
+         */
         public void loadData() {
             String sql = "WITH item_counts AS (\r\n" + 
                         "       SELECT order_id,\r\n" + 
@@ -341,7 +415,10 @@ public class ManagerCtrl {
 
             view.getItems().setAll(entries);
         }
-
+        
+        /**
+         * @return A TableView node with the current x-report data.
+         */
         public TableView<HourlySalesSummary> getView() {
             return view;
         }
@@ -349,8 +426,15 @@ public class ManagerCtrl {
 
     HourlySalesSummaryTable reportTable = new HourlySalesSummaryTable();
     
-    // https://stackoverflow.com/questions/22789449/export-stage-into-pdf
+    /**
+     * Opens a prompt to the user to export a snapshot of the provided node
+     * as a PDF file with a maximum length of 1 page. 
+     * 
+     * @param node The scene graph node to snapshot for the exported PDF.
+     * 
+     */
     private void promptExportToPDF(Node node) {
+        // https://stackoverflow.com/questions/22789449/export-stage-into-pdf
         SnapshotParameters params = new SnapshotParameters();
         // what if no scaling the snapshot :D
 
@@ -404,6 +488,10 @@ public class ManagerCtrl {
         } 
     }
 
+    /** Gets the current time and date in text string format.
+     * 
+     * @return A string containing the current date and time formatted for display in the x-report popup window.
+     */
     private String getCurrentTimeDateText() {
         Date currDate = new Date(System.currentTimeMillis());
         Time currTime = new Time(System.currentTimeMillis());
@@ -411,6 +499,11 @@ public class ManagerCtrl {
         return labelFormat.formatted(currDate, currTime);
     }    
 
+    /** Creates a popup window displaying the x-report, which includes a table
+     *  of hourly sales summary data and buttons for exporting to PDF, refreshing the data, and closing the window.
+     * 
+     * @param event The button ActionEvent that triggered the creation of the popup window.
+     */
     private void createXReportPopupWindow(ActionEvent event) {
         Stage popup = new Stage();
         popup.setTitle("X-report");
@@ -457,18 +550,18 @@ public class ManagerCtrl {
 
     @FXML private BarChart<Number, String> topCashiersChart;
     @FXML private BarChart<Number, String> empTopCashiersChart; 
-
+    
+    /** Represents a row of data held in the sales report table.
+     */
     public static class SalesReportRow {
         public String itemName;
         public Integer quantitySold;
         public Double totalRevenue;
     }
 
-
-
-
-
-    // Restock Reports
+    /** 
+    * Initializes the base structure for Restock Entries and the Table
+    */
     public static class RestockEntries {
         public Integer id;
         public String name;
@@ -477,10 +570,16 @@ public class ManagerCtrl {
         public Integer minStock;
     }
 
-    //currently programmed like x report
+    /**
+     * generates the restock table
+     */
     public static class RestockTable {
         private ObservableList<RestockEntries> entries = FXCollections.observableArrayList();
         private TableView<RestockEntries> view;
+
+        /**
+         * generates the restock table with headers
+         */
         public RestockTable() {
             view = new TableView<>();
 
@@ -505,7 +604,10 @@ public class ManagerCtrl {
             view.getColumns().add(stockColumn);
             view.getColumns().add(minStockColumn);
         }
-
+        
+        /**
+         * loads the stock data into the table
+         */
         public void loadData() {
             entries.clear();
             String sql = "SELECT id, name, unit, stock, min_stock FROM inventory WHERE stock < min_stock ORDER BY id";
@@ -526,6 +628,11 @@ public class ManagerCtrl {
             }
             view.getItems().setAll(entries);
         }
+        
+        /**
+         * @return returns the view of the table
+         * Generates the view
+         */
         public TableView<RestockEntries> getView() {
             return view;
         }
@@ -583,7 +690,12 @@ public class ManagerCtrl {
             System.out.println("the print failed");
         });
     
-        // TODO: break ts up pls
+        /**
+        * Creates a popup window displaying the sales report, which includes 
+        * a table of sales data for items sold between the selected start and end dates. 
+        * The user can select the date range and load the report data, 
+        * as well as print the report.
+        */
         salesReportButton.setOnAction(event -> {
             Stage popup = new Stage();
             popup.setTitle("Sales Report");
@@ -700,6 +812,10 @@ public class ManagerCtrl {
       
     }
     
+    /** refreshes the financials view by reloading the total revenue, orders today, 
+     * and revenue trend data from the database.
+     * 
+     */
     private void refreshFinanicals() {
         try { 
             loadTotalRevenue();
@@ -718,6 +834,9 @@ public class ManagerCtrl {
     @FXML private TableColumn<EmployeeRow, Boolean> managerColumn;
     private final ObservableList<EmployeeRow> employees = FXCollections.observableArrayList();
 
+    /** Initializes the employees table view by setting up the cell value factories for each column and 
+     * populating the table with employee data from the database.
+     */
     private void initializeEmployees() {
         cashierColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
         salesColumn.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().sales()));
@@ -726,6 +845,10 @@ public class ManagerCtrl {
         employeesFullTable.setItems(employees);
     }
 
+    /** Refreshes the employees table view by retrieving the latest employee data from the
+     *  database and updating the table.
+     * 
+     */
     private void refreshEmployees() {
         try {
             employees.setAll(employeeDAO.getAllWithSales());
@@ -735,6 +858,10 @@ public class ManagerCtrl {
     }
 
     @FXML
+    /** Adds a new employee to the database by prompting the user for the employee's name and 
+     * inserting it into the database.
+     * 
+     */
     private void addEmployee() {
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Add Employee");
@@ -752,6 +879,10 @@ public class ManagerCtrl {
     }
 
     @FXML
+    /** Updates the name of the selected employee in the employees table view by prompting the user for
+     *  a new name and updating it in the database.
+     * 
+     */
     private void updateEmployee() {
         EmployeeRow sel = employeesFullTable.getSelectionModel().getSelectedItem();
         if (sel == null) return;
@@ -771,6 +902,9 @@ public class ManagerCtrl {
         });
     }
 
+    /**
+     * Adds an employee to the table
+     */
     @FXML
     private void removeEmployee() {
         EmployeeRow sel = employeesFullTable.getSelectionModel().getSelectedItem();
@@ -784,6 +918,9 @@ public class ManagerCtrl {
         }
     }
 
+    /**
+     * Promotes the employee to manager 
+     */
     @FXML
     private void promoteEmployee() {
         EmployeeRow sel = employeesFullTable.getSelectionModel().getSelectedItem();
@@ -806,6 +943,9 @@ public class ManagerCtrl {
     @FXML private TableColumn<InventoryItem, String> inventoryUnitColumn;
     private final ObservableList<InventoryItem> inventoryItems = FXCollections.observableArrayList();
 
+    /**
+     * initializes the inventory
+     */
     private void initializeInventory() {
         inventoryIdColumn.setCellValueFactory(d -> new SimpleIntegerProperty(d.getValue().id()));
         inventoryNameColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
@@ -813,7 +953,10 @@ public class ManagerCtrl {
         inventoryUnitColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().unit()));
         inventoryFullTable.setItems(inventoryItems);
     }
-
+        
+    /**
+     * pulls the latest inventories from the database
+     */
     private void refreshInventory() {
         try {
             inventoryItems.setAll(inventoryDAO.getAll());
@@ -822,6 +965,9 @@ public class ManagerCtrl {
         }
     }
 
+    /**
+     * adds new inventory items
+     */
     @FXML
     private void addInventoryItem() {
         Dialog<InventoryItem> dialog = new Dialog<>();
@@ -872,6 +1018,9 @@ public class ManagerCtrl {
         });
     }
 
+    /**
+     * updates the quantities of inventory items
+     */
     @FXML
     private void updateInventoryQuantity() {
         InventoryItem selected = inventoryFullTable.getSelectionModel().getSelectedItem();
@@ -931,6 +1080,9 @@ public class ManagerCtrl {
         }
     }
 
+    /**
+     * Prompts user to add a new menu item and associated recipe
+     */
     @FXML
     private void addMenuItem() {
         Dialog<Item> dialog = new Dialog<>();
@@ -976,6 +1128,9 @@ public class ManagerCtrl {
         });
     }
 
+    /**
+     * Prompts user to change the name or price of a menu item
+     */
     @FXML
     private void updateMenuItem() {
         Item selected = menuTable.getSelectionModel().getSelectedItem();

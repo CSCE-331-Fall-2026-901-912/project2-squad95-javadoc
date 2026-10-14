@@ -32,6 +32,7 @@ dependencies {
 plugins {
   id 'application'
   id 'org.openjfx.javafxplugin' version '0.1.0'
+  id 'java'
 }
 
 repositories {
@@ -52,4 +53,7 @@ javafx {
 application {
     mainClass = 'com.app.CashierCtrl'
     // mainClass = 'com.app.Manager'
+}
+javadoc {
+    options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PRIVATE
 }
