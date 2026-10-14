@@ -381,6 +381,47 @@ public class ManagerCtrl {
     }
 
     /**
+     * 
+     * ColumnCurrencyFormatSetter: Helper class for setting columns' format to currency.
+     * This should be used only after calling .setCellValueFactory() on columns to be formatted. 
+     * @param <RowData> The structure representing each row of the Table.
+     */
+    class ColumnCurrencyFormatSetter<RowData, T> {
+        NumberFormat currencyFormat;
+        Callback< TableColumn<RowData, T>, TableCell<RowData, T> > moneyCellFactory;
+
+        /**
+         * Initializes instance, given an ISO_4217 currency code.
+         * @param currencyCode The type of currency to represent column data as. 
+         */
+        ColumnCurrencyFormatSetter(String currencyCode) {
+            this.currencyFormat = NumberFormat.getCurrencyInstance();
+            this.currencyFormat.setCurrency(Currency.getInstance(currencyCode));
+
+            this.moneyCellFactory = (tc) -> new TableCell<RowData, T>() {
+                // https://stackoverflow.com/questions/48733121/javafx-format-double-in-tablecolumn
+                @Override
+                protected void updateItem(T value, boolean empty) {
+                    super.updateItem(value, empty);
+                    if (empty) {
+                        setText(null);
+                    } else {
+                        setText(currencyFormat.format(value));
+                    }
+                }
+            };
+        }
+
+        ColumnCurrencyFormatSetter() {
+            this("USD");
+        }
+
+        public void applyTo(TableColumn<RowData, T> col) {
+            col.setCellFactory(moneyCellFactory);
+        }
+    }
+
+    /**
      * Contains both the data reprentation of the x-report and its view. 
      */
     class HourlySalesSummaryTable {
@@ -407,27 +448,10 @@ public class ManagerCtrl {
             avgRevenueCol.setCellValueFactory(data -> 
                 new SimpleObjectProperty<>(data.getValue().averageRevenue));        
             
-
-            NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
-            // ISO_4217 currency code
-            currencyFormat.setCurrency(Currency.getInstance("USD"));
-            // oh my god i cannot use var
-            Callback< TableColumn<HourlySalesSummary, Double>, TableCell<HourlySalesSummary, Double> >
-            moneyCellFactory = (tc) -> new TableCell<HourlySalesSummary, Double>() {
-                // https://stackoverflow.com/questions/48733121/javafx-format-double-in-tablecolumn
-                @Override
-                protected void updateItem(Double value, boolean empty) {
-                    super.updateItem(value, empty);
-                    if (empty) {
-                        setText(null);
-                    } else {
-                        setText(currencyFormat.format(value));
-                    }
-                }
-            };
-
-            totalRevenueCol.setCellFactory(moneyCellFactory);
-            avgRevenueCol.setCellFactory(moneyCellFactory);
+            ColumnCurrencyFormatSetter<HourlySalesSummary, Double> moneyFormatSetter = 
+                new ColumnCurrencyFormatSetter<>("USD");
+            moneyFormatSetter.applyTo(totalRevenueCol);
+            moneyFormatSetter.applyTo(avgRevenueCol);
 
             view.getColumns().add(hourCol);
             view.getColumns().add(transactionsCol);
@@ -1199,6 +1223,11 @@ public class ManagerCtrl {
         menuIdColumn.setCellValueFactory(d -> new SimpleIntegerProperty(d.getValue().id()));
         menuNameColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
         menuPriceColumn.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().basePrice()));
+
+        ColumnCurrencyFormatSetter<Item, Number> currencyFormatSetter =
+            new ColumnCurrencyFormatSetter<>("USD");
+        currencyFormatSetter.applyTo(menuPriceColumn);
+
         menuTable.setItems(menuItems);
     }
 
