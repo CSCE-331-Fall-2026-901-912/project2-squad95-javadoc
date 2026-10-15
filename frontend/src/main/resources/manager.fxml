@@ -207,7 +207,7 @@
                             <Label text="Order Soon!" style="-fx-font-size: 16px;"/>
                         </VBox>
                         <VBox HBox.hgrow="ALWAYS">
-                            <Label text="Stock Total" alignment="CENTER" maxWidth="Infinity" style="-fx-font-size: 18px;"/>
+                            <Label text="Stock Totals" alignment="CENTER" maxWidth="Infinity" style="-fx-font-size: 18px;"/>
                             <BarChart fx:id="inventoryStockChart" prefHeight="150">
                                 <xAxis><CategoryAxis/></xAxis>
                                 <yAxis><NumberAxis/></yAxis>
