@@ -38,13 +38,15 @@ public class LoginCtrl {
             if (rs.next()) {
                 String role = rs.getString("role");
                 boolean isManager = "manager".equalsIgnoreCase(role);
+                int employeeId = Integer.parseInt(idText); 
                 
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/cashier.fxml"));
                 Parent root = loader.load();
                 
                 CashierCtrl cashierCtrl = loader.getController();
                 cashierCtrl.setManagerAccess(isManager);
-                
+                cashierCtrl.setEmployeeId(employeeId); 
+
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 stage.setScene(new Scene(root, 1280, 720));
                 stage.show();

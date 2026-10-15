@@ -254,7 +254,14 @@ public class CashierCtrl extends Application implements Initializable {
         stage.show();
     }
 
-    
+    private int loggedInEmployeeId = -1;
+
+    /**
+     * Sets the ID of the employee currently using the register.
+     */
+    public void setEmployeeId(int employeeId) {
+        this.loggedInEmployeeId = employeeId;
+    }
 
     private void onCheckout(ActionEvent event) {
         int idx = getOrderIndexOfId(currProgOrderId);
@@ -262,8 +269,9 @@ public class CashierCtrl extends Application implements Initializable {
             new Alert(Alert.AlertType.WARNING, "Select an order first.").showAndWait();
             return;
         }
-        Order order = orderEntries.get(idx);
-        if (order.orderItems().isEmpty()) {
+        final Order orderToProcess = orderEntries.get(idx);
+        
+        if (orderToProcess.orderItems().isEmpty()) {
             new Alert(Alert.AlertType.WARNING, "This order is empty.").showAndWait();
             return;
         }
@@ -271,13 +279,13 @@ public class CashierCtrl extends Application implements Initializable {
         checkoutButton.setDisable(true);
         Task<OrderReceipt> task = new Task<>() {
             @Override protected OrderReceipt call() throws Exception {
-                return orderDAO.checkout(order, Session.employeeId, Session.taxRate);
+                return orderDAO.checkout(orderToProcess, loggedInEmployeeId, Session.taxRate);
             }
         };
         task.setOnSucceeded(e -> {
             checkoutButton.setDisable(false);
             OrderReceipt r = task.getValue();
-            removeFirstOrderOfId(order.id());
+            removeFirstOrderOfId(orderToProcess.id());
             new Alert(Alert.AlertType.INFORMATION, String.format(
                 "Order #%d placed.%nSubtotal: $%.2f%nTax: $%.2f%nTotal: $%.2f",
                 r.orderId(), r.subtotal(), r.tax(), r.grandTotal())).showAndWait();
