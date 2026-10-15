@@ -281,7 +281,8 @@ public class CashierCtrl extends Application implements Initializable {
         checkoutButton.setDisable(true);
         Task<OrderReceipt> task = new Task<>() {
             @Override protected OrderReceipt call() throws Exception {
-                return orderDAO.checkout(orderToProcess, loggedInEmployeeId, Session.taxRate);
+                // Now pulls the globally saved ID from the Session
+                return orderDAO.checkout(orderToProcess, Session.employeeId, Session.taxRate);
             }
         };
         task.setOnSucceeded(e -> {

@@ -72,6 +72,7 @@
                         </TableView>
                         <TableView fx:id="employeeTable" prefHeight="250" HBox.hgrow="ALWAYS">
                             <columns>
+                                <TableColumn fx:id="dashEmpIdCol" text="ID" prefWidth="50"/>
                                 <TableColumn fx:id="dashCashierCol" text="Cashier" prefWidth="100"/>
                                 <TableColumn fx:id="dashSalesCol" text="Sales made" prefWidth="100"/>
                                 <TableColumn fx:id="dashManagerCol" text="Manager" prefWidth="90"/>
@@ -177,6 +178,7 @@
                     </HBox>
                     <TableView fx:id="employeesFullTable" VBox.vgrow="ALWAYS" prefHeight="300">
                         <columns>
+                            <TableColumn fx:id="empTabIdCol" text="ID" prefWidth="50"/>
                             <TableColumn fx:id="cashierColumn" text="Cashier" prefWidth="150"/>
                             <TableColumn fx:id="salesColumn" text="Sales made" prefWidth="150"/>
                             <TableColumn fx:id="managerColumn" text="Manager" prefWidth="100"/>
