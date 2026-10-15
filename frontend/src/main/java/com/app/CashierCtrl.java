@@ -92,6 +92,8 @@ public class CashierCtrl extends Application implements Initializable {
 
     @FXML private Button managerViewButton;
 
+    @FXML private Button notesButton;
+
     // the working id used for tracking the currently selected
     // order. this should be transformed into a different id
     // for inserting into the database when submitted
@@ -449,6 +451,37 @@ public class CashierCtrl extends Application implements Initializable {
         Platform.runLater(() -> new Alert(Alert.AlertType.ERROR, "Database error: " + ex.getMessage()).showAndWait());
     }
 
+    private void onOpenOrderNotes(ActionEvent event) {
+        int idx = getOrderIndexOfId(currProgOrderId);
+        if (idx < 0) {
+            new Alert(Alert.AlertType.WARNING, "Select an order first.").showAndWait();
+            return;
+        }
+        final Order orderToNote = orderEntries.get(idx);
+
+        Stage popup = new Stage();
+        popup.setTitle("Notes for Order " + Integer.toString(orderToNote.id()));
+        VBox root = new VBox(10);
+        root.alignmentProperty().set(Pos.TOP_CENTER);
+        root.setPadding(new Insets(5, 5, 10, 5));
+
+        TextArea textArea = new TextArea();
+        textArea.setText(orderToNote.notes());
+        textArea.setPrefHeight(600);
+
+        Button confirmButton = new Button("Save and Close");
+        confirmButton.setOnAction(e -> {
+            orderToNote.notes = textArea.getText();
+            popup.close();
+        });
+
+        root.getChildren().addAll(textArea, confirmButton);
+
+        popup.setScene(new Scene(root, 350, 350));
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.show();
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resourceBundle) { 
         // https://blueskyworkshop.com/topics/Java-Pages/fx-ListView-Basics/
@@ -462,6 +495,8 @@ public class CashierCtrl extends Application implements Initializable {
 
         checkoutButton.setOnAction(this::onCheckout);
         deleteOrderButton.setOnAction(this::onDeleteOrder);
+
+        notesButton.setOnAction(this::onOpenOrderNotes);
     }
 
     @Override
