@@ -398,6 +398,11 @@ private void loadOrdersToday() {
                 new SimpleObjectProperty<>(data.getValue().totalOrders));
             finAmountCol.setCellValueFactory(data -> 
                 new SimpleObjectProperty<>(data.getValue().totalRevenue));
+
+            ColumnCurrencyFormatSetter<OrdersDayRow, Double> currencyFormatSetter =
+                new ColumnCurrencyFormatSetter<>("USD");
+            currencyFormatSetter.applyTo(finAmountCol);
+
             // TODO: determine if "met sales goal column" should be done
             //finMetGoalCol.setCellValueFactory(data -> 
                 //new SimpleObjectProperty<>("No"));
@@ -893,8 +898,6 @@ private void initializeOrdersTab() {
 
         xReportButton.setOnAction( this::createXReportPopupWindow );
 
-
-
         restockReportTableView.loadData();
         restockReportBtn.setOnAction( event -> { 
             restockReportTableView.loadData();
@@ -1081,12 +1084,20 @@ private void initializeOrdersTab() {
         cashierColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
         salesColumn.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().sales()));
         managerColumn.setCellValueFactory(d -> new SimpleBooleanProperty(d.getValue().isManager()));
+        
+        ColumnCurrencyFormatSetter<EmployeeRow, Number> currencyFormatSetter =
+                new ColumnCurrencyFormatSetter<>("USD");
+        currencyFormatSetter.applyTo(salesColumn);
+
         employeesFullTable.setItems(employees);
 
         if (dashCashierCol != null) {
             dashCashierCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
             dashSalesCol.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().sales()));
             dashManagerCol.setCellValueFactory(d -> new SimpleBooleanProperty(d.getValue().isManager()));
+            
+            currencyFormatSetter.applyTo(dashSalesCol);
+
             employeeTable.setItems(employees);
         }
     }
