@@ -117,6 +117,7 @@ public class ManagerCtrl {
         initializeEmployees();
         initializeInventory();
         initializeMenu();
+        initializeOrdersTab();
         refreshEmployees();
         LoadTopEmployees();
         refreshInventory();
@@ -201,16 +202,17 @@ public class ManagerCtrl {
         public Date date;
         public Integer totalOrders;
         public Double totalRevenue;
-        public String metSalesGoal;
+        //public String metSalesGoal;
     }
     @FXML private Label ordersTotalLabel;
     @FXML private Label revenueTotalLabel;
+    @FXML private Label ordersTabTotalLabel;
 
     @FXML private TableView<OrdersDayRow> financialsTable;
     @FXML TableColumn<OrdersDayRow, Date> finDayCol;
     @FXML TableColumn<OrdersDayRow, Integer> finTotalOrdersCol;
     @FXML TableColumn<OrdersDayRow, Double> finAmountCol;
-    @FXML TableColumn<OrdersDayRow, String> finMetGoalCol;
+    //@FXML TableColumn<OrdersDayRow, String> finMetGoalCol;
 
     @FXML private Label finOrdersTotalLabel;
     @FXML private Label finRevenueTotalLabel;
@@ -227,12 +229,36 @@ public class ManagerCtrl {
         public Double totalRevenue;
     }
 
+    public static class OrderTableRow {
+        public Integer id;
+        public String items;
+        public Double total;
+        public String date;
+        public String time;
+    }
+
+    @FXML private BarChart<String, Number> orderTrendChart;
+    @FXML private TableView<OrderTableRow> ordersTable;
+    @FXML private TableColumn<OrderTableRow, Number> orderIdCol;
+    @FXML private TableColumn<OrderTableRow, String> orderItemsCol;
+    @FXML private TableColumn<OrderTableRow, String> orderTotalCol;
+    @FXML private TableColumn<OrderTableRow, String> orderDateCol;
+    @FXML private TableColumn<OrderTableRow, String> orderTimeCol;
+
+    @FXML private TableView<OrderTableRow> dashOrdersTable;
+    @FXML private TableColumn<OrderTableRow, Number> dashOrderIdCol;
+    @FXML private TableColumn<OrderTableRow, String> dashOrderItemsCol;
+    @FXML private TableColumn<OrderTableRow, String> dashOrderTotalCol;
+    @FXML private TableColumn<OrderTableRow, String> dashOrderTimeCol;
+
+
     // Database Queries
+
     /** Loads the total number of orders for today and updates the label in the financials view.
      * 
      */
-    private void loadOrdersToday() {
-        // today's orders for Dashboard
+private void loadOrdersToday() {
+        // today's orders for Dashboard and Orders Tab
         String sql = "SELECT COUNT(id) FROM orders WHERE date = CURRENT_DATE;";
 
         try (Connection conn = Database.getConnection();
@@ -242,8 +268,11 @@ public class ManagerCtrl {
             if (rs.next()) {
                 String count = String.valueOf(rs.getInt(1));
                 
-                // Update Dashboard tab only
+                // Update Dashboard tab
                 if (ordersTotalLabel != null) ordersTotalLabel.setText(count);
+                
+                // Update Orders tab
+                if (ordersTabTotalLabel != null) ordersTabTotalLabel.setText(count);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -290,7 +319,7 @@ public class ManagerCtrl {
     /** Loads the revenue trend data from the database and populates the finRevenueTrendChart with the results.
      * 
      */
-private void loadRevenueTrend() {
+    private void loadRevenueTrend() {
         String sql = "SELECT TO_CHAR(date, 'Mon') AS month, SUM(subtotal) AS revenue " +
                      "FROM orders " +
                      "GROUP BY TO_CHAR(date, 'Mon'), EXTRACT(MONTH FROM date) " +
@@ -370,8 +399,8 @@ private void loadRevenueTrend() {
             finAmountCol.setCellValueFactory(data -> 
                 new SimpleObjectProperty<>(data.getValue().totalRevenue));
             // TODO: determine if "met sales goal column" should be done
-            finMetGoalCol.setCellValueFactory(data -> 
-                new SimpleObjectProperty<>("No"));
+            //finMetGoalCol.setCellValueFactory(data -> 
+                //new SimpleObjectProperty<>("No"));
             
             // TODO: either move this out of the function or use a different collection
             ObservableList<OrdersDayRow> entries = FXCollections.observableArrayList();
@@ -390,6 +419,8 @@ private void loadRevenueTrend() {
             e.printStackTrace();
         }
     }
+
+    
 
     /**
      * Represents a row of data held in the HourlySalesSummaryTable class.
@@ -539,6 +570,83 @@ private void loadRevenueTrend() {
          */
         public TableView<HourlySalesSummary> getView() {
             return view;
+        }
+    }
+
+    /** Initializes the orders tab by setting up the table columns, loading today's orders into the table, 
+     * and loading the hourly trend data into the chart.
+     */
+private void initializeOrdersTab() {
+        if (orderIdCol != null) {
+            orderIdCol.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().id));
+            orderItemsCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().items));
+            orderTotalCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("$%,.2f", data.getValue().total)));
+            orderDateCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().date));
+            orderTimeCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().time));
+        }
+
+        if (dashOrderIdCol != null) {
+            dashOrderIdCol.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().id));
+            dashOrderItemsCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().items));
+            dashOrderTotalCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("$%,.2f", data.getValue().total)));
+            dashOrderTimeCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().time));
+        }
+
+        ObservableList<OrderTableRow> tableData = FXCollections.observableArrayList();
+        String tableSql = "SELECT o.id, o.subtotal, o.date, o.time, string_agg(i.name, ', ') as item_names " +
+                          "FROM orders o " +
+                          "LEFT JOIN order_items oi ON o.id = oi.order_id " +
+                          "LEFT JOIN items i ON oi.item_id = i.id " +
+                          "WHERE o.date = CURRENT_DATE " +
+                          "GROUP BY o.id, o.subtotal, o.date, o.time " +
+                          "ORDER BY o.time DESC;";
+
+        try (Connection conn = Database.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(tableSql)) {
+             
+            while (rs.next()) {
+                OrderTableRow row = new OrderTableRow();
+                row.id = rs.getInt("id");
+                row.total = rs.getDouble("subtotal");
+                row.date = rs.getString("date");
+                row.time = rs.getString("time");
+                row.items = rs.getString("item_names");
+                if (row.items == null) row.items = "No items";
+                tableData.add(row);
+            }
+            
+            if (ordersTable != null) ordersTable.setItems(tableData);
+            if (dashOrdersTable != null) dashOrdersTable.setItems(tableData);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String chartSql = "SELECT EXTRACT(HOUR FROM CAST(time as TIME)) as hour, COUNT(id) as total_orders " +
+                          "FROM orders WHERE date = CURRENT_DATE " +
+                          "GROUP BY EXTRACT(HOUR FROM CAST(time as TIME)) " +
+                          "ORDER BY hour ASC;";
+                          
+        try (Connection conn = Database.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(chartSql)) {
+             
+            XYChart.Series<String, Number> series = new XYChart.Series<>();
+            series.setName("Orders Today");
+            
+            while (rs.next()) {
+                String hourLabel = rs.getInt("hour") + ":00";
+                int count = rs.getInt("total_orders");
+                series.getData().add(new XYChart.Data<>(hourLabel, count));
+            }
+            
+            if (orderTrendChart != null) {
+                orderTrendChart.getData().clear();
+                orderTrendChart.getData().add(series);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -1116,6 +1224,7 @@ private void loadRevenueTrend() {
     @FXML private TableColumn<InventoryItem, String> inventoryNameColumn;
     @FXML private TableColumn<InventoryItem, Number> inventoryQuantityColumn;
     @FXML private TableColumn<InventoryItem, String> inventoryUnitColumn;
+    @FXML private Label lowStockCountLabel;
     private final ObservableList<InventoryItem> inventoryItems = FXCollections.observableArrayList();
 
     /**
@@ -1132,9 +1241,22 @@ private void loadRevenueTrend() {
     /**
      * pulls the latest inventories from the database
      */
-    private void refreshInventory() {
+private void refreshInventory() {
         try {
             inventoryItems.setAll(inventoryDAO.getAll());
+            
+            String sql = "SELECT COUNT(id) FROM inventory WHERE stock < " + MIN_STOCK + ";";
+            try (Connection conn = Database.getConnection();
+                 Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
+                 
+                if (rs.next()) {
+                    int lowStockCount = rs.getInt(1);
+                    if (lowStockCountLabel != null) {
+                        lowStockCountLabel.setText(String.valueOf(lowStockCount));
+                    }
+                }
+            }
         } catch (SQLException e) {
             dbError(e);
         }

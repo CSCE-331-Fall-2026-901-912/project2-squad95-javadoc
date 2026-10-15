@@ -62,12 +62,12 @@
                         </VBox>
                     </HBox>
                     <HBox spacing="20" VBox.vgrow="ALWAYS">
-                        <TableView fx:id="inventoryTable" prefHeight="250" HBox.hgrow="ALWAYS">
+                        <TableView fx:id="dashOrdersTable" prefHeight="250" HBox.hgrow="ALWAYS">
                             <columns>
-                                <TableColumn fx:id="inventoryIdColumn" text="ID" prefWidth="70"/>
-                                <TableColumn fx:id="inventoryNameColumn" text="Item" prefWidth="200"/>
-                                <TableColumn fx:id="inventoryUnitColumn" text="Unit" prefWidth="120"/>
-                                <TableColumn fx:id="inventoryQuantityColumn" text="Quantity" prefWidth="150"/>
+                                <TableColumn fx:id="dashOrderIdCol" text="Order #" prefWidth="70"/>
+                                <TableColumn fx:id="dashOrderItemsCol" text="Items" prefWidth="180"/>
+                                <TableColumn fx:id="dashOrderTotalCol" text="Total" prefWidth="80"/>
+                                <TableColumn fx:id="dashOrderTimeCol" text="Time" prefWidth="100"/>
                             </columns>
                         </TableView>
                         <TableView fx:id="employeeTable" prefHeight="250" HBox.hgrow="ALWAYS">
@@ -113,7 +113,7 @@
                                 <TableColumn fx:id="finDayCol" text="Day" prefWidth="80"/>
                                 <TableColumn fx:id="finTotalOrdersCol" text="total order" prefWidth="100"/>
                                 <TableColumn fx:id="finAmountCol" text="amount" prefWidth="100"/>
-                                <TableColumn fx:id="finMetGoalCol" text="meets goal" prefWidth="100"/>
+                                <!-- <TableColumn fx:id="finMetGoalCol" text="meets goal" prefWidth="100"/> -->
                             </columns>
                         </TableView>
                     </VBox>
@@ -140,7 +140,7 @@
                     <HBox spacing="30">
                         <VBox styleClass="kpi-card kpi-red" alignment="CENTER" prefWidth="220" prefHeight="120">
                             <Label text="Orders today" style="-fx-font-size: 18px;"/>
-                            <Label text="42" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                            <Label fx:id="ordersTabTotalLabel" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
                         </VBox>
                         <VBox HBox.hgrow="ALWAYS">
                             <Label text="Order trend" alignment="CENTER" maxWidth="Infinity" style="-fx-font-size: 18px;"/>
@@ -150,14 +150,13 @@
                             </BarChart>
                         </VBox>
                     </HBox>
-                    
                     <TableView fx:id="ordersTable" VBox.vgrow="ALWAYS">
                         <columns>
-                            <TableColumn text="Order #" prefWidth="100"/>
-                            <TableColumn text="Items" prefWidth="300"/>
-                            <TableColumn text="total" prefWidth="100"/>
-                            <TableColumn text="date" prefWidth="150"/>
-                            <TableColumn text="time" prefWidth="150"/>
+                            <TableColumn fx:id="orderIdCol" text="Order #" prefWidth="100"/>
+                            <TableColumn fx:id="orderItemsCol" text="Items" prefWidth="300"/>
+                            <TableColumn fx:id="orderTotalCol" text="total" prefWidth="100"/>
+                            <TableColumn fx:id="orderDateCol" text="date" prefWidth="150"/>
+                            <TableColumn fx:id="orderTimeCol" text="time" prefWidth="150"/>
                         </columns>
                     </TableView>
                 </VBox>
@@ -203,12 +202,12 @@
                         <Button text="Add Item"  onAction="#addInventoryItem"/>
                         <Button text="Update Quantity" onAction="#updateInventoryQuantity"/>
                         <VBox styleClass="kpi-card kpi-red" alignment="CENTER" prefWidth="220" prefHeight="120">
-                            <Label text="Low Stock" style="-fx-font-size: 18px;"/>
-                            <Label text="##" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                            <Label text="Total Low Stock Items:" style="-fx-font-size: 18px;"/>
+                            <Label fx:id="lowStockCountLabel" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
                             <Label text="Order Soon!" style="-fx-font-size: 16px;"/>
                         </VBox>
                         <VBox HBox.hgrow="ALWAYS">
-                            <Label text="Stock Totals" alignment="CENTER" maxWidth="Infinity" style="-fx-font-size: 18px;"/>
+                            <Label text="Stock Total" alignment="CENTER" maxWidth="Infinity" style="-fx-font-size: 18px;"/>
                             <BarChart fx:id="inventoryStockChart" prefHeight="150">
                                 <xAxis><CategoryAxis/></xAxis>
                                 <yAxis><NumberAxis/></yAxis>
