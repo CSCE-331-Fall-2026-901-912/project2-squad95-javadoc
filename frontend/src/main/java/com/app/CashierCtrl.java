@@ -90,6 +90,8 @@ public class CashierCtrl extends Application implements Initializable {
 
     @FXML private Button deleteOrderButton;
 
+    @FXML private Button managerViewButton;
+
     // the working id used for tracking the currently selected
     // order. this should be transformed into a different id
     // for inserting into the database when submitted
@@ -224,6 +226,17 @@ public class CashierCtrl extends Application implements Initializable {
         orderEntries.get(currOrderIndex).orderItems().add(item);
     }
 
+    /**
+     * Toggles the visibility of the manager view button based on the logged-in user's role.
+     * @param isManager true if the user is a manager, false if they are a cashier.
+     */
+    public void setManagerAccess(boolean isManager) {
+        if (managerViewButton != null) {
+            managerViewButton.setVisible(isManager);
+            managerViewButton.setManaged(isManager);
+        }
+    }
+
     // TODO: speed up manager switching because it's a PITA to load for debugging everytime
     @FXML
     private void switchToManager(ActionEvent event) throws IOException {
@@ -240,6 +253,8 @@ public class CashierCtrl extends Application implements Initializable {
         stage.setScene(scene);
         stage.show();
     }
+
+    
 
     private void onCheckout(ActionEvent event) {
         int idx = getOrderIndexOfId(currProgOrderId);
@@ -445,13 +460,13 @@ public class CashierCtrl extends Application implements Initializable {
     public void start(Stage primaryStage) throws Exception {
         // Set the controller manually to avoid needing to respecify fx:controller 
         // attribute again for every .fxml import. fx:controller must not be set though
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/cashier.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/login.fxml")); // Changed to login.fxml
         // loader.setController(new CashierCtrl());
         Parent root = loader.load();
     
         Scene scene = new Scene(root, 1280, 720);
     
-        primaryStage.setTitle("FXML Welcome");
+        primaryStage.setTitle("POS System");
         primaryStage.setScene(scene);
         primaryStage.show();
 
