@@ -290,7 +290,7 @@ public class ManagerCtrl {
     /** Loads the revenue trend data from the database and populates the finRevenueTrendChart with the results.
      * 
      */
-    private void loadRevenueTrend() {
+private void loadRevenueTrend() {
         String sql = "SELECT TO_CHAR(date, 'Mon') AS month, SUM(subtotal) AS revenue " +
                      "FROM orders " +
                      "GROUP BY TO_CHAR(date, 'Mon'), EXTRACT(MONTH FROM date) " +
@@ -308,12 +308,31 @@ public class ManagerCtrl {
             while (rs.next()) {
                 String month = rs.getString("month");
                 double revenue = rs.getDouble("revenue");
-                finSeries.getData().add(new XYChart.Data<>(month, revenue));
-                dashSeries.getData().add(new XYChart.Data<>(month, revenue));
+                
+                XYChart.Data<String, Number> finData = new XYChart.Data<>(month, revenue);
+                XYChart.Data<String, Number> dashData = new XYChart.Data<>(month, revenue);
+                
+                // colors for bars
+                finData.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                    if (newNode != null) {
+                        newNode.setStyle(revenue >= 85000 ? "-fx-bar-fill: #22d428;" : "-fx-bar-fill: #e01f1f;"); // if >= $85,000 in monthly sales
+                    }
+                });
+                
+                dashData.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                    if (newNode != null) {
+                        newNode.setStyle(revenue >= 85000 ? "-fx-bar-fill: #22d428;" : "-fx-bar-fill: #e01f1f;");
+                    }
+                });
+
+                finSeries.getData().add(finData);
+                dashSeries.getData().add(dashData);
             }
-            //  Financials
+            
+            // Financials
             finRevenueTrendChart.getData().clear();
             finRevenueTrendChart.getData().add(finSeries);
+            
             // Dashboard
             if (revenueTrendChart != null) {
                 revenueTrendChart.getData().clear();
@@ -954,7 +973,6 @@ public class ManagerCtrl {
         cashierColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
         salesColumn.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().sales()));
         managerColumn.setCellValueFactory(d -> new SimpleBooleanProperty(d.getValue().isManager()));
-        //hoursColumn.setVisible(false); // no hours data in the schema
         employeesFullTable.setItems(employees);
 
         if (dashCashierCol != null) {

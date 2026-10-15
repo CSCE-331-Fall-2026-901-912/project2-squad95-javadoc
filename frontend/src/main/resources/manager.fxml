@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.app.ManagerCtrl">
+<BorderPane stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.app.ManagerCtrl">
     
     <!-- Navigation Sidebar -->
     <left>
@@ -72,13 +72,12 @@
                         </TableView>
                         <TableView fx:id="employeeTable" prefHeight="250" HBox.hgrow="ALWAYS">
                             <columns>
-                                <TableColumn text="Cashier" prefWidth="100"/>
-                                <TableColumn text="Sales made" prefWidth="100"/>
-                                <TableColumn text="Manager" prefWidth="90"/>
+                                <TableColumn fx:id="dashCashierCol" text="Cashier" prefWidth="100"/>
+                                <TableColumn fx:id="dashSalesCol" text="Sales made" prefWidth="100"/>
+                                <TableColumn fx:id="dashManagerCol" text="Manager" prefWidth="90"/>
                             </columns>
                         </TableView>
                     </HBox>
-                    
                 </VBox>
 
                 <!-- Financials -->
@@ -87,7 +86,7 @@
                         <HBox spacing="20">
                             <VBox styleClass="kpi-card kpi-green" alignment="CENTER" prefWidth="190" prefHeight="100">
                                 <Label text="Total Revenue" style="-fx-font-size: 18px;"/>
-                                <Label fx:id="finRevenueTotalLabel" text="\$24,680" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+                                <Label fx:id="finRevenueTotalLabel" text="\$0" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
                             </VBox>
                             <VBox styleClass="kpi-card kpi-red" alignment="CENTER" prefWidth="190" prefHeight="100">
                                 <!-- To be removed? -->
