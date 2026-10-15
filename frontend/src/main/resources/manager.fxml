@@ -103,7 +103,6 @@
                             <children>
                                 <Button mnemonicParsing="false" text="X-report" textAlignment="CENTER" fx:id="xReportButton" />
                                 <Button mnemonicParsing="false" text="Sales Report" textAlignment="CENTER" fx:id="salesReportButton" />
-                                <Button mnemonicParsing="false" text="Restock report" textAlignment="CENTER" fx:id="restockReportBtn" />
                             </children>
                         </HBox>               
                     </VBox>
@@ -225,6 +224,8 @@
                     <HBox spacing="20" alignment="CENTER_LEFT">
                         <Button text="Add Item" onAction="#addInventoryItem"/>
                         <Button text="Update Quantity" onAction="#updateInventoryQuantity"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button mnemonicParsing="false" text="Restock report" textAlignment="CENTER" fx:id="restockReportBtn" />
                     </HBox>
                 </VBox>
 
