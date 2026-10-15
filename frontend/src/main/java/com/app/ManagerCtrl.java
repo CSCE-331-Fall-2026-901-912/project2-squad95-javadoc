@@ -322,6 +322,7 @@ private void loadOrdersToday() {
     private void loadRevenueTrend() {
         String sql = "SELECT TO_CHAR(date, 'Mon') AS month, SUM(subtotal) AS revenue " +
                      "FROM orders " +
+                     "WHERE EXTRACT(YEAR FROM date) = 2025 " +
                      "GROUP BY TO_CHAR(date, 'Mon'), EXTRACT(MONTH FROM date) " +
                      "ORDER BY EXTRACT(MONTH FROM date);";
 
@@ -1064,12 +1065,14 @@ private void initializeOrdersTab() {
 
 
     @FXML private TableView<EmployeeRow> employeesFullTable;
+    @FXML private TableColumn<EmployeeRow, Number> empTabIdCol;
     @FXML private TableColumn<EmployeeRow, String> cashierColumn;
     @FXML private TableColumn<EmployeeRow, Number> hoursColumn;
     @FXML private TableColumn<EmployeeRow, Number> salesColumn;
     @FXML private TableColumn<EmployeeRow, Boolean> managerColumn;
 
     @FXML private TableView<EmployeeRow> employeeTable;
+    @FXML private TableColumn<EmployeeRow, Number> dashEmpIdCol;
     @FXML private TableColumn<EmployeeRow, String> dashCashierCol;
     @FXML private TableColumn<EmployeeRow, Number> dashHoursCol;
     @FXML private TableColumn<EmployeeRow, Number> dashSalesCol;
@@ -1081,6 +1084,7 @@ private void initializeOrdersTab() {
      * populating the table with employee data from the database.
      */
     private void initializeEmployees() {
+        if (empTabIdCol != null) empTabIdCol.setCellValueFactory(d -> new SimpleIntegerProperty(d.getValue().id()));
         cashierColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
         salesColumn.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().sales()));
         managerColumn.setCellValueFactory(d -> new SimpleBooleanProperty(d.getValue().isManager()));
@@ -1092,6 +1096,7 @@ private void initializeOrdersTab() {
         employeesFullTable.setItems(employees);
 
         if (dashCashierCol != null) {
+            if (dashEmpIdCol != null) dashEmpIdCol.setCellValueFactory(d -> new SimpleIntegerProperty(d.getValue().id()));
             dashCashierCol.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
             dashSalesCol.setCellValueFactory(d -> new SimpleDoubleProperty(d.getValue().sales()));
             dashManagerCol.setCellValueFactory(d -> new SimpleBooleanProperty(d.getValue().isManager()));
