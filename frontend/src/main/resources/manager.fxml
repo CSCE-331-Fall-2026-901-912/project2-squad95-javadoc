@@ -14,6 +14,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.DatePicker?>
 
 <BorderPane stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.app.ManagerCtrl">
     
@@ -26,6 +27,7 @@
             <Button text="Orders" onAction="#showOrders" prefWidth="200" styleClass="nav-btn"/>
             <Button text="Employees" onAction="#showEmployees" prefWidth="200" styleClass="nav-btn"/>
             <Button text="Inventory" onAction="#showInventory" prefWidth="200" styleClass="nav-btn"/>
+            <Button text="Product Usage" onAction="#showUsage" prefWidth="200" styleClass="nav-btn"/>
             <Button text="Cashier" onAction="#switchToCashier" prefWidth="200" styleClass="nav-btn"/>
         </VBox>
     </left>
@@ -228,6 +230,35 @@
                         <Region HBox.hgrow="ALWAYS"/>
                         <Button mnemonicParsing="false" text="Restock report" textAlignment="CENTER" fx:id="restockReportBtn" />
                     </HBox>
+                </VBox>
+
+                <VBox fx:id="usageView" spacing="20" visible="false" managed="false" style="-fx-padding: 25;">
+
+                    <Label text="Product Usage Chart" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Start Date:"/>
+                        <DatePicker fx:id="usageStartDate"/>
+
+                        <Label text="End Date:"/>
+                        <DatePicker fx:id="usageEndDate"/>
+
+                        <Button text="Generate Chart"
+                                onAction="#loadUsageChart"/>
+                    </HBox>
+
+                    <BarChart fx:id="usageChart" title="Inventory Usage" animated="false" legendVisible="false" VBox.vgrow="ALWAYS">
+
+                        <xAxis>
+                            <CategoryAxis label="Inventory Item"/>
+                        </xAxis>
+
+                        <yAxis>
+                            <NumberAxis label="Quantity Used"/>
+                        </yAxis>
+
+                    </BarChart>
+
                 </VBox>
 
             </StackPane>

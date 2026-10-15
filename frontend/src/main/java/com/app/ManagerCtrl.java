@@ -105,6 +105,7 @@ public class ManagerCtrl {
     @FXML private VBox employeesView;
     @FXML private VBox inventoryFullView;
     @FXML private VBox menuView;
+    @FXML private VBox usageView;
 
     @FXML
     /**
@@ -122,6 +123,8 @@ public class ManagerCtrl {
         LoadTopEmployees();
         refreshInventory();
         refreshMenu();
+
+        initializeUsageChart();
     }
     /**
      * Creates an an alert for a database exception describing the exception
@@ -140,7 +143,7 @@ public class ManagerCtrl {
      */
     private void showOnly(Region view) {
         for (Region r : List.of(dashboardView, financialsView, ordersView,
-                                employeesView, inventoryFullView, menuView)) {
+                                employeesView, inventoryFullView, menuView, usageView)) {
             boolean on = (r == view);
             r.setVisible(on);
             r.setManaged(on);
@@ -177,6 +180,8 @@ public class ManagerCtrl {
      * @param e
      */
     @FXML private void showMenu(ActionEvent e)       { showOnly(menuView); }
+
+    @FXML private void showUsage(ActionEvent event) {showOnly(usageView);}
     
     /**
      * Switches to the cashier view when the "Switch to Cashier" button is clicked.
@@ -1389,6 +1394,102 @@ private void initializeOrdersTab() {
         });
     }
 
+    
+
+
+/**
+ * Creates a popup window displaying inventory usage
+ * for a selected date range.
+ */
+
+
+    @FXML private DatePicker usageStartDate;
+    @FXML private DatePicker usageEndDate;
+    @FXML private BarChart<String, Number> usageChart;
+
+
+    
+    private void initializeUsageChart() {
+        usageStartDate.setValue(java.time.LocalDate.of(2025, 1, 1));
+        usageEndDate.setValue(java.time.LocalDate.of(2025, 12, 31));
+
+        usageStartDate.valueProperty().addListener((obs, oldDate, newDate) -> {
+            if (newDate != null) {
+                loadUsageChart();
+            }
+        });
+
+        usageEndDate.valueProperty().addListener((obs, oldDate, newDate) -> {
+            if (newDate != null) {
+                loadUsageChart();
+            }
+        });
+
+        loadUsageChart();
+    }
+
+
+    @FXML
+    private void loadUsageChart() {
+
+        if (usageStartDate.getValue() == null ||
+            usageEndDate.getValue() == null ||
+            usageStartDate.getValue().isAfter(usageEndDate.getValue())) {
+
+            new Alert(
+                Alert.AlertType.WARNING,
+                "Please select a valid date range."
+            ).showAndWait();
+            return;
+        }
+
+        String sql =
+            "SELECT inv.name, inv.unit, " +
+            "SUM(r.quantity) AS total_used " +
+            "FROM order_items oi " +
+            "JOIN orders o ON oi.order_id = o.id " +
+            "JOIN recipes r ON oi.item_id = r.item_id " +
+            "JOIN inventory inv ON r.inventory_id = inv.id " +
+            "WHERE o.date BETWEEN ? AND ? " +
+            "GROUP BY inv.id, inv.name, inv.unit " +
+            "ORDER BY total_used DESC";
+
+        XYChart.Series<String, Number> series =
+            new XYChart.Series<>();
+
+        series.setName("Inventory Used");
+
+        try (Connection conn = Database.getConnection();
+            java.sql.PreparedStatement stmt =
+                conn.prepareStatement(sql)) {
+
+            stmt.setDate(1, java.sql.Date.valueOf(usageStartDate.getValue()));
+            stmt.setDate(2, java.sql.Date.valueOf(usageEndDate.getValue()));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String name = rs.getString("name");
+                    String unit = rs.getString("unit");
+                    double used = rs.getDouble("total_used");
+
+                    series.getData().add(
+                        new XYChart.Data<>(
+                            name + " (" + unit + ")",
+                            used
+                        )
+                    );
+                }
+            }
+
+            usageChart.getData().setAll(series);
+
+        } catch (SQLException e) {
+            dbError(e);
+        }
+    }
+
+
+    
 
     @FXML private TableView<Item> menuTable;
     @FXML private TableColumn<Item, Number> menuIdColumn;
