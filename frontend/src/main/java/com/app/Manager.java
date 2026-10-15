@@ -9,8 +9,10 @@ import javafx.stage.Stage;
 public class Manager extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/manager.fxml"));
-        primaryStage.setTitle("Manager Dashboard");
+        Parent root = FXMLLoader.load(getClass().getResource("/login.fxml"));
+        primaryStage.setScene(new Scene(root, 800, 600));
+        // Parent root = FXMLLoader.load(getClass().getResource("/manager.fxml"));
+        // primaryStage.setTitle("Manager Dashboard");
         primaryStage.setScene(new Scene(root, 1024, 768));
         primaryStage.show();
     }
