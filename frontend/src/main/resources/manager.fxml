@@ -199,8 +199,6 @@
                 <!-- Inventory -->
                 <VBox fx:id="inventoryFullView" spacing="20" visible="false" managed="false">
                     <HBox spacing="30">
-                        <Button text="Add Item"  onAction="#addInventoryItem"/>
-                        <Button text="Update Quantity" onAction="#updateInventoryQuantity"/>
                         <VBox styleClass="kpi-card kpi-red" alignment="CENTER" prefWidth="220" prefHeight="120">
                             <Label text="Total Low Stock Items:" style="-fx-font-size: 18px;"/>
                             <Label fx:id="lowStockCountLabel" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
