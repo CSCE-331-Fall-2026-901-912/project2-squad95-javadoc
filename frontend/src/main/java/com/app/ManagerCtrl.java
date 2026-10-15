@@ -1225,6 +1225,7 @@ private void initializeOrdersTab() {
     @FXML private TableColumn<InventoryItem, Number> inventoryQuantityColumn;
     @FXML private TableColumn<InventoryItem, String> inventoryUnitColumn;
     @FXML private Label lowStockCountLabel;
+    @FXML private BarChart<String, Number> inventoryStockChart;
     private final ObservableList<InventoryItem> inventoryItems = FXCollections.observableArrayList();
 
     /**
@@ -1241,7 +1242,7 @@ private void initializeOrdersTab() {
     /**
      * pulls the latest inventories from the database
      */
-private void refreshInventory() {
+    private void refreshInventory() {
         try {
             inventoryItems.setAll(inventoryDAO.getAll());
             
@@ -1256,6 +1257,23 @@ private void refreshInventory() {
                         lowStockCountLabel.setText(String.valueOf(lowStockCount));
                     }
                 }
+            }
+            
+            if (inventoryStockChart != null) {
+                inventoryStockChart.getData().clear();
+                
+                XYChart.Series<String, Number> lowStockSeries = new XYChart.Series<>();
+                lowStockSeries.setName("Stock Level");
+                
+                for (InventoryItem item : inventoryItems) {
+                    if (item.stock() < MIN_STOCK) {
+                        String unit = item.unit() != null ? item.unit() : "units";
+                        String axisLabel = item.name() + "\n(" + unit + ")";
+                        
+                        lowStockSeries.getData().add(new XYChart.Data<>(axisLabel, item.stock()));
+                    }
+                }
+                inventoryStockChart.getData().add(lowStockSeries);
             }
         } catch (SQLException e) {
             dbError(e);

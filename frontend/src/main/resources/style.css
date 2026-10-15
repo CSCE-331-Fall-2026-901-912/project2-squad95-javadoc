@@ -36,3 +36,7 @@ root {
 #empTopCashiersChart .chart-bar.default-color0 {
     -fx-bar-fill: #f1e50d; 
 }
+
+#inventoryStockChart .chart-bar.default-color0 {
+    -fx-bar-fill: #ad19c8; 
+}
