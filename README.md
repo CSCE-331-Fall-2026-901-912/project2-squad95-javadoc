@@ -1,5 +1,5 @@
-# project2-squad95
-This contains the code for Project 2 of Squad 95, containing Kenny Le, Ethan Faulkner, Christopher Jermia, Jeffrey Yu, and Andrew Schrick. With the exception for grading purposes, these codes shall not be used without permission.
+# project2-squad95-javadoc
+This contains the documentations for Project 2 of Squad 95, containing Kenny Le, Ethan Faulkner, Christopher Jermia, Jeffrey Yu, and Andrew Schrick. With the exception for grading purposes, these codes shall not be used without permission.
 
 This project uses Gradle as a build tool and JavaFX as an application framework. 
 
