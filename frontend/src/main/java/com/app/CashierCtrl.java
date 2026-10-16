@@ -61,6 +61,11 @@ import io.github.cdimascio.dotenv.Dotenv;
 //maybe not needed
 import java.util.List;
 
+
+/**
+ * CashierCtrl
+ * Controller class for the cashier interface.
+*/
 public class CashierCtrl extends Application implements Initializable {
 
     private static final ItemDAO itemDAO = new ItemDAO();
@@ -107,6 +112,11 @@ public class CashierCtrl extends Application implements Initializable {
     private TilePane menuItemsPane;
     final ObservableList<ShopMenuItem> menuItems = FXCollections.observableArrayList();
     
+    /**
+     * @author Kenny Le
+     * Appends a new order to the internal list of order entries.
+     * @param event Event object provided by the click event. Unused.
+     */
     private void onNewOrderClick(ActionEvent event) {
         ObservableList<OrderItem> orderList = FXCollections.observableArrayList();
         ++latestProgOrderId;
@@ -114,6 +124,11 @@ public class CashierCtrl extends Application implements Initializable {
         orderEntries.add(newOrder);
     }
 
+    /**
+     * @author Kenny Le
+     * Connects the order list UI to their respective actions and listeners.
+     * Should only be called once during program startup.
+     */
     private void initializeOrderLists() {
         newOrderButton.setOnAction(this::onNewOrderClick);
         
@@ -135,6 +150,12 @@ public class CashierCtrl extends Application implements Initializable {
         // TODO for phase 4: delete/modify existing order item 
     }
 
+    /**
+     * @author Kenny Le
+     * Searches the internal order entries list to remove the first element matching the given ID.
+     * @param targetId The ID of the order to find and remove. This is not the index of the order.
+     * @return Whether or not an order of matching targetId was found and removed.
+     */
     private boolean removeFirstOrderOfId(int targetId) {
         // Linear search, because id =/= list index
         // would be better to use an observable map later on
@@ -151,6 +172,12 @@ public class CashierCtrl extends Application implements Initializable {
         return false;
     }
 
+    /**
+     * @author Kenny Le
+     * Searches the internal order entries list to return the index of first element matching the given ID.
+     * @param targetId The ID of the order to get. This is not the index of the order.
+     * @return The index of the matched order in the order entries list, or -1 if not found.
+     */
     private int getOrderIndexOfId(int targetId) {
         for (int i = 0; i < orderEntries.size(); ++i) {
             Order entry = orderEntries.get(i);
@@ -164,6 +191,11 @@ public class CashierCtrl extends Application implements Initializable {
         return -1;
     }
 
+    /**
+     * @author Kenny Le
+     * Method used by a button to delete orders. Deletes the currently selected order.
+     * @param event Unused button event object.
+     */
     private void onDeleteOrder(ActionEvent event) {
         removeFirstOrderOfId(currProgOrderId);
     } 
@@ -173,6 +205,11 @@ public class CashierCtrl extends Application implements Initializable {
     private double selectedDrinkPrice = 0.0;
     private double toppingTotal = 0.0;
 
+    /**
+     * @author Jeffrey Yu
+     * Populates the menu pane with a list of items given in the resources/items.csv file.
+     * Silently prints to the console upon any IO errors.
+     */
     public void initialize1() {
         System.out.println(new java.io.File("items.csv").getAbsolutePath());
 
@@ -221,6 +258,12 @@ public class CashierCtrl extends Application implements Initializable {
         }
     }
 
+    /**
+     * @author Kenny Le
+     * Appends the order item to the currently selected order.
+     * Does nothing if no order is selected.
+     * @param item The OrderItem to append to the currently selected order.
+     */
     private void addItemToCurrOrder(OrderItem item) {
         int currOrderIndex = getOrderIndexOfId(currProgOrderId);
         // handle case where no order is selected 
@@ -239,9 +282,15 @@ public class CashierCtrl extends Application implements Initializable {
         }
     }
 
-    // TODO: speed up manager switching because it's a PITA to load for debugging everytime
+    /**
+     * Changes the current view of the application from Cashier to Manager by
+     * reading manager.fxml. This is done on every call.
+     * @param event Unused button event.
+     * @throws IOException manager.fxml is malformed or missing from resources/. 
+     */
     @FXML
     private void switchToManager(ActionEvent event) throws IOException {
+        // TODO: speed up manager switching because it's a PITA to load for debugging everytime
         FXMLLoader loader = new FXMLLoader(
             getClass().getResource("/manager.fxml")
         );
@@ -260,11 +309,21 @@ public class CashierCtrl extends Application implements Initializable {
 
     /**
      * Sets the ID of the employee currently using the register.
+     * @param employeeId The ID of the employee logging in.
      */
     public void setEmployeeId(int employeeId) {
         this.loggedInEmployeeId = employeeId;
     }
 
+    /**
+     * @author Kenny Le
+     * @author Ethan Faulkner
+     * Sends the currently selected order to the database, then removes it from the internal order entries list. 
+     * Creates an alert if the selected order cannot be found or if the order has no items. 
+     * Creates a confirmation popup on success.
+     * Used as an action for the checkout button.
+     * @param event Unused button event.
+     */
     private void onCheckout(ActionEvent event) {
         int idx = getOrderIndexOfId(currProgOrderId);
         if (idx < 0) {
@@ -300,6 +359,13 @@ public class CashierCtrl extends Application implements Initializable {
         new Thread(task).start();
     }
 
+
+    /**
+     * @author Jeffrey Yu
+     * Constructs a popup for the employee to select toppings for the current drink to be added.
+     * This popup is populated with a cached set of toppings from the database.
+     * showSugarPopup() is called when the confirm button is clicked. 
+     */
     private void showToppingsPopup() {
         Stage popup = new Stage();
         popup.setTitle("Select Toppings");
@@ -340,6 +406,11 @@ public class CashierCtrl extends Application implements Initializable {
         popup.showAndWait();
     }
 
+    /**
+     * @author Jeffrey Yu
+     * Constructs a popup for the employee to select the sugar level for the current drink to be added.
+     * showIcePopup() is called when the confirm button is clicked. 
+     */
     private void showSugarPopup(Set<Topping> chosenToppings) {
         Stage popup = new Stage();
         popup.setTitle("Select Sugar Level");
