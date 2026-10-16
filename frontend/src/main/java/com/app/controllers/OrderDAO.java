@@ -1,12 +1,28 @@
 package com.app.controllers;
 
-import java.sql.*;
-import java.time.*;
-import com.app.models.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Time;
+import java.time.LocalDateTime;
+
 import com.app.Database;
+import com.app.models.Order;
+import com.app.models.OrderItem;
+import com.app.models.OrderReceipt;
+import com.app.models.Topping;
 
 public class OrderDAO {
-
+    /**
+     * Takes in information on the orders, calculate the total and return as a receipt
+     * @param order the drink order
+     * @param employeeId the id of the employee who placed the order
+     * @param taxRate rate of tax
+     * @return OrderReceipt
+     * @throws SQLException
+     */
     public OrderReceipt checkout(Order order, int employeeId, double taxRate) throws SQLException {
         double subtotal = order.orderItems().stream().mapToDouble(OrderItem::totalPrice).sum();
         subtotal = round2(subtotal);
@@ -90,5 +106,10 @@ public class OrderDAO {
         }
     }
 
+    /**
+     * rounds number to two decimal places
+     * @param v the number to be rounded
+     * @return a two decimal place double
+     */
     private static double round2(double v) { return Math.round(v * 100.0) / 100.0; }
 }

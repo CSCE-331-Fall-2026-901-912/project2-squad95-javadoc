@@ -1,12 +1,21 @@
 package com.app.controllers;
 
-import java.sql.*;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
+
 import com.app.Database;
 import com.app.models.EmployeeRow;
 
 public class EmployeeDAO {
+    /**
+     * Takes in the employees from the database and organize them in a row
+     * @return List<EmployeeRow>
+     * @throws SQLException
+     */
     public List<EmployeeRow> getAllWithSales() throws SQLException {
         String sql = """
             SELECT e.id, e.name, e.role, COALESCE(SUM(o.grandtotal), 0) AS sales
