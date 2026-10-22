@@ -13,7 +13,7 @@ import com.app.models.Topping;
 public class ToppingDAO {
     /**
      * Attracts the toppings from the SQL database and return it as a list
-     * @return List<Topping>
+     * @return List of all toppings from the database.
      * @throws SQLException
      */
     public List<Topping> getAll() throws SQLException {
