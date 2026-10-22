@@ -1,7 +1,11 @@
 /**
  * Session.java
  * This class manages the session for storing the employee and tax rate.
- * @author: Christopher Jermia, Kenny Le, Jeffrey Yu, Ethan Faulkner, Andrew Schrick
+ * @author: Christopher Jermia
+ * @author: Kenny Le
+ * @author: Jeffrey Yu
+ * @author: Ethan Faulkner
+ * @author: Andrew Schrick
  */
 
 package com.app;

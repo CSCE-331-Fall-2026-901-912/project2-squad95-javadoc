@@ -3,7 +3,11 @@
  * This is a class created for the Manager dashboard for the application.
  * It starts the application, loads the FXML file for login,
  * then sets the whole scene for the primary stage
- * @author: Christopher Jermia, Kenny Le, Jeffrey Yu, Ethan Faulkner, Andrew Schrick
+ * @author: Christopher Jermia
+ * @author: Kenny Le
+ * @author: Jeffrey Yu
+ * @author: Ethan Faulkner
+ * @author: Andrew Schrick
  */
 
 package com.app;

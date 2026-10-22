@@ -19,7 +19,11 @@ import java.sql.ResultSet;
  * Validates employee credentials against the database, sets up the active session, 
  * and switches the application view to the main cashier interface based on user roles.
  * 
- * @author Your Name/Team
+ * @author: Christopher Jermia
+ * @author: Kenny Le
+ * @author: Jeffrey Yu
+ * @author: Ethan Faulkner
+ * @author: Andrew Schrick
  * @version 1.0
  */
 public class LoginCtrl {
