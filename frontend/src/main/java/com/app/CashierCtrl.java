@@ -68,6 +68,9 @@ import java.util.List;
 */
 public class CashierCtrl extends Application implements Initializable {
 
+    /** Creates the cashier controller. */
+    public CashierCtrl() {}
+
     /** Represents the database table for order items. */
     private static final ItemDAO itemDAO = new ItemDAO();
     /** Represents the database table for toppings. */
@@ -430,6 +433,7 @@ public class CashierCtrl extends Application implements Initializable {
      * Constructs a popup for the employee to select the sugar level for the current drink to be added.
      * showIcePopup() is called when the confirm button is clicked. 
      * @author Jeffrey Yu
+     * @param chosenToppings the toppings selected for the current drink
      */
     private void showSugarPopup(Set<Topping> chosenToppings) {
         Stage popup = new Stage();
@@ -464,6 +468,7 @@ public class CashierCtrl extends Application implements Initializable {
      * Constructs a popup for the employee to select the ice level for the current drink to be added.
      * Creates and appends a new order item to the order's entries when Confirm is clicked. 
      * @author Jeffrey Yu
+     * @param chosenToppings the toppings selected for the current drink
      */
     private void showIcePopup(Set<Topping> chosenToppings) {
         Stage popup = new Stage();
@@ -524,7 +529,7 @@ public class CashierCtrl extends Application implements Initializable {
     /**
      * Populates the menu pane with buttons from the list of Item objects passed to this method, and 
      * assigns styling and action events 
-     * @param items
+     * @param items the menu items to display as buttons
      */
     private void populateMenuPane(List<Item> items) {
         menuItemsPane.getChildren().clear();
@@ -654,4 +659,4 @@ public class CashierCtrl extends Application implements Initializable {
         launch();
     }
 
-}
+}

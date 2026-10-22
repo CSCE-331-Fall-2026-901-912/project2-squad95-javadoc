@@ -9,7 +9,19 @@ import java.util.List;
 import com.app.models.Item;
 import com.app.Database;
 
+/**
+ * Data access object for menu items.
+ */
 public class ItemDAO {
+    /** Creates an item DAO. */
+    public ItemDAO() {}
+
+    /**
+     * Retrieves all menu items ordered by id.
+     *
+     * @return the list of menu items
+     * @throws SQLException if a database access error occurs
+     */
     public List<Item> getAll() throws SQLException {
         String sql = "SELECT id, name, base_price FROM items ORDER BY id";
         List<Item> items = new ArrayList<>();
@@ -23,6 +35,14 @@ public class ItemDAO {
         return items;
     }
 
+    /**
+     * Inserts a new menu item with the next available id.
+     *
+     * @param name the item name
+     * @param basePrice the base price of the item
+     * @return the newly created item
+     * @throws SQLException if a database access error occurs
+     */
     public Item insert(String name, double basePrice) throws SQLException {
         try (Connection conn = Database.getConnection()) {
             int id = Ids.nextId(conn, "items");
@@ -37,6 +57,12 @@ public class ItemDAO {
         }
     }
 
+    /**
+     * Updates the name and base price of an existing item.
+     *
+     * @param item the item containing the id and new values
+     * @throws SQLException if a database access error occurs
+     */
     public void update(Item item) throws SQLException {
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(
