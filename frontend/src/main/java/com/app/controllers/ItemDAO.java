@@ -10,6 +10,11 @@ import com.app.models.Item;
 import com.app.Database;
 
 public class ItemDAO {
+    /**
+     * Gets all menu items from database
+     * @return List of menu items as Item objects
+     * @throws SQLException 
+     */
     public List<Item> getAll() throws SQLException {
         String sql = "SELECT id, name, base_price FROM items ORDER BY id";
         List<Item> items = new ArrayList<>();
@@ -23,6 +28,13 @@ public class ItemDAO {
         return items;
     }
 
+    /**
+     * Inserts new menu item into database
+     * @param name Name of new menu item
+     * @param basePrice Base price of new menu item
+     * @return New Item object representing the added menu item
+     * @throws SQLException
+     */
     public Item insert(String name, double basePrice) throws SQLException {
         try (Connection conn = Database.getConnection()) {
             int id = Ids.nextId(conn, "items");
@@ -37,6 +49,10 @@ public class ItemDAO {
         }
     }
 
+    /**
+     * Updates an existing menu item in the database
+     * @param item Item object to be added to database
+     */
     public void update(Item item) throws SQLException {
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(

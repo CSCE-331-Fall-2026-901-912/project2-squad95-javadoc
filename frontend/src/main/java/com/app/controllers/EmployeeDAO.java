@@ -48,10 +48,33 @@ public class EmployeeDAO {
         }
     }
 
+    /**
+     * Updates employee name in database
+     * @param id Id of changed employee
+     * @param name New employee name
+     * @throws SQLException
+     */
     public void updateName(int id, String name) throws SQLException { exec("UPDATE employees SET name = ? WHERE id = ?", name, id); }
+    /**
+     * Updates employee role in database
+     * @param id Id of changed employee
+     * @param role Employee's new role
+     * @throws SQLException
+     */
     public void updateRole(int id, String role) throws SQLException { exec("UPDATE employees SET role = ? WHERE id = ?", role, id); }
+    /**
+     * Deletes employee from database
+     * @param id Id of employee to be deleted
+     * @throws SQLException
+     */
     public void delete(int id) throws SQLException { exec("DELETE FROM employees WHERE id = ?", id); }
 
+    /**
+     * Executes sql statement with parameters
+     * @param sql Sql statement to be executed
+     * @param params Parameters used in sql statement
+     * @throws SQLException
+     */
     private void exec(String sql, Object... params) throws SQLException {
         try (Connection conn = Database.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             for (int i = 0; i < params.length; i++) ps.setObject(i + 1, params[i]);
