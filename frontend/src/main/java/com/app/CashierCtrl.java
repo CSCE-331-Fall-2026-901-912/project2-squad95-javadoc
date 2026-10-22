@@ -68,48 +68,69 @@ import java.util.List;
 */
 public class CashierCtrl extends Application implements Initializable {
 
+    /** Represents the database table for order items. */
     private static final ItemDAO itemDAO = new ItemDAO();
+    /** Represents the database table for toppings. */
     private static final ToppingDAO toppingDAO = new ToppingDAO();
+    /** Represents the database table for the order history. */
     private static final OrderDAO orderDAO = new OrderDAO();
 
+    /** The list of toppings loaded from the database. Used by the toppings selection popup. */
     private volatile List<Topping> toppings = List.of();
+    /** Tracks information from the selected drink button to be used in creating an order item. */
     private Button selectedDrink = null;
+    /** Tracks the selected item used in creating an order item. */
     private Item selectedItem = null;
+    /** Tracks the user-selected sugar level used in creating an order item.*/
     private String selectedSugar = "100%";
+    /** Tracks the user-selected ice level used in creating an order item. */
     private String selectedIce = "Regular Ice";
 
     // Note: fx:id and variable name *must match* because of JavaFX reflection 
-    @FXML 
-    private ListView<Order> ordersList;
+    /** Displays the current list of orders to be modified and submitted to the database. */
+    @FXML private ListView<Order> ordersList;
     // NOTE: cellfactory is an alternative but that's for phase 4/5
+    /** Hold internal data for the current list of orders to be modified and submitted to the database. */
     final ObservableList<Order> orderEntries = FXCollections.observableArrayList();
 
-    @FXML 
-    private ListView<OrderItem> orderItemsList;
+    /** Displays the current list of items for the currently selected order. */
+    @FXML private ListView<OrderItem> orderItemsList;
 
-    @FXML 
-    private Button newOrderButton;
+    /** Button object for creating a new order. Mapped to its corresponding element in the cashier.fxml file. */
+    @FXML private Button newOrderButton;
 
-    @FXML
-    private Button checkoutButton;
+    /** Button object for submitting an order. Mapped to its corresponding element in the cashier.fxml file. */
+    @FXML private Button checkoutButton;
 
+    /** Button object for deleting the selected order. Mapped to its corresponding element in the cashier.fxml file. */
     @FXML private Button deleteOrderButton;
-
+    
+    /** 
+     * Button object for switching to the manager view for users with appropriate permissions. 
+     * Mapped to its corresponding element in the cashier.fxml file. 
+    */
     @FXML private Button managerViewButton;
 
+    /** Button object for editing the selected order's notes. Mapped to its corresponding element in the cashier.fxml file. */
     @FXML private Button notesButton;
 
-    // the working id used for tracking the currently selected
-    // order. this should be transformed into a different id
-    // for inserting into the database when submitted
+    /** A constant signifying that no order is currently selected. */
     final static int NO_ORDER_SELECTED = -1;
+
+
+    /**
+     * The working ID used for tracking the currently selected
+     * order. This should be transformed into a different ID
+     * for inserting into the database when submitted.
+     */
     private static int currProgOrderId = NO_ORDER_SELECTED;
 
-    // the id of the most recently created order. used for creating new orders
+    /** The ID of the most recently created order. Internally used for creating new orders. */
     private static int latestProgOrderId = 0; 
 
-    @FXML
-    private TilePane menuItemsPane;
+    /** A TilePane displaying available menu items from the database. */
+    @FXML private TilePane menuItemsPane;
+    /** Holds the data of menuItems displayed by menuItemsPane. */
     final ObservableList<ShopMenuItem> menuItems = FXCollections.observableArrayList();
     
     /**
@@ -200,10 +221,10 @@ public class CashierCtrl extends Application implements Initializable {
         removeFirstOrderOfId(currProgOrderId);
     } 
 
-    @FXML
-    private Label orderPreviewLabel;
-    private double selectedDrinkPrice = 0.0;
-    private double toppingTotal = 0.0;
+    /** Displays information about the currently selected order item in an order. */
+    @FXML private Label orderPreviewLabel;
+    // private double selectedDrinkPrice = 0.0;
+    // private double toppingTotal = 0.0;
 
     /**
      * @author Jeffrey Yu
@@ -241,7 +262,7 @@ public class CashierCtrl extends Application implements Initializable {
                     button.setStyle("-fx-background-color: lightgreen;");
 
                     selectedDrink = button;
-                    selectedDrinkPrice = price;
+                    // selectedDrinkPrice = price;
 
                     System.out.println("Selected: " + name);
                     System.out.println("Price: $" + price);
@@ -305,15 +326,15 @@ public class CashierCtrl extends Application implements Initializable {
         stage.show();
     }
 
-    private int loggedInEmployeeId = -1;
+    // private int loggedInEmployeeId = -1;
 
-    /**
-     * Sets the ID of the employee currently using the register.
-     * @param employeeId The ID of the employee logging in.
-     */
-    public void setEmployeeId(int employeeId) {
-        this.loggedInEmployeeId = employeeId;
-    }
+    // /**
+    //  * Sets the ID of the employee currently using the register.
+    //  * @param employeeId The ID of the employee logging in.
+    //  */
+    // public void setEmployeeId(int employeeId) {
+    //     // this.loggedInEmployeeId = employeeId;
+    // }
 
     /**
      * @author Kenny Le
@@ -440,6 +461,11 @@ public class CashierCtrl extends Application implements Initializable {
         popup.show();
     }
 
+    /**
+     * @author Jeffrey Yu
+     * Constructs a popup for the employee to select the ice level for the current drink to be added.
+     * Creates and appends a new order item to the order's entries when Confirm is clicked. 
+     */
     private void showIcePopup(Set<Topping> chosenToppings) {
         Stage popup = new Stage();
         popup.setTitle("Select Ice Level");
@@ -480,7 +506,10 @@ public class CashierCtrl extends Application implements Initializable {
         popup.show();
     }
     
-    
+    /**
+     * Fetches menu items from the database, then attempts to populate the menu pane with fetched menu items.
+     * Shows an error message if fetching from the database fails.
+     */
     private void loadMenu() {
         Task<List<Item>> task = new Task<>() {
             @Override protected List<Item> call() throws Exception {
@@ -493,6 +522,11 @@ public class CashierCtrl extends Application implements Initializable {
         new Thread(task).start();
     }
     
+    /**
+     * Populates the menu pane with buttons from the list of Item objects passed to this method, and 
+     * assigns styling and action events 
+     * @param items
+     */
     private void populateMenuPane(List<Item> items) {
         menuItemsPane.getChildren().clear();
         for (Item item : items) {
@@ -518,11 +552,23 @@ public class CashierCtrl extends Application implements Initializable {
         }
     }
 
+    /**
+     * For errors related to the database. Prints the stack trace leading to the error
+     * and displays an error message to the user.
+     * @param ex The database exception object holding relevant error information.
+     */
     private static void showError(Throwable ex) {
         ex.printStackTrace();
         Platform.runLater(() -> new Alert(Alert.AlertType.ERROR, "Database error: " + ex.getMessage()).showAndWait());
     }
 
+    /**
+     * @author Kenny Le
+     * Button action for creating a popup menu allowing the user to edit the notes
+     * for the currently selected order. Saves user-inputted text for the currently
+     * selected order when the confirmButton is clicked.
+     * @param event Unused button event.
+     */
     private void onOpenOrderNotes(ActionEvent event) {
         int idx = getOrderIndexOfId(currProgOrderId);
         if (idx < 0) {
@@ -554,6 +600,12 @@ public class CashierCtrl extends Application implements Initializable {
         popup.show();
     }
 
+    /** 
+     * Initializes the cashier interface when called after login, 
+     * attaching the appropriate data and actions to views and buttons in the UI. 
+     * @param location Unused URL parameter.
+     * @param resourceBundle Unused ResourceBundle parameter.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resourceBundle) { 
         // https://blueskyworkshop.com/topics/Java-Pages/fx-ListView-Basics/
@@ -571,6 +623,14 @@ public class CashierCtrl extends Application implements Initializable {
         notesButton.setOnAction(this::onOpenOrderNotes);
     }
 
+    /**    (non-Javadoc)
+     * First loads the login scene for the interface (see java.com.app.LoginCtrl),
+     * which should load the cashier scene after a successful login.
+     * Sets the initial size and name of the application.
+     * @param primaryStage The stage object used by the main application.
+     * @throws Exception Exception may be thrown if the login.fxml file is malformed.
+     * @see javafx.application.Application#start(javafx.stage.Stage)
+     */
     @Override
     public void start(Stage primaryStage) throws Exception {
         // Set the controller manually to avoid needing to respecify fx:controller 
@@ -587,6 +647,10 @@ public class CashierCtrl extends Application implements Initializable {
 
     }
 
+    /**
+     * Launches the application. The start() method is indirectly invoked.
+     * @param args Command line arguments, which are unused.
+     */
     public static void main(String[] args) {
         launch();
     }
