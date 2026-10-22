@@ -10,13 +10,16 @@ import com.app.models.InventoryItem;
 import com.app.models.Item;
 import com.app.models.Recipe;
 
+/**
+ * Data access object for recipes.
+ */
 public class RecipeDAO {
     /**
      * Attracts the recipes from the SQL database and return it as a record with the item name and the item recipe
-     * @param item
-     * @param recipe
+     * @param item The menu item to insert.
+     * @param recipe The recipe to modify.
      * @return Recipe
-     * @throws SQLException
+     * @throws SQLException when failing to retrieve data from the database.
      */
     public Recipe insert(Item item, Map<InventoryItem, Integer> recipe) throws SQLException {
         try (Connection conn = Database.getConnection()) {

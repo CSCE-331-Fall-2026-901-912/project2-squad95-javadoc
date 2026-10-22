@@ -10,11 +10,14 @@ import java.util.List;
 import com.app.Database;
 import com.app.models.Topping;
 
+/**
+ * Data access object for toppings.
+ */
 public class ToppingDAO {
     /**
      * Attracts the toppings from the SQL database and return it as a list
      * @return List of all toppings from the database.
-     * @throws SQLException
+     * @throws SQLException if a database access error occurs
      */
     public List<Topping> getAll() throws SQLException {
         String sql = "SELECT id, name, base_price FROM toppings ORDER BY id";

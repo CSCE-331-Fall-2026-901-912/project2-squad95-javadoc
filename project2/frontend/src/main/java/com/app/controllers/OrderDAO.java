@@ -14,6 +14,9 @@ import com.app.models.OrderItem;
 import com.app.models.OrderReceipt;
 import com.app.models.Topping;
 
+/**
+ * Data access object for order entries.
+ */
 public class OrderDAO {
     /**
      * Takes in information on the orders, calculate the total and return as a receipt
