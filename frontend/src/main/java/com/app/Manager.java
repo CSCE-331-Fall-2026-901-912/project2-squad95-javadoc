@@ -18,8 +18,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * Application entry point that launches the login screen.
+ */
 public class Manager extends Application {
-    @Override
+    /** Creates the application instance. */
+    public Manager() {}
+
     /**
      * Start: the main entry point for JavaFX applications.
      * Loads the FXML file for the login screen and sets it 
@@ -28,6 +33,7 @@ public class Manager extends Application {
      * @param primaryStage The primary stage for this application - with scenes
      * @throws Exception if an error occurs during loading of the FXML file.
      */
+    @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/login.fxml"));
         // 4:3 display ratio, can be adjusted per user preference
@@ -43,4 +49,4 @@ public class Manager extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-}
+}

@@ -27,7 +27,9 @@ import java.sql.ResultSet;
  * @version 1.0
  */
 public class LoginCtrl {
-    
+    /** Creates the login controller. */
+    public LoginCtrl() {}
+
     /** Text field for entering the employee ID. */
     @FXML 
     private TextField employeeIdField;
@@ -92,4 +94,4 @@ public class LoginCtrl {
             errorLabel.setText("Database error occurred");
         }
     }
-}
+}

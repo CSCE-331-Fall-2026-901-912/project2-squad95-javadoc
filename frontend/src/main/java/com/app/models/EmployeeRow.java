@@ -9,5 +9,10 @@ package com.app.models;
  * @param sales total sales of orders made by the employee
  */
 public record EmployeeRow(int id, String name, String role, double sales) {
+    /**
+     * Checks whether this employee is a manager.
+     *
+     * @return {@code true} if the role is "manager" (case-insensitive)
+     */
     public boolean isManager() { return "manager".equalsIgnoreCase(role); }
-}
+}

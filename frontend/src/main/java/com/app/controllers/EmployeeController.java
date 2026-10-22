@@ -10,7 +10,19 @@ import java.util.List;
 import com.app.Database;
 import com.app.models.Employee;
 
+/**
+ * Controller providing access to employee records.
+ */
 public class EmployeeController {
+    /** Creates an employee controller. */
+    public EmployeeController() {}
+
+    /**
+     * Retrieves all employees from the database.
+     *
+     * @return the list of all employees
+     * @throws SQLException if a database access error occurs
+     */
     public List<Employee> getAll() throws SQLException {
         String sql = "SELECT id, name, role FROM toppings";
         List<Employee> employees = new ArrayList<>();

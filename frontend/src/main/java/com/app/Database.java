@@ -17,10 +17,15 @@ import java.sql.SQLException;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
+/**
+ * Provides database connections for the application, configured via environment variables.
+ */
 public final class Database {
-    // Connection parameters for the database, for host, user, and password
+    /** JDBC URL of the database host. */
     private static final String URL;
+    /** Database user name. */
     private static final String USER;
+    /** Database password. */
     private static final String PASSWORD;
 
     static {
@@ -30,7 +35,9 @@ public final class Database {
         PASSWORD = dotenv.get("DB_PASSWORD");
     }
 
+    /** Utility class; not instantiable. */
     private Database() {}
+
     /**
      * Gets a connection to the database.
      *

@@ -162,41 +162,45 @@ public class ManagerCtrl {
     
     /**
      * Displays dashboard view
-     * @param e
+     * @param e the triggering action event
      */
     @FXML private void showDashboard(ActionEvent e)  { showOnly(dashboardView); }
     /**
      * Displays financials view
-     * @param e
+     * @param e the triggering action event
      */
     @FXML private void showFinancials(ActionEvent e) { showOnly(financialsView); }
     /**
      * Displays orders view
-     * @param e
+     * @param e the triggering action event
      */
     @FXML private void showOrders(ActionEvent e)     { showOnly(ordersView); }
     /**
      * Displays the employees in the store
-     * @param e
+     * @param e the triggering action event
      */
     @FXML private void showEmployees(ActionEvent e)  { showOnly(employeesView); }
     /**
      * Displays the list of inventory
-     * @param e
+     * @param e the triggering action event
      */
     @FXML private void showInventory(ActionEvent e)  { showOnly(inventoryFullView); }
     /**
      * Displays the menu view
-     * @param e
+     * @param e the triggering action event
      */
     @FXML private void showMenu(ActionEvent e)       { showOnly(menuView); }
 
+    /**
+     * Displays the usage view
+     * @param event the triggering action event
+     */
     @FXML private void showUsage(ActionEvent event) {showOnly(usageView);}
     
     /**
      * Switches to the cashier view when the "Switch to Cashier" button is clicked.
-     * @param event
-     * @throws IOException
+     * @param event the triggering action event
+     * @throws IOException if the cashier FXML cannot be loaded
      */
     @FXML
     private void switchToCashier(ActionEvent event) throws IOException {
@@ -219,18 +223,27 @@ public class ManagerCtrl {
         public Double totalRevenue;
         //public String metSalesGoal;
     }
+    /** Label showing the total number of orders. */
     @FXML private Label ordersTotalLabel;
     @FXML private Label revenueTotalLabel;
+    /** Label showing the order total in the orders view. */
     @FXML private Label ordersTabTotalLabel;
 
+    /** Table of daily order totals in the financials view. */
     @FXML private TableView<OrdersDayRow> financialsTable;
+    /** Day column in the financials table. */
     @FXML TableColumn<OrdersDayRow, Date> finDayCol;
+    /** Total orders column in the financials table. */
     @FXML TableColumn<OrdersDayRow, Integer> finTotalOrdersCol;
+    /** Revenue amount column in the financials table. */
     @FXML TableColumn<OrdersDayRow, Double> finAmountCol;
     //@FXML TableColumn<OrdersDayRow, String> finMetGoalCol;
 
+    /** Label showing the total number of orders in the financials view. */
     @FXML private Label finOrdersTotalLabel;
+    /** Label showing the total revenue in the financials view. */
     @FXML private Label finRevenueTotalLabel;
+    /** Bar chart of the revenue trend in the financials view. */
     @FXML private BarChart<String, Number> finRevenueTrendChart;
     @FXML private BarChart<String, Number> revenueTrendChart;
 
@@ -262,17 +275,28 @@ public class ManagerCtrl {
     }
 
     @FXML private BarChart<String, Number> orderTrendChart;
+    /** Table of orders in the orders view. */
     @FXML private TableView<OrderTableRow> ordersTable;
+    /** Order id column in the orders table. */
     @FXML private TableColumn<OrderTableRow, Number> orderIdCol;
+    /** Items column in the orders table. */
     @FXML private TableColumn<OrderTableRow, String> orderItemsCol;
+    /** Order total column in the orders table. */
     @FXML private TableColumn<OrderTableRow, String> orderTotalCol;
+    /** Order date column in the orders table. */
     @FXML private TableColumn<OrderTableRow, String> orderDateCol;
+    /** Order time column in the orders table. */
     @FXML private TableColumn<OrderTableRow, String> orderTimeCol;
 
+    /** Table of recent orders shown on the dashboard. */
     @FXML private TableView<OrderTableRow> dashOrdersTable;
+    /** Order id column in the dashboard orders table. */
     @FXML private TableColumn<OrderTableRow, Number> dashOrderIdCol;
+    /** Items column in the dashboard orders table. */
     @FXML private TableColumn<OrderTableRow, String> dashOrderItemsCol;
+    /** Order total column in the dashboard orders table. */
     @FXML private TableColumn<OrderTableRow, String> dashOrderTotalCol;
+    /** Order time column in the dashboard orders table. */
     @FXML private TableColumn<OrderTableRow, String> dashOrderTimeCol;
 
 
@@ -468,6 +492,7 @@ private void loadOrdersToday() {
      * ColumnCurrencyFormatSetter: Helper class for setting columns' format to currency.
      * This should be used only after calling .setCellValueFactory() on columns to be formatted. 
      * @param <RowData> The structure representing each row of the Table.
+     * @param <T> The type of data in the column to be formatted as currency.
      */
     class ColumnCurrencyFormatSetter<RowData, T> {
         NumberFormat currencyFormat;
@@ -1085,8 +1110,9 @@ private void loadOrdersToday() {
     
     /** refreshes the financials view by reloading the total revenue, orders today, 
      * and revenue trend data from the database.
-     * @deprecated
+     * @deprecated no longer used; superseded by the newer financials refresh logic
      */
+    @Deprecated 
     private void refreshFinanicals() {
         try { 
             loadTotalRevenue();
@@ -1098,20 +1124,32 @@ private void loadOrdersToday() {
     }
 
 
+    /** Full employees table in the employees view. */
     @FXML private TableView<EmployeeRow> employeesFullTable;
+    /** Employee id column in the employees table. */
     @FXML private TableColumn<EmployeeRow, Number> empTabIdCol;
+    /** Employee name column in the employees table. */
     @FXML private TableColumn<EmployeeRow, String> cashierColumn;
+    /** Hours worked column in the employees table. */
     @FXML private TableColumn<EmployeeRow, Number> hoursColumn;
     @FXML private TableColumn<EmployeeRow, Number> salesColumn;
+    /** Manager flag column in the employees table. */
     @FXML private TableColumn<EmployeeRow, Boolean> managerColumn;
 
+    /** Employee table shown on the dashboard. */
     @FXML private TableView<EmployeeRow> employeeTable;
+    /** Employee id column in the dashboard employee table. */
     @FXML private TableColumn<EmployeeRow, Number> dashEmpIdCol;
+    /** Employee name column in the dashboard employee table. */
     @FXML private TableColumn<EmployeeRow, String> dashCashierCol;
+    /** Hours worked column in the dashboard employee table. */
     @FXML private TableColumn<EmployeeRow, Number> dashHoursCol;
+    /** Sales column in the dashboard employee table. */
     @FXML private TableColumn<EmployeeRow, Number> dashSalesCol;
+    /** Manager flag column in the dashboard employee table. */
     @FXML private TableColumn<EmployeeRow, Boolean> dashManagerCol;
     
+    /** Observable list of employee rows backing the employee tables. */
     private final ObservableList<EmployeeRow> employees = FXCollections.observableArrayList();
 
     /** Initializes the employees table view by setting up the cell value factories for each column and 
@@ -1231,6 +1269,7 @@ private void loadOrdersToday() {
     }
 
     @FXML BarChart<Number, String> topCashiersChart;
+    /** Bar chart of top cashiers by sales. */
     @FXML BarChart<Number, String> empTopCashiersChart;
 
     /** 
@@ -1273,13 +1312,21 @@ private void loadOrdersToday() {
     }
 
 
+    /** Full inventory table in the inventory view. */
     @FXML private TableView<InventoryItem> inventoryFullTable;
+    /** Item id column in the inventory table. */
     @FXML private TableColumn<InventoryItem, Number> inventoryIdColumn;
+    /** Item name column in the inventory table. */
     @FXML private TableColumn<InventoryItem, String> inventoryNameColumn;
+    /** Stock quantity column in the inventory table. */
     @FXML private TableColumn<InventoryItem, Number> inventoryQuantityColumn;
+    /** Unit of measure column in the inventory table. */
     @FXML private TableColumn<InventoryItem, String> inventoryUnitColumn;
+    /** Label showing the number of low-stock inventory items. */
     @FXML private Label lowStockCountLabel;
+    /** Bar chart of current inventory stock levels. */
     @FXML private BarChart<String, Number> inventoryStockChart;
+    /** Observable list of inventory items backing the inventory table. */
     private final ObservableList<InventoryItem> inventoryItems = FXCollections.observableArrayList();
 
     /**
@@ -1530,10 +1577,15 @@ private void loadOrdersToday() {
 
     
 
+    /** Table of menu items in the menu view. */
     @FXML private TableView<Item> menuTable;
+    /** Item id column in the menu table. */
     @FXML private TableColumn<Item, Number> menuIdColumn;
+    /** Item name column in the menu table. */
     @FXML private TableColumn<Item, String> menuNameColumn;
+    /** Item price column in the menu table. */
     @FXML private TableColumn<Item, Number> menuPriceColumn;
+    /** Observable list of menu items backing the menu table. */
     private final ObservableList<Item> menuItems = FXCollections.observableArrayList();
 
     /**
@@ -1635,7 +1687,12 @@ private void loadOrdersToday() {
     }
 
     /**
-     * Prompts user to change the name or price of a menu item
+     * Builds a recipe from the values entered in the add-menu-item dialog.
+     *
+     * @param nameField the text field containing the item name
+     * @param priceField the text field containing the item base price
+     * @param qtyFields the quantity fields keyed by inventory item
+     * @return the constructed recipe, or {@code null} if the input is invalid
      */
     private Recipe buildRecipe(TextField nameField, TextField priceField,
                             Map<InventoryItem, TextField> qtyFields) {

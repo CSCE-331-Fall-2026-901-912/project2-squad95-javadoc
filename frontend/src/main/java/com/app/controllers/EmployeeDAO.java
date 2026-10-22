@@ -10,11 +10,17 @@ import java.util.List;
 import com.app.Database;
 import com.app.models.EmployeeRow;
 
+/**
+ * Data access object for employee records.
+ */
 public class EmployeeDAO {
+    /** Creates an employee DAO. */
+    public EmployeeDAO() {}
+
     /**
      * Takes in the employees from the database and organize them in a row
      * @return the list of all employees from the database with associated sales
-     * @throws SQLException
+     * @throws SQLException if a database access error occurs
      */
     public List<EmployeeRow> getAllWithSales() throws SQLException {
         String sql = """
@@ -35,6 +41,13 @@ public class EmployeeDAO {
         return list;
     }
 
+    /**
+     * Inserts a new employee with the next available id.
+     *
+     * @param name the employee's name
+     * @param role the employee's role (cashier or manager)
+     * @throws SQLException if a database access error occurs
+     */
     public void insert(String name, String role) throws SQLException {
         try (Connection conn = Database.getConnection()) {
             int id = Ids.nextId(conn, "employees");
@@ -48,14 +61,43 @@ public class EmployeeDAO {
         }
     }
 
+    /**
+     * Updates an employee's name.
+     *
+     * @param id the employee id
+     * @param name the new name
+     * @throws SQLException if a database access error occurs
+     */
     public void updateName(int id, String name) throws SQLException { exec("UPDATE employees SET name = ? WHERE id = ?", name, id); }
+
+    /**
+     * Updates an employee's role.
+     *
+     * @param id the employee id
+     * @param role the new role
+     * @throws SQLException if a database access error occurs
+     */
     public void updateRole(int id, String role) throws SQLException { exec("UPDATE employees SET role = ? WHERE id = ?", role, id); }
+
+    /**
+     * Deletes an employee.
+     *
+     * @param id the id of the employee to delete
+     * @throws SQLException if a database access error occurs
+     */
     public void delete(int id) throws SQLException { exec("DELETE FROM employees WHERE id = ?", id); }
 
+    /**
+     * Executes a parameterized update statement.
+     *
+     * @param sql the SQL statement with {@code ?} placeholders
+     * @param params the values bound to the placeholders, in order
+     * @throws SQLException if a database access error occurs
+     */
     private void exec(String sql, Object... params) throws SQLException {
         try (Connection conn = Database.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             for (int i = 0; i < params.length; i++) ps.setObject(i + 1, params[i]);
             ps.executeUpdate();
         }
     }
-}
+}

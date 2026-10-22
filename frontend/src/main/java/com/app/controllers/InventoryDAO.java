@@ -6,7 +6,19 @@ import java.util.ArrayList;
 import com.app.models.InventoryItem;
 import com.app.Database;
 
+/**
+ * Data access object for inventory records.
+ */
 public class InventoryDAO {
+    /** Creates an inventory DAO. */
+    public InventoryDAO() {}
+
+    /**
+     * Retrieves all inventory items ordered by id.
+     *
+     * @return the list of inventory items
+     * @throws SQLException if a database access error occurs
+     */
     public List<InventoryItem> getAll() throws SQLException {
         String sql = "SELECT id, name, unit, stock FROM inventory ORDER BY id";
         List<InventoryItem> list = new ArrayList<>();
@@ -21,6 +33,15 @@ public class InventoryDAO {
         return list;
     }
 
+    /**
+     * Inserts a new inventory item with the next available id.
+     *
+     * @param name the item name
+     * @param unit the unit of measure
+     * @param stock the initial stock quantity
+     * @return the newly created inventory item
+     * @throws SQLException if a database access error occurs
+     */
     public InventoryItem insert(String name, String unit, int stock) throws SQLException {
         try (Connection conn = Database.getConnection()) {
             int id = Ids.nextId(conn, "inventory");
@@ -36,6 +57,13 @@ public class InventoryDAO {
         }
     }
 
+    /**
+     * Updates the stock quantity of an inventory item.
+     *
+     * @param id the inventory item id
+     * @param stock the new stock quantity
+     * @throws SQLException if a database access error occurs
+     */
     public void updateStock(int id, int stock) throws SQLException {
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement("UPDATE inventory SET stock = ? WHERE id = ?")) {
