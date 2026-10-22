@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+
+<GridPane prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.app.CashierCtrl">
+  <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="295.3333740234375" minWidth="10.0" percentWidth="25.0" prefWidth="142.33334350585938" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="381.0" minWidth="10.0" percentWidth="50.0" prefWidth="301.33335367838544" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="374.6666259765625" minWidth="10.0" percentWidth="25.0" prefWidth="150.66664632161456" />
+  </columnConstraints>
+  <rowConstraints>
+    <RowConstraints />
+    <RowConstraints maxHeight="131.33332061767578" minHeight="0.0" prefHeight="34.33333524068197" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="406.6666666666667" minHeight="10.0" prefHeight="326.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="178.99998474121094" minHeight="0.0" prefHeight="68.66664632161456" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="178.99998474121094" minHeight="10.0" prefHeight="72.66668701171875" vgrow="SOMETIMES" />
+  </rowConstraints>
+   <children>
+      <ScrollPane hbarPolicy="NEVER" pannable="true" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+         <content>
+            <TilePane fx:id="menuItemsPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefColumns="3" prefHeight="300.0" prefRows="3" prefTileHeight="100.0" prefTileWidth="100.0" prefWidth="639.0">
+               <!-- <children>
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Pearl Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Green Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Black Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Classic Oolong Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Honey Green Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Honey Black Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Honey Oolong Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Honey Pearl Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Mango Green Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Matcha Pearl Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Coffee Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Taro Pearl Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Thai Pearl Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Coconut Pearl Milk Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Mango Green Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Passion Chess" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Berry Lychee Burst" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Peach Tea" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Honey Lemonade" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Strawberry Coconut" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Matcha Fresh Milk" wrapText="True" />
+                  <Button maxHeight="100.0" maxWidth="100.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="60.0" prefWidth="60.0" text="Coffee Creama" wrapText="True" />
+               </children> -->
+            </TilePane>
+         </content>
+      </ScrollPane>
+      <Button fx:id="checkoutButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Checkout" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+      <ToolBar maxHeight="1.7976931348623157E308" prefHeight="57.0" prefWidth="1280.0" GridPane.columnSpan="2147483647" GridPane.rowIndex="1">
+        <items>
+          <Button fx:id="managerViewButton" prefHeight="58.0" text="Manager View" onAction="#switchToManager" />
+        </items>
+      </ToolBar>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="20" GridPane.rowIndex="4">
+         <children>
+            <Button fx:id="newOrderButton" mnemonicParsing="false" prefHeight="73.0" prefWidth="102.0" text="New" />
+            <Button fx:id="deleteOrderButton" mnemonicParsing="false" prefHeight="73.0" prefWidth="104.0" text="Delete" />
+         </children>
+      </HBox>
+      <SplitPane dividerPositions="0.4342105263157894" prefHeight="160.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3" GridPane.rowSpan="2147483647">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <Label layoutX="12.0" layoutY="7.0" text="Order Preview" />
+                  <Label fx:id="orderPreviewLabel" layoutX="12.0" layoutY="40.0" prefWidth="250.0" wrapText="true" text="No order selected" alignment="TOP_LEFT"/>
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <Label layoutX="14.0" layoutY="5.0" text="Notes" />
+                  <ScrollPane hbarPolicy="NEVER" layoutX="10.0" layoutY="22.0" prefHeight="205.0" prefWidth="460.0">
+                     <content>
+                        <TilePane prefHeight="200.0" prefTileHeight="100.0" prefTileWidth="100.0" prefWidth="456.0">
+                           <children>
+                              <Button fx:id="notesButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Open Notes" />
+                              <!-- <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="anoter" /> -->
+                              <!-- <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="anoter" /> -->
+                           </children>
+                        </TilePane>
+                     </content>
+                  </ScrollPane>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+      <VBox maxHeight="1.7976931348623157E308" maxWidth="1000.0" prefHeight="52.0" prefWidth="150.0" GridPane.rowIndex="2" GridPane.rowSpan="2">
+         <children>
+            <Label text="Orders" />
+            <ListView fx:id="ordersList" prefHeight="1000.0" prefWidth="200.0" />
+         </children>
+      </VBox>
+      <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.rowSpan="2">
+         <children>
+            <Label prefWidth="10000.0" text="Order ID: 76535362427" />
+            <ListView fx:id="orderItemsList" prefHeight="2000.0" prefWidth="200.0" />
+         </children>
+      </VBox>
+   </children>
+</GridPane>
