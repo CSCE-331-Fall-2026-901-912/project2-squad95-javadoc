@@ -134,8 +134,8 @@ public class CashierCtrl extends Application implements Initializable {
     final ObservableList<ShopMenuItem> menuItems = FXCollections.observableArrayList();
     
     /**
-     * @author Kenny Le
      * Appends a new order to the internal list of order entries.
+     * @author Kenny Le
      * @param event Event object provided by the click event. Unused.
      */
     private void onNewOrderClick(ActionEvent event) {
@@ -146,9 +146,9 @@ public class CashierCtrl extends Application implements Initializable {
     }
 
     /**
-     * @author Kenny Le
      * Connects the order list UI to their respective actions and listeners.
      * Should only be called once during program startup.
+     * @author Kenny Le
      */
     private void initializeOrderLists() {
         newOrderButton.setOnAction(this::onNewOrderClick);
@@ -172,8 +172,8 @@ public class CashierCtrl extends Application implements Initializable {
     }
 
     /**
-     * @author Kenny Le
      * Searches the internal order entries list to remove the first element matching the given ID.
+     * @author Kenny Le
      * @param targetId The ID of the order to find and remove. This is not the index of the order.
      * @return Whether or not an order of matching targetId was found and removed.
      */
@@ -194,8 +194,8 @@ public class CashierCtrl extends Application implements Initializable {
     }
 
     /**
-     * @author Kenny Le
      * Searches the internal order entries list to return the index of first element matching the given ID.
+     * @author Kenny Le
      * @param targetId The ID of the order to get. This is not the index of the order.
      * @return The index of the matched order in the order entries list, or -1 if not found.
      */
@@ -213,8 +213,8 @@ public class CashierCtrl extends Application implements Initializable {
     }
 
     /**
-     * @author Kenny Le
      * Method used by a button to delete orders. Deletes the currently selected order.
+     * @author Kenny Le
      * @param event Unused button event object.
      */
     private void onDeleteOrder(ActionEvent event) {
@@ -227,9 +227,9 @@ public class CashierCtrl extends Application implements Initializable {
     // private double toppingTotal = 0.0;
 
     /**
-     * @author Jeffrey Yu
      * Populates the menu pane with a list of items given in the resources/items.csv file.
      * Silently prints to the console upon any IO errors.
+     * @author Jeffrey Yu
      */
     public void initialize1() {
         System.out.println(new java.io.File("items.csv").getAbsolutePath());
@@ -280,7 +280,6 @@ public class CashierCtrl extends Application implements Initializable {
     }
 
     /**
-     * @author Kenny Le
      * Appends the order item to the currently selected order.
      * Does nothing if no order is selected.
      * @param item The OrderItem to append to the currently selected order.
@@ -337,12 +336,12 @@ public class CashierCtrl extends Application implements Initializable {
     // }
 
     /**
-     * @author Kenny Le
-     * @author Ethan Faulkner
      * Sends the currently selected order to the database, then removes it from the internal order entries list. 
      * Creates an alert if the selected order cannot be found or if the order has no items. 
      * Creates a confirmation popup on success.
      * Used as an action for the checkout button.
+     * @author Kenny Le
+     * @author Ethan Faulkner
      * @param event Unused button event.
      */
     private void onCheckout(ActionEvent event) {
@@ -382,10 +381,10 @@ public class CashierCtrl extends Application implements Initializable {
 
 
     /**
-     * @author Jeffrey Yu
      * Constructs a popup for the employee to select toppings for the current drink to be added.
      * This popup is populated with a cached set of toppings from the database.
      * showSugarPopup() is called when the confirm button is clicked. 
+     * @author Jeffrey Yu
      */
     private void showToppingsPopup() {
         Stage popup = new Stage();
@@ -428,9 +427,9 @@ public class CashierCtrl extends Application implements Initializable {
     }
 
     /**
-     * @author Jeffrey Yu
      * Constructs a popup for the employee to select the sugar level for the current drink to be added.
      * showIcePopup() is called when the confirm button is clicked. 
+     * @author Jeffrey Yu
      */
     private void showSugarPopup(Set<Topping> chosenToppings) {
         Stage popup = new Stage();
@@ -462,9 +461,9 @@ public class CashierCtrl extends Application implements Initializable {
     }
 
     /**
-     * @author Jeffrey Yu
      * Constructs a popup for the employee to select the ice level for the current drink to be added.
      * Creates and appends a new order item to the order's entries when Confirm is clicked. 
+     * @author Jeffrey Yu
      */
     private void showIcePopup(Set<Topping> chosenToppings) {
         Stage popup = new Stage();
@@ -563,10 +562,10 @@ public class CashierCtrl extends Application implements Initializable {
     }
 
     /**
-     * @author Kenny Le
      * Button action for creating a popup menu allowing the user to edit the notes
      * for the currently selected order. Saves user-inputted text for the currently
      * selected order when the confirmButton is clicked.
+     * @author Kenny Le
      * @param event Unused button event.
      */
     private void onOpenOrderNotes(ActionEvent event) {

@@ -908,8 +908,8 @@ private void loadOrdersToday() {
         }
         
         /**
+         * Getter for the restock table's view object
          * @return returns the view of the table
-         * Generates the view
          */
         public TableView<RestockEntries> getView() {
             return view;
