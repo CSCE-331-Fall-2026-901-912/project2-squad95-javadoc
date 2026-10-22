@@ -93,18 +93,28 @@ import javax.print.attribute.standard.*;
 */
 public class ManagerCtrl {
 
+    /** Database object representing the table of menu items */
     private final ItemDAO itemDAO = new ItemDAO();
+    /** Database object representing the table of inventory items */
     private final InventoryDAO inventoryDAO = new InventoryDAO();
+    /** Database object representing the table of employees */
     private final EmployeeDAO employeeDAO = new EmployeeDAO();
+    /** Database object representing the table of recipes */
     private final RecipeDAO recipeDAO = new RecipeDAO();
 
-
+    /** Displays the dashboard view to the user. */
     @FXML private VBox dashboardView;
+    /** Displays the finanicals view to the user. */
     @FXML private HBox financialsView;
+    /** Displays the orders view to the user. */
     @FXML private VBox ordersView;
+    /** Displays the employees view to the user. */
     @FXML private VBox employeesView;
+    /** Displays the inventory view to the user. */
     @FXML private VBox inventoryFullView;
+    /** Displays the order menu view to the user. */
     @FXML private VBox menuView;
+    /** Displays the product usage view to the user. */
     @FXML private VBox usageView;
 
     @FXML
@@ -228,12 +238,21 @@ public class ManagerCtrl {
     @FXML private Button restockReportBtn;
     //@FXML private Button salesReportButton;
 
+    /**
+     * SalesReportRow
+     * Represents a row in the sales report table.
+     */
     public static class SalesReportRow {
         public String itemName;
         public Integer quantitySold;
         public Double totalRevenue;
     }
 
+    /**
+     * OrderTableRow
+     * Represents a row of data for both the orders table in the orders view
+     * and the dashboard orders table.
+     */
     public static class OrderTableRow {
         public Integer id;
         public String items;
@@ -434,7 +453,7 @@ private void loadOrdersToday() {
     
 
     /**
-     * Represents a row of data held in the HourlySalesSummaryTable class.
+     * Represents a row of data held in the HourlySalesSummaryTable class. Used in the x-report.
      */
     class HourlySalesSummary {
         public Integer hour;
@@ -587,7 +606,7 @@ private void loadOrdersToday() {
     /** Initializes the orders tab by setting up the table columns, loading today's orders into the table, 
      * and loading the hourly trend data into the chart.
      */
-private void initializeOrdersTab() {
+    private void initializeOrdersTab() {
         if (orderIdCol != null) {
             orderIdCol.setCellValueFactory(data -> new SimpleIntegerProperty(data.getValue().id));
             orderItemsCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().items));
@@ -661,6 +680,9 @@ private void initializeOrdersTab() {
         }
     }
 
+    /** 
+     * Holds both the view object and the internal data for the x-report's table. 
+     */
     HourlySalesSummaryTable reportTable = new HourlySalesSummaryTable();
     
     /**
@@ -800,7 +822,10 @@ private void initializeOrdersTab() {
     * Initializes the base structure for Restock Entries and the Table
     */
     private static final double MIN_STOCK = 10000.0;
-    // Restock Reports
+    
+    /** Restock Reports
+     * Represents a row of the restock table.
+     */
     public static class RestockEntries {
         public Integer id;
         public String name;
@@ -810,7 +835,7 @@ private void initializeOrdersTab() {
     }
 
     /**
-     * generates the restock table
+     * Helper class that generates the restock table.
      */
     public static class RestockTable {
         private ObservableList<RestockEntries> entries = FXCollections.observableArrayList();
@@ -883,8 +908,8 @@ private void initializeOrdersTab() {
         }
         
         /**
+         * Getter for the restock table's view object
          * @return returns the view of the table
-         * Generates the view
          */
         public TableView<RestockEntries> getView() {
             return view;
@@ -893,6 +918,10 @@ private void initializeOrdersTab() {
 
     RestockTable restockReportTableView = new RestockTable();
 
+    /**
+     * Initializes the financials view, populating tables and charts within the view
+     * and assigning actions to buttons in the view.
+     */
     private void initializeFinancials() {
         loadTotalRevenue();
         loadOrdersToday();
@@ -1056,7 +1085,7 @@ private void initializeOrdersTab() {
     
     /** refreshes the financials view by reloading the total revenue, orders today, 
      * and revenue trend data from the database.
-     * 
+     * @deprecated
      */
     private void refreshFinanicals() {
         try { 
@@ -1204,6 +1233,10 @@ private void initializeOrdersTab() {
     @FXML BarChart<Number, String> topCashiersChart;
     @FXML BarChart<Number, String> empTopCashiersChart;
 
+    /** 
+     * Fetches and populates the two top cashiers charts using data from the database.
+     * If an error occurs, silently fails and prints an error message to the console.
+     */
     private void LoadTopEmployees() {
         String sql = "SELECT e.name, SUM(o.subtotal) AS total_sales " +
                      "FROM orders o JOIN employees e ON o.employee_id = e.id " +
@@ -1250,7 +1283,8 @@ private void initializeOrdersTab() {
     private final ObservableList<InventoryItem> inventoryItems = FXCollections.observableArrayList();
 
     /**
-     * initializes the inventory
+     * initializes the inventory, setting the appropriate CellValueFactory for each
+     * of the columns in the inventory table.
      */
     private void initializeInventory() {
         inventoryIdColumn.setCellValueFactory(d -> new SimpleIntegerProperty(d.getValue().id()));
@@ -1261,7 +1295,7 @@ private void initializeOrdersTab() {
     }
         
     /**
-     * pulls the latest inventories from the database
+     * pulls the latest inventories from the database and refreshes the inventoryStockChart
      */
     private void refreshInventory() {
         try {
@@ -1302,7 +1336,8 @@ private void initializeOrdersTab() {
     }
 
     /**
-     * adds new inventory items
+     * adds new inventory items to the database, refreshing the inventory on
+     * success and printing a stack trace on failure. attached to a button in .fxml file
      */
     @FXML
     private void addInventoryItem() {
@@ -1355,7 +1390,8 @@ private void initializeOrdersTab() {
     }
 
     /**
-     * updates the quantities of inventory items
+     * updates the quantities of inventory items, refreshing the inventory on
+     * success and printing a stack trace on failure. attached to a button in .fxml file
      */
     @FXML
     private void updateInventoryQuantity() {
@@ -1397,10 +1433,7 @@ private void initializeOrdersTab() {
     
 
 
-/**
- * Creates a popup window displaying inventory usage
- * for a selected date range.
- */
+
 
 
     @FXML private DatePicker usageStartDate;
@@ -1408,7 +1441,10 @@ private void initializeOrdersTab() {
     @FXML private BarChart<String, Number> usageChart;
 
 
-    
+    /**
+     * Creates a popup window displaying inventory usage
+     * for a selected date range.
+     */
     private void initializeUsageChart() {
         usageStartDate.setValue(java.time.LocalDate.of(2025, 1, 1));
         usageEndDate.setValue(java.time.LocalDate.of(2025, 12, 31));
@@ -1428,7 +1464,10 @@ private void initializeOrdersTab() {
         loadUsageChart();
     }
 
-
+    /**
+     * Loads an inventory usage chart based on user-inputted start and end dates.
+     * Alerts the user if database fetching fails.
+     */
     @FXML
     private void loadUsageChart() {
 
@@ -1497,6 +1536,10 @@ private void initializeOrdersTab() {
     @FXML private TableColumn<Item, Number> menuPriceColumn;
     private final ObservableList<Item> menuItems = FXCollections.observableArrayList();
 
+    /**
+     * Initializes the order menu view, setting the column formats and populating the 
+     * table with available menu items.
+     */
     private void initializeMenu() {
         menuIdColumn.setCellValueFactory(d -> new SimpleIntegerProperty(d.getValue().id()));
         menuNameColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().name()));
@@ -1509,6 +1552,9 @@ private void initializeOrdersTab() {
         menuTable.setItems(menuItems);
     }
 
+    /**
+     * Refreshes the menu table with items from the database, alerting the user on error.   
+     */
     private void refreshMenu() {
         try {
             menuItems.setAll(itemDAO.getAll());
@@ -1613,6 +1659,12 @@ private void initializeOrdersTab() {
             return null;
         }
     }
+
+    /**
+     * Prompts the user with a dialog to modify the currently selected menu item.
+     * On confirmation, updates the data associated with the selected menu item in the 
+     * database on success, and alerts the user with an error on database failure.
+     */
     @FXML
     private void updateMenuItem() {
         Item selected = menuTable.getSelectionModel().getSelectedItem();

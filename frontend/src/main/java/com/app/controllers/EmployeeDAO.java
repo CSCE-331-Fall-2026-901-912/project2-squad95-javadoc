@@ -13,7 +13,7 @@ import com.app.models.EmployeeRow;
 public class EmployeeDAO {
     /**
      * Takes in the employees from the database and organize them in a row
-     * @return List<EmployeeRow>
+     * @return the list of all employees from the database with associated sales
      * @throws SQLException
      */
     public List<EmployeeRow> getAllWithSales() throws SQLException {
