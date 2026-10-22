@@ -93,12 +93,16 @@ import javax.print.attribute.standard.*;
 */
 public class ManagerCtrl {
 
+    /** Database object representing the table of menu items */
     private final ItemDAO itemDAO = new ItemDAO();
+    /** Database object representing the table of inventory items */
     private final InventoryDAO inventoryDAO = new InventoryDAO();
+    /** Database object representing the table of employees */
     private final EmployeeDAO employeeDAO = new EmployeeDAO();
+    /** Database object representing the table of recipes */
     private final RecipeDAO recipeDAO = new RecipeDAO();
 
-
+    
     @FXML private VBox dashboardView;
     @FXML private HBox financialsView;
     @FXML private VBox ordersView;
